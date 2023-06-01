@@ -1,0 +1,9 @@
+/**/Binaries/
+/**/Saved/
+/**/Intermediate/
+/**/DerivedDataCache/
+
+.idea/
+.vscode/
+
+.DS_Store
