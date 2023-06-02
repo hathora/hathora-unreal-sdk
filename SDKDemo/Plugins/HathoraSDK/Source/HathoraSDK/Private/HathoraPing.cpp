@@ -37,26 +37,29 @@ void UHathoraPing::GetRegionalPings(const FOnGetRegionalPingsDelegate& OnComplet
 void UHathoraPing::PingUrlsAndAggregateTimes(
 	const TArray<FDiscoveredPingEndpoint>& PingEndpoints, const FOnGetRegionalPingsDelegate& OnComplete)
 {
-	TMap<FString, int32> Pings;
-	UE_LOG(LogTemp, Display,TEXT("%d"), Pings.Num());
-	int32                CompletedPings = 0;
+	// These variables must be heap allocated, because this function returns before the callback below is invoked,
+	// which would invalidate them if they were stack allocated but passed by reference.
+	TSharedPtr<TMap<FString, int32>> Pings = MakeShared<TMap<FString, int32>>();
+	TSharedPtr<int32>                CompletedPings = MakeShared<int32>(0);
+	
 	const int32 PingsToComplete = PingEndpoints.Num();
 
 	// aggregate the results of N asynchronous operations into a single TMap.
 	for (const FDiscoveredPingEndpoint& PingEndpoint : PingEndpoints)
 	{
 
-		GetPingTime(PingEndpoint, FHathoraPingSocket::FOnGetPingDelegate::CreateLambda([&, PingEndpoint, CompletedPings, Pings, PingsToComplete, =OnComplete](int32 PingTime, bool bWasSuccesful) {
+		GetPingTime(PingEndpoint, FHathoraPingSocket::FOnGetPingDelegate::CreateLambda([ PingEndpoint, CompletedPings, Pings, PingsToComplete, OnComplete](int32 PingTime, bool bWasSuccesful) {
 			UE_LOG(LogTemp, Display, TEXT("ping of %s completed, for sure"), *PingEndpoint.Host);
 			if (bWasSuccesful)
 			{
 				UE_LOG(LogTemp, Display, TEXT("ping of %s was successful %d"), *PingEndpoint.Host, PingTime);
-				Pings.Add(PingEndpoint.Region, PingTime);
+				Pings->Add(PingEndpoint.Region, PingTime);
 			}
 			// Regardless of whether the ping was successful, we will mark it complete.
-			if (++CompletedPings == PingsToComplete)
+			if (++(*CompletedPings) == PingsToComplete)
 			{
-				(void)OnComplete.ExecuteIfBound(Pings);
+				UE_LOG(LogTemp, Display, TEXT("all pings complete"))
+				(void)OnComplete.ExecuteIfBound(*Pings);
 			}
 		}));
 	}
@@ -70,8 +73,9 @@ void UHathoraPing::GetPingTime(const FDiscoveredPingEndpoint& PingEndpoint, cons
 	const FString& MessageText = TEXT("PING");
 	const FString& Url = FString::Printf(TEXT("wss://%s:%d/ws"), *PingEndpoint.Host, PingEndpoint.Port);
 
-	// Unfortunately, we can't nest the OnMessage handler inside OnConnected, so we just use this local variable instead.
-	double                 StartTime = 0.0;
+	// Unfortunately, we can't nest the OnMessage handler inside OnConnected, however it appears to need to be heap allocated
+	// for the same reason as the Pings map above.
+	TSharedPtr<double> StartTime = MakeShared<double>(0.0);
 	TSharedPtr<IWebSocket> WebSocket = FWebSocketsModule::Get().CreateWebSocket(Url);
 
 	WebSocket->OnConnectionError().AddLambda([OnComplete](const FString& Reason) {
@@ -79,13 +83,14 @@ void UHathoraPing::GetPingTime(const FDiscoveredPingEndpoint& PingEndpoint, cons
 		(void)OnComplete.ExecuteIfBound(0, false);
 	});
 
-	WebSocket->OnMessage().AddLambda([MessageText, WebSocket, &StartTime, OnComplete](const FString& Message) {
+	WebSocket->OnMessage().AddLambda([MessageText, WebSocket, StartTime, OnComplete](const FString& Message) {
 		UE_LOG(LogTemp, Display, TEXT("received message: %s %d %d"), *Message, Message.Len(), MessageText.Len());
 
 		
-		if (StartTime != 0 && Message == MessageText)
+		if (StartTime.IsValid() && *StartTime != 0.0 && Message == MessageText)
 		{
-			const int32 PingTimeMs = static_cast<int32>((FPlatformTime::Seconds() - StartTime) * 1000);
+			UE_LOG(LogTemp, Display, TEXT("this is the ping time! %f"), FPlatformTime::Seconds() - *StartTime);
+			const int32 PingTimeMs = static_cast<int32>((FPlatformTime::Seconds() - *StartTime) * 1000);
 			(void)OnComplete.ExecuteIfBound(PingTimeMs, true);
 			WebSocket->Close();
 		}
@@ -95,9 +100,9 @@ void UHathoraPing::GetPingTime(const FDiscoveredPingEndpoint& PingEndpoint, cons
 		UE_LOG(LogTemp, Display, TEXT("websocket was closed!"));
 	});
 	
-	WebSocket->OnConnected().AddLambda([&StartTime, WebSocket, MessageText]() {
+	WebSocket->OnConnected().AddLambda([StartTime, WebSocket, MessageText]() {
 		UE_LOG(LogTemp, Display, TEXT("WebSocket is connected..."));
-		StartTime = FPlatformTime::Seconds();
+		*StartTime = FPlatformTime::Seconds();
 		WebSocket->Send(MessageText);
 	});
 	
