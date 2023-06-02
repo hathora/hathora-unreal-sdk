@@ -17,6 +17,7 @@ public class HathoraSDK : ModuleRules
 		
 		PrivateIncludePaths.AddRange(
 			new string[] {
+				"HathoraSDK/Private"
 				// ... add other private include paths required here ...
 			}
 			);

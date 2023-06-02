@@ -3,7 +3,7 @@
 
 #include "CoreMinimal.h"
 #include "Delegates/Delegate.h"
-#include "DiscoveredPingEndpoint.h"
+#include "HathoraSDK/Private/DiscoveredPingEndpoint.h"
 #include "HathoraPing.generated.h"
 
 UCLASS()

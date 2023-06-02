@@ -3,7 +3,9 @@
 #include "DiscoveredPingEndpoint.h"
 #include "HttpModule.h"
 #include "JsonObjectConverter.h"
-#include "HathoraPingSocket.h"
+#include "WebSocketsModule.h"
+#include "IWebSocket.h"
+#include "HathoraSDK.h"
 #include "Interfaces/IHttpRequest.h"
 #include "Interfaces/IHttpResponse.h"
 
@@ -19,11 +21,11 @@ void UHathoraPing::GetRegionalPings(const FOnGetRegionalPingsDelegate& OnComplet
 		}
 		else
 		{
-			UE_LOG(LogTemp, Error, TEXT("Could not retrieve ping endpoints"));
+			UE_LOG(LogHathoraSDK, Warning, TEXT("Could not retrieve ping endpoints"));
 			TMap<FString, int32> Pings;
 			if (!OnComplete.ExecuteIfBound(Pings))
 			{
-				UE_LOG(LogTemp, Error, TEXT("[GetRegionalPings] function pointer was not valid, so OnComplete will not be called"));
+				UE_LOG(LogHathoraSDK, Warning, TEXT("[GetRegionalPings] function pointer was not valid, so OnComplete will not be called"));
 			}
 		}
 	});
@@ -48,17 +50,16 @@ void UHathoraPing::PingUrlsAndAggregateTimes(
 	for (const FDiscoveredPingEndpoint& PingEndpoint : PingEndpoints)
 	{
 
-		GetPingTime(PingEndpoint, FHathoraPingSocket::FOnGetPingDelegate::CreateLambda([ PingEndpoint, CompletedPings, Pings, PingsToComplete, OnComplete](int32 PingTime, bool bWasSuccesful) {
-			UE_LOG(LogTemp, Display, TEXT("ping of %s completed, for sure"), *PingEndpoint.Host);
+		GetPingTime(PingEndpoint, FOnGetPingDelegate::CreateLambda([ PingEndpoint, CompletedPings, Pings, PingsToComplete, OnComplete](int32 PingTime, bool bWasSuccesful) {
 			if (bWasSuccesful)
 			{
-				UE_LOG(LogTemp, Display, TEXT("ping of %s was successful %d"), *PingEndpoint.Host, PingTime);
+				UE_LOG(LogHathoraSDK, VeryVerbose, TEXT("ping of %s was successful, time: %d ms"), *PingEndpoint.Host, PingTime);
 				Pings->Add(PingEndpoint.Region, PingTime);
 			}
 			// Regardless of whether the ping was successful, we will mark it complete.
 			if (++(*CompletedPings) == PingsToComplete)
 			{
-				UE_LOG(LogTemp, Display, TEXT("all pings complete"))
+				UE_LOG(LogHathoraSDK, VeryVerbose, TEXT("all pings complete"));
 				(void)OnComplete.ExecuteIfBound(*Pings);
 			}
 		}));
@@ -79,17 +80,13 @@ void UHathoraPing::GetPingTime(const FDiscoveredPingEndpoint& PingEndpoint, cons
 	TSharedPtr<IWebSocket> WebSocket = FWebSocketsModule::Get().CreateWebSocket(Url);
 
 	WebSocket->OnConnectionError().AddLambda([OnComplete](const FString& Reason) {
-		UE_LOG(LogTemp, Error, TEXT("failed to connect due to %s"), *Reason);
+		UE_LOG(LogHathoraSDK, Warning, TEXT("failed to connect to ping server due to %s"), *Reason);
 		(void)OnComplete.ExecuteIfBound(0, false);
 	});
 
 	WebSocket->OnMessage().AddLambda([MessageText, WebSocket, StartTime, OnComplete](const FString& Message) {
-		UE_LOG(LogTemp, Display, TEXT("received message: %s %d %d"), *Message, Message.Len(), MessageText.Len());
-
-		
 		if (StartTime.IsValid() && *StartTime != 0.0 && Message == MessageText)
 		{
-			UE_LOG(LogTemp, Display, TEXT("this is the ping time! %f"), FPlatformTime::Seconds() - *StartTime);
 			const int32 PingTimeMs = static_cast<int32>((FPlatformTime::Seconds() - *StartTime) * 1000);
 			(void)OnComplete.ExecuteIfBound(PingTimeMs, true);
 			WebSocket->Close();
@@ -97,11 +94,12 @@ void UHathoraPing::GetPingTime(const FDiscoveredPingEndpoint& PingEndpoint, cons
 	});
 	
 	WebSocket->OnClosed().AddLambda([](int32 StatusCode, const FString& Reason, bool bWasClean) {
-		UE_LOG(LogTemp, Display, TEXT("websocket was closed!"));
+		UE_LOG(LogHathoraSDK, VeryVerbose, TEXT("websocket closed %s with status code %d because %s"),
+			bWasClean ? TEXT("cleanly") : TEXT("uncleanly"), StatusCode, *Reason); 
 	});
 	
-	WebSocket->OnConnected().AddLambda([StartTime, WebSocket, MessageText]() {
-		UE_LOG(LogTemp, Display, TEXT("WebSocket is connected..."));
+	WebSocket->OnConnected().AddLambda([StartTime, WebSocket, MessageText, Url]() {
+		UE_LOG(LogHathoraSDK, VeryVerbose, TEXT("websocket connection to %s established"), *Url);
 		*StartTime = FPlatformTime::Seconds();
 		WebSocket->Send(MessageText);
 	});
