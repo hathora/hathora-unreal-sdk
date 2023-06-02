@@ -9,13 +9,13 @@ USTRUCT()
 struct FDiscoveredPingEndpoint
 {
 	GENERATED_BODY()
-	
+
 	UPROPERTY()
 	FString Region;
-	
+
 	UPROPERTY()
 	FString Host;
-	
+
 	UPROPERTY()
 	int32 Port;
 };
