@@ -6,14 +6,15 @@
 #include "UObject/Object.h"
 #include "HathoraSdkConfig.generated.h"
 
-UCLASS(Config=Game)
+UCLASS(Config = Game)
 class HATHORASDK_API UHathoraSdkConfig : public UObject
 {
-    GENERATED_BODY()
+	GENERATED_BODY()
 
 public:
-    UHathoraSdkConfig();
-    const FString& GetBaseUrl() const { return BaseUrl; };
+	UHathoraSdkConfig();
+	const FString& GetBaseUrl() const { return BaseUrl; };
+
 private:
-    FString BaseUrl;
+	FString BaseUrl;
 };
