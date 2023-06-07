@@ -9,6 +9,11 @@
 #include "Interfaces/IHttpRequest.h"
 #include "Interfaces/IHttpResponse.h"
 
+UHathoraPing::UHathoraPing(const FObjectInitializer& ObjectInitializer) : UObject(ObjectInitializer)
+{
+    this->HathoraSdkConfig = NewObject<UHathoraSdkConfig>();
+}
+
 void UHathoraPing::GetRegionalPings(const FOnGetRegionalPingsDelegate& OnComplete)
 {
 
@@ -30,8 +35,7 @@ void UHathoraPing::GetRegionalPings(const FOnGetRegionalPingsDelegate& OnComplet
 		}
 	});
 
-	// TODO - How should this get passed in to this package?
-	Request->SetURL("https://api.hathora.dev/discovery/v1/ping");
+    Request->SetURL(FString::Printf(TEXT("%s/discovery/v1/ping"), *this->HathoraSdkConfig->GetBaseUrl()));
 	Request->ProcessRequest();
 }
 
@@ -39,8 +43,6 @@ void UHathoraPing::GetRegionalPings(const FOnGetRegionalPingsDelegate& OnComplet
 void UHathoraPing::PingUrlsAndAggregateTimes(
 	const TArray<FDiscoveredPingEndpoint>& PingEndpoints, const FOnGetRegionalPingsDelegate& OnComplete)
 {
-	// These variables must be heap allocated, because this function returns before the callback below is invoked,
-	// which would invalidate them if they were stack allocated but passed by reference.
 	TSharedPtr<TMap<FString, int32>> Pings = MakeShared<TMap<FString, int32>>();
 	TSharedPtr<int32>                CompletedPings = MakeShared<int32>(0);
 	
@@ -74,8 +76,7 @@ void UHathoraPing::GetPingTime(const FDiscoveredPingEndpoint& PingEndpoint, cons
 	const FString& MessageText = TEXT("PING");
 	const FString& Url = FString::Printf(TEXT("wss://%s:%d/ws"), *PingEndpoint.Host, PingEndpoint.Port);
 
-	// Unfortunately, we can't nest the OnMessage handler inside OnConnected, however it appears to need to be heap allocated
-	// for the same reason as the Pings map above.
+	// Unfortunately, we can't nest the OnMessage handler inside OnConnected,
 	TSharedPtr<double> StartTime = MakeShared<double>(0.0);
 	TSharedPtr<IWebSocket> WebSocket = FWebSocketsModule::Get().CreateWebSocket(Url);
 
