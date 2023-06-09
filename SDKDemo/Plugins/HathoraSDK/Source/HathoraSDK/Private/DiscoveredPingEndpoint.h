@@ -15,5 +15,5 @@ struct FDiscoveredPingEndpoint
 	FString Host;
 
 	UPROPERTY()
-	int32 Port;
+	int32 Port = 0;
 };
