@@ -55,7 +55,7 @@ void UHathoraPing::PingUrlsAndAggregateTimes(
 		GetPingTime(PingEndpoint, FOnGetPingDelegate::CreateLambda([ PingEndpoint, CompletedPings, Pings, PingsToComplete, OnComplete](int32 PingTime, bool bWasSuccesful) {
 			if (bWasSuccesful)
 			{
-				UE_LOG(LogHathoraSDK, Log, TEXT("ping to %s %s:%d was successful, time: %d ms"), *PingEndpoint.Region, *PingEndpoint.Host, PingEndpoint.Port);
+				UE_LOG(LogHathoraSDK, Log, TEXT("ping to %s %s:%d was successful, time: %d ms"), *PingEndpoint.Region, *PingEndpoint.Host, PingEndpoint.Port, PingTime);
 				Pings->Add(PingEndpoint.Region, PingTime);
 			}
 			// Regardless of whether the ping was successful, we will mark it complete.
