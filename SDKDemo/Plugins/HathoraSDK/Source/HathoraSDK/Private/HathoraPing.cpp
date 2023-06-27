@@ -61,7 +61,7 @@ void UHathoraPing::PingUrlsAndAggregateTimes(
 			// Regardless of whether the ping was successful, we will mark it complete.
 			if (++(*CompletedPings) == PingsToComplete)
 			{
-				UE_LOG(LogHathoraSDK, Log, TEXT("all pings complete"));
+				UE_LOG(LogHathoraSDK, Log, TEXT("Pings to all Hathora regions complete."));
 				(void)OnComplete.ExecuteIfBound(*Pings);
 			}
 		}));
