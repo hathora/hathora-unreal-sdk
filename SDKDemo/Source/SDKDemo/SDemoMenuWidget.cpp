@@ -47,7 +47,8 @@ FReply SDemoMenuWidget::OnClicked() const
 			UE_LOG(LogTemp, Display, TEXT("Ping in %s is %d ms"), *Region, Pair.Value);	
 		}
 	});
-	UHathoraPing::GetRegionalPings(OnComplete);
+	UHathoraPing* HathoraPing = NewObject<UHathoraPing>();
+	HathoraPing->GetRegionalPings(OnComplete);
 	return FReply::Handled();
 }
 #undef LOCTEXT_NAMESPACE
