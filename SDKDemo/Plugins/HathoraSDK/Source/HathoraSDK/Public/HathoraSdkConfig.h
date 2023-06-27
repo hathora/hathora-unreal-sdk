@@ -14,7 +14,9 @@ class HATHORASDK_API UHathoraSdkConfig : public UObject
 public:
 	UHathoraSdkConfig();
 	const FString& GetBaseUrl() const { return BaseUrl; };
+	int32 GetPingMeasurementsToTake() const { return PingMeasurementsToTake; }
 
 private:
 	FString BaseUrl;
+	int32 PingMeasurementsToTake = 10;
 };
