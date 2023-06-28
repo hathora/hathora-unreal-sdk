@@ -22,10 +22,11 @@ public:
 	void GetRegionalPings(const FOnGetRegionalPingsDelegate& OnComplete);
 
 private:
+	
 	UPROPERTY()
 	UHathoraSdkConfig* HathoraSdkConfig;
-	DECLARE_DELEGATE_TwoParams(FOnGetPingDelegate, int32 /* Ping */, bool /* bWasSuccessful */);
 	static void PingUrlsAndAggregateTimes(const TArray<FDiscoveredPingEndpoint>& PingEndpoints, int32 MeasurementsToTake, const FOnGetRegionalPingsDelegate& OnComplete);
-	static void GetPingTime(const FDiscoveredPingEndpoint& PingEndpoint, int32 PingID, const FOnGetPingDelegate& OnComplete);
+	typedef TDelegate<void(TArray<double>& /* Measurements */, bool /* bSuccessful */)> FOnGetPingMeasurementsDelegate;
+	static void GetPingMeasurements(const FDiscoveredPingEndpoint& PingEndpoint, int32 MeasurementsToTake, const FOnGetPingMeasurementsDelegate& OnComplete);
 	static void GetMedianPingPerRegion(TMap<FString,TArray<int32>>& AllPingMeasurementsByRegion, const FOnGetRegionalPingsDelegate& OnComplete);
 };

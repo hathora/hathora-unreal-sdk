@@ -42,36 +42,12 @@ void UHathoraPing::GetRegionalPings(const FOnGetRegionalPingsDelegate& OnComplet
 }
 
 // The number of samples should be small so we use the naive median-finding algorithm
-inline int32 GetMedianNaively(TArray<int32>& PingMeasurements)
+inline double GetMedianNaively(TArray<double>& PingMeasurements)
 {
 			PingMeasurements.Sort();
 			int32 NumMeasurements = PingMeasurements.Num();
 			int32 MiddleIndex = PingMeasurements.Num() / 2;
-			return (NumMeasurements % 2) ? FMath::RoundToInt32((PingMeasurements[MiddleIndex -1] + PingMeasurements[MiddleIndex]) / 2) : PingMeasurements[MiddleIndex];
-}
-
-void UHathoraPing::GetMedianPingPerRegion(TMap<FString, TArray<int32>>& AllPingMeasurementsByRegion, const FOnGetRegionalPingsDelegate& OnComplete)
-{
-		TSharedPtr<TMap<FString, int32>> MedianPingByRegion = MakeShared<TMap<FString, int32>>();
-		for (auto& [Region, PingMeasurements]: AllPingMeasurementsByRegion)
-		{
-			MedianPingByRegion->Add(Region, GetMedianNaively(PingMeasurements));
-		}
-		(void)OnComplete.ExecuteIfBound(*MedianPingByRegion);
-}
-
-
-inline void InitializePingMeasurementsMap(const TArray<FDiscoveredPingEndpoint>& PingEndpoints, TMap<FString, TArray<int32>>& PingMeasurementsByRegion, int32 MeasurementsToTake)
-{
-	for (const FDiscoveredPingEndpoint& PingEndpoint: PingEndpoints)
-	{
-		TArray<int32> Arr = TArray<int32>();
-		// Pre-allocate the array to be large enough for the total number of measurements we will take
-		// This will avoid re-allocations during the ping checking, which could be subject to race conditions due to the asynchronous
-		// nature of the checker
-		Arr.Reserve(MeasurementsToTake);
-		PingMeasurementsByRegion.Emplace(PingEndpoint.Region, Arr);		
-	}	
+			return (NumMeasurements % 2) ? (PingMeasurements[MiddleIndex -1] + PingMeasurements[MiddleIndex]) / 2 : PingMeasurements[MiddleIndex];
 }
 
 void UHathoraPing::PingUrlsAndAggregateTimes(
@@ -79,70 +55,70 @@ void UHathoraPing::PingUrlsAndAggregateTimes(
 	int32 MeasurementsToTake,
 	const FOnGetRegionalPingsDelegate& OnComplete)
 {
-	TSharedPtr<TMap<FString, TArray<int32>>> Pings = MakeShared<TMap<FString, TArray<int32>>>();
+	TSharedPtr<TMap<FString, int32>> Pings = MakeShared<TMap<FString, int32>>();
 	TSharedPtr<int32>                CompletedRegions = MakeShared<int32>(0);
 
-	InitializePingMeasurementsMap(PingEndpoints, *Pings, MeasurementsToTake);
-	
 	const int32 RegionsToPing = PingEndpoints.Num();
 
 	// aggregate the results of N asynchronous operations into a single TMap.
 	for (const FDiscoveredPingEndpoint& PingEndpoint : PingEndpoints)
 	{
-		for (int32 PingAttempt = 0; PingAttempt < MeasurementsToTake; ++PingAttempt)
-		{
-			GetPingTime(PingEndpoint, PingAttempt, FOnGetPingDelegate::CreateLambda([ PingAttempt, MeasurementsToTake, PingEndpoint, CompletedRegions, Pings, RegionsToPing, OnComplete](int32 PingTime, bool bWasSuccesful) {
+			GetPingMeasurements(PingEndpoint, MeasurementsToTake, FOnGetPingMeasurementsDelegate::CreateLambda([ PingEndpoint, CompletedRegions, Pings, RegionsToPing, OnComplete](TArray<double>& PingMeasurements, bool bWasSuccesful) {
 				if (bWasSuccesful)
 				{
-					UE_LOG(LogHathoraSDK, Log, TEXT("Ping to %s (%s:%d) took: %d ms"), *PingEndpoint.Region, *PingEndpoint.Host, PingEndpoint.Port, PingTime);
-					TArray<int32>* CompletedPingsForRegion = Pings->Find(PingEndpoint.Region);
-					CompletedPingsForRegion->Add(PingTime);
+					int32 MedianPing = FMath::RoundToInt32(GetMedianNaively(PingMeasurements));
+					UE_LOG(LogHathoraSDK, Log, TEXT("Median ping to %s (%s:%d) took: %d ms"), *PingEndpoint.Region, *PingEndpoint.Host, PingEndpoint.Port, MedianPing);
+					Pings->Add(PingEndpoint.Region, MedianPing);
 				}
 				// Regardless of whether the ping was successful, we will mark it complete.
 				if (++(*CompletedRegions) == RegionsToPing)
 				{
-					UE_LOG(LogHathoraSDK, Log, TEXT("all pings complete"));
+					UE_LOG(LogHathoraSDK, Log, TEXT("Pings to all Hathora regions complete."));
 					(void)OnComplete.ExecuteIfBound(*Pings);
 				}
 			}));
-		}
 	}
 }
 
-
-DECLARE_DELEGATE_TwoParams(FOnGetPingDelegate, int32 /* Ping */, bool /* bWasSuccessful */);
-
-void UHathoraPing::GetPingTime(const FDiscoveredPingEndpoint& PingEndpoint, int32 PingID, const FOnGetPingDelegate& OnComplete) 
+void UHathoraPing::GetPingMeasurements(const FDiscoveredPingEndpoint& PingEndpoint, int32 MeasurementsToTake, const FOnGetPingMeasurementsDelegate& OnComplete) 
 {
 	const FString& MessageTemplate = TEXT("PING-%d");
 	const FString& Url = FString::Printf(TEXT("wss://%s:%d/ws"), *PingEndpoint.Host, PingEndpoint.Port);
 
 	// Unfortunately, we can't nest the OnMessage handler inside OnConnected,
-	TSharedPtr<double> StartTime = MakeShared<double>(0.0);
+	TSharedPtr<int32> MeasurementsTaken = MakeShared<int32>(0);
 	TSharedPtr<TArray<double>> StartTimes = MakeShared<TArray<double>>();
-	StartTimes->SetNumZeroed(PingID);
+	StartTimes->SetNumZeroed(MeasurementsToTake);
+	TSharedPtr<TArray<double>> Measurements = MakeShared<TArray<double>>();
+	Measurements->SetNum(MeasurementsToTake);
 	TSharedPtr<IWebSocket> WebSocket = FWebSocketsModule::Get().CreateWebSocket(Url);
 
-	WebSocket->OnConnectionError().AddLambda([OnComplete](const FString& Reason) {
+	WebSocket->OnConnectionError().AddLambda([OnComplete, Measurements](const FString& Reason) {
 		UE_LOG(LogHathoraSDK, Warning, TEXT("failed to connect to ping server due to %s"), *Reason);
-		(void)OnComplete.ExecuteIfBound(0, false);
+		(void)OnComplete.ExecuteIfBound(*Measurements, false);
 	});
 
-	WebSocket->OnMessage().AddLambda([MessageTemplate, WebSocket, StartTime, OnComplete](const FString& Message) {
+	WebSocket->OnMessage().AddLambda([WebSocket, PingEndpoint, MeasurementsTaken, MeasurementsToTake, Measurements, StartTimes, OnComplete](const FString& Message) {
+		UE_LOG(LogHathoraSDK, Display, TEXT("received message %s from %s"), *Message, *PingEndpoint.Region);
 		if (Message.StartsWith("PING-"))
 		{
 			TArray<FString> Split;
-			Message.ParseIntoArray(Split, *Message, true);
+			Message.ParseIntoArray(Split, TEXT("-"), true);
 			if (Split.Num() == 2 && Split[0] == "PING")
 			{
-				int32 PingID = FCString::Atoi(*Split[1]);
+				if (const int PingID = FCString::Strtoi(*Split[1], nullptr, 10); PingID > 0 && PingID <= MeasurementsToTake)
+				{
+					// Convert s -> ms
+					(*Measurements)[PingID - 1] = (FPlatformTime::Seconds() - (*StartTimes)[PingID - 1]) * 1000;
+					UE_LOG(LogHathoraSDK, Display, TEXT("ping %d/%d to %s took %f ms"), PingID, MeasurementsToTake, *PingEndpoint.Region, (*Measurements)[PingID - 1]);
+				}
 			}
 		}
-		if (StartTime.IsValid() && *StartTime != 0.0 && Message == MessageTemplate)
+
+		if (Measurements.IsValid() && MeasurementsTaken.IsValid() && ++(*MeasurementsTaken) == MeasurementsToTake)
 		{
-			const int32 PingTimeMs = static_cast<int32>((FPlatformTime::Seconds() - *StartTime) * 1000);
-			(void)OnComplete.ExecuteIfBound(PingTimeMs, true);
 			WebSocket->Close();
+			(void)OnComplete.ExecuteIfBound(*Measurements, true);
 		}
 	});
 	
@@ -151,13 +127,15 @@ void UHathoraPing::GetPingTime(const FDiscoveredPingEndpoint& PingEndpoint, int3
 			bWasClean ? TEXT("cleanly") : TEXT("uncleanly"), StatusCode, *Reason); 
 	});
 	
-	WebSocket->OnConnected().AddLambda([PingID, StartTime, StartTimes, WebSocket, MessageTemplate, Url]() {
+	WebSocket->OnConnected().AddLambda([MeasurementsToTake, StartTimes, WebSocket, MessageTemplate, Url]() {
 		UE_LOG(LogHathoraSDK, VeryVerbose, TEXT("websocket connection to %s established"), *Url);
 
-		for (int32 PingAttempt = 0; PingAttempt < PingID; ++PingAttempt)
+		// Use 1-based attempt numbers to avoid overloading 0-based error condition for Strtoi
+		for (int32 PingAttempt = 1; PingAttempt <= MeasurementsToTake; ++PingAttempt)
 		{
-			(*StartTimes)[PingAttempt] = FPlatformTime::Seconds();
-			WebSocket->Send(FString::Printf(MessageTemplate, PingAttempt));
+			(*StartTimes)[PingAttempt - 1] = FPlatformTime::Seconds();
+			WebSocket->Send(FString::Printf(TEXT("PING-%d"), PingAttempt));
+			UE_LOG(LogHathoraSDK, Display, TEXT("sent message %d/%d to %s"), PingAttempt, MeasurementsToTake, *Url);
 		}
 	});
 	
