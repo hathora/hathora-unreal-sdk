@@ -99,19 +99,11 @@ void UHathoraPing::GetPingMeasurements(const FDiscoveredPingEndpoint& PingEndpoi
 
 	WebSocket->OnMessage().AddLambda([WebSocket, PingEndpoint, MeasurementsTaken, MeasurementsToTake, Measurements, StartTimes, OnComplete](const FString& Message) {
 		UE_LOG(LogHathoraSDK, Display, TEXT("received message %s from %s"), *Message, *PingEndpoint.Region);
-		if (Message.StartsWith("PING-"))
+		if (Message == "PING")
 		{
-			TArray<FString> Split;
-			Message.ParseIntoArray(Split, TEXT("-"), true);
-			if (Split.Num() == 2 && Split[0] == "PING")
-			{
-				if (const int PingID = FCString::Strtoi(*Split[1], nullptr, 10); PingID > 0 && PingID <= MeasurementsToTake)
-				{
-					// Convert s -> ms
-					(*Measurements)[PingID - 1] = (FPlatformTime::Seconds() - (*StartTimes)[PingID - 1]) * 1000;
-					UE_LOG(LogHathoraSDK, Display, TEXT("ping %d/%d to %s took %f ms"), PingID, MeasurementsToTake, *PingEndpoint.Region, (*Measurements)[PingID - 1]);
-				}
-			}
+			// Convert s -> ms
+			(*Measurements)[*MeasurementsTaken] = (FPlatformTime::Seconds() - (*StartTimes)[*MeasurementsTaken]) * 1000;
+			UE_LOG(LogHathoraSDK, Display, TEXT("ping %d/%d to %s took %f ms"), *MeasurementsTaken, MeasurementsToTake, *PingEndpoint.Region, (*Measurements)[*MeasurementsTaken]);
 		}
 
 		// Ensure that all measurements happen sequentially by only sending the next message after the previous one has been received.
@@ -123,7 +115,7 @@ void UHathoraPing::GetPingMeasurements(const FDiscoveredPingEndpoint& PingEndpoi
 		else
 		{
 			(*StartTimes)[*MeasurementsTaken] = FPlatformTime::Seconds();
-			WebSocket->Send(FString::Printf(TEXT("PING-%d"), *MeasurementsTaken + 1));
+			WebSocket->Send(FString::Printf(TEXT("PING")));
 			UE_LOG(LogHathoraSDK, Display, TEXT("sent message %d/%d to %s"), *MeasurementsTaken + 1, MeasurementsToTake, *PingEndpoint.Region);
 		}
 	});
@@ -138,7 +130,7 @@ void UHathoraPing::GetPingMeasurements(const FDiscoveredPingEndpoint& PingEndpoi
 
 			(*StartTimes)[0] = FPlatformTime::Seconds();
 			// Use 1-based attempt numbers to avoid overloading 0-based error condition for Strtoi
-			WebSocket->Send(FString::Printf(TEXT("PING-%d"), 1));
+			WebSocket->Send(FString::Printf(TEXT("PING")));
 			UE_LOG(LogHathoraSDK, Display, TEXT("sent message %d/%d to %s"), 1, MeasurementsToTake, *PingEndpoint.Region);
 	});
 	
