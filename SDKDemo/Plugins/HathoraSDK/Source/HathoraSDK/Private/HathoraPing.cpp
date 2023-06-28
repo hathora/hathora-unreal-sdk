@@ -1,7 +1,6 @@
 // Copyright 2023 Hathora, Inc.
 #include "HathoraPing.h"
 #include "DiscoveredPingEndpoint.h"
-#include "EditorViewportClient.h"
 #include "HttpModule.h"
 #include "JsonObjectConverter.h"
 #include "WebSocketsModule.h"
