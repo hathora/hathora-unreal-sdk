@@ -115,10 +115,17 @@ void UHathoraPing::GetPingMeasurements(const FDiscoveredPingEndpoint& PingEndpoi
 			}
 		}
 
+		// Ensure that all measurements happen sequentially by only sending the next message after the previous one has been received.
 		if (Measurements.IsValid() && MeasurementsTaken.IsValid() && ++(*MeasurementsTaken) == MeasurementsToTake)
 		{
 			WebSocket->Close();
 			(void)OnComplete.ExecuteIfBound(*Measurements, true);
+		}
+		else
+		{
+			(*StartTimes)[*MeasurementsTaken] = FPlatformTime::Seconds();
+			WebSocket->Send(FString::Printf(TEXT("PING-%d"), *MeasurementsTaken + 1));
+			UE_LOG(LogHathoraSDK, Display, TEXT("sent message %d/%d to %s"), *MeasurementsTaken + 1, MeasurementsToTake, *PingEndpoint.Region);
 		}
 	});
 	
@@ -127,16 +134,13 @@ void UHathoraPing::GetPingMeasurements(const FDiscoveredPingEndpoint& PingEndpoi
 			bWasClean ? TEXT("cleanly") : TEXT("uncleanly"), StatusCode, *Reason); 
 	});
 	
-	WebSocket->OnConnected().AddLambda([MeasurementsToTake, StartTimes, WebSocket, MessageTemplate, Url]() {
+	WebSocket->OnConnected().AddLambda([MeasurementsToTake, StartTimes, WebSocket, MessageTemplate, Url, PingEndpoint]() {
 		UE_LOG(LogHathoraSDK, VeryVerbose, TEXT("websocket connection to %s established"), *Url);
 
-		// Use 1-based attempt numbers to avoid overloading 0-based error condition for Strtoi
-		for (int32 PingAttempt = 1; PingAttempt <= MeasurementsToTake; ++PingAttempt)
-		{
-			(*StartTimes)[PingAttempt - 1] = FPlatformTime::Seconds();
-			WebSocket->Send(FString::Printf(TEXT("PING-%d"), PingAttempt));
-			UE_LOG(LogHathoraSDK, Display, TEXT("sent message %d/%d to %s"), PingAttempt, MeasurementsToTake, *Url);
-		}
+			(*StartTimes)[0] = FPlatformTime::Seconds();
+			// Use 1-based attempt numbers to avoid overloading 0-based error condition for Strtoi
+			WebSocket->Send(FString::Printf(TEXT("PING-%d"), 1));
+			UE_LOG(LogHathoraSDK, Display, TEXT("sent message %d/%d to %s"), 1, MeasurementsToTake, *PingEndpoint.Region);
 	});
 	
 	WebSocket->Connect();
