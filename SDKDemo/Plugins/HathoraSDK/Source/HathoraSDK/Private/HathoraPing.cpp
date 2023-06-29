@@ -91,7 +91,7 @@ void UHathoraPing::GetPingMeasurements(const FDiscoveredPingEndpoint& PingEndpoi
 	TSharedPtr<TArray<double>> StartTimes = MakeShared<TArray<double>>();
 	StartTimes->SetNumZeroed(MeasurementsToTake);
 	TSharedPtr<TArray<double>> Measurements = MakeShared<TArray<double>>();
-	Measurements->SetNum(MeasurementsToTake);
+	Measurements->SetNumZeroed(MeasurementsToTake);
 	TSharedPtr<IWebSocket> WebSocket = FWebSocketsModule::Get().CreateWebSocket(Url);
 
 	WebSocket->OnConnectionError().AddLambda([OnComplete, Measurements, PingEndpoint](const FString& Reason) {
