@@ -8,11 +8,11 @@
 #include "HathoraSDK.h"
 #include "Interfaces/IHttpRequest.h"
 #include "Interfaces/IHttpResponse.h"
-#include <wchar.h>
 
-UHathoraPing::UHathoraPing(const FObjectInitializer& ObjectInitializer) : UObject(ObjectInitializer)
+UHathoraPing::UHathoraPing(const FObjectInitializer& ObjectInitializer)
+	: UObject(ObjectInitializer)
 {
-    this->HathoraSdkConfig = NewObject<UHathoraSdkConfig>();
+	this->HathoraSdkConfig = NewObject<UHathoraSdkConfig>();
 }
 
 void UHathoraPing::GetRegionalPings(const FOnGetRegionalPingsDelegate& OnComplete)
@@ -36,23 +36,25 @@ void UHathoraPing::GetRegionalPings(const FOnGetRegionalPingsDelegate& OnComplet
 		}
 	});
 
-    Request->SetURL(FString::Printf(TEXT("%s/discovery/v1/ping"), *this->HathoraSdkConfig->GetBaseUrl()));
+	Request->SetURL(FString::Printf(TEXT("%s/discovery/v1/ping"), *this->HathoraSdkConfig->GetBaseUrl()));
 	Request->ProcessRequest();
 }
 
 // The number of samples should be small so we use the naive median-finding algorithm
 inline double GetMedianNaively(TArray<double>& PingMeasurements)
 {
-			PingMeasurements.Sort();
-			int32 NumMeasurements = PingMeasurements.Num();
-			int32 MiddleIndex = PingMeasurements.Num() / 2;
-			return (NumMeasurements % 2) ? (PingMeasurements[MiddleIndex -1] + PingMeasurements[MiddleIndex]) / 2 : PingMeasurements[MiddleIndex];
+	// This mutates PingMeasurements, but since this array is not exposed outside of the context of getting ping measurements
+	// it's currently fine.
+	PingMeasurements.Sort();
+	int32 NumMeasurements = PingMeasurements.Num();
+	int32 MiddleIndex = PingMeasurements.Num() / 2;
+	return (NumMeasurements % 2) ? PingMeasurements[MiddleIndex] : (PingMeasurements[MiddleIndex - 1] + PingMeasurements[MiddleIndex]) / 2;
 }
 
 void UHathoraPing::PingUrlsAndAggregateTimes(
 	const TArray<FDiscoveredPingEndpoint>& PingEndpoints,
-	int32 MeasurementsToTake,
-	const FOnGetRegionalPingsDelegate& OnComplete)
+	int32                                  MeasurementsToTake,
+	const FOnGetRegionalPingsDelegate&     OnComplete)
 {
 	TSharedPtr<TMap<FString, int32>> Pings = MakeShared<TMap<FString, int32>>();
 	TSharedPtr<int32>                CompletedRegions = MakeShared<int32>(0);
@@ -62,77 +64,77 @@ void UHathoraPing::PingUrlsAndAggregateTimes(
 	// aggregate the results of N asynchronous operations into a single TMap.
 	for (const FDiscoveredPingEndpoint& PingEndpoint : PingEndpoints)
 	{
-			GetPingMeasurements(PingEndpoint, MeasurementsToTake, FOnGetPingMeasurementsDelegate::CreateLambda([ PingEndpoint, CompletedRegions, Pings, RegionsToPing, OnComplete](TArray<double>& PingMeasurements, bool bWasSuccesful) {
-				if (bWasSuccesful)
-				{
-					int32 MedianPing = FMath::RoundToInt32(GetMedianNaively(PingMeasurements));
-					UE_LOG(LogHathoraSDK, Log, TEXT("Median ping to %s (%s:%d) took: %d ms"), *PingEndpoint.Region, *PingEndpoint.Host, PingEndpoint.Port, MedianPing);
-					Pings->Add(PingEndpoint.Region, MedianPing);
-				}
-				// Regardless of whether the ping was successful, we will mark it complete.
-				if (++(*CompletedRegions) == RegionsToPing)
-				{
-					UE_LOG(LogHathoraSDK, Log, TEXT("Pings to all Hathora regions complete."));
-					(void)OnComplete.ExecuteIfBound(*Pings);
-				}
-			}));
+		GetPingMeasurements(PingEndpoint, MeasurementsToTake, FOnGetPingMeasurementsDelegate::CreateLambda([ PingEndpoint, CompletedRegions, Pings, RegionsToPing, OnComplete](TArray<double>& PingMeasurements, bool bWasSuccesful) {
+			if (bWasSuccesful)
+			{
+				const int32 MedianPing = FMath::RoundToInt32(GetMedianNaively(PingMeasurements));
+				UE_LOG(LogHathoraSDK, Log, TEXT("Median ping to %s (%s:%d) took: %d ms"), *PingEndpoint.Region, *PingEndpoint.Host, PingEndpoint.Port, MedianPing);
+				Pings->Add(PingEndpoint.Region, MedianPing);
+			}
+			// Regardless of whether the ping was successful, we will mark it complete.
+			if (++(*CompletedRegions) == RegionsToPing)
+			{
+				UE_LOG(LogHathoraSDK, Log, TEXT("Pings to all Hathora regions complete."));
+				(void)OnComplete.ExecuteIfBound(*Pings);
+			}
+		}));
 	}
 }
 
-void UHathoraPing::GetPingMeasurements(const FDiscoveredPingEndpoint& PingEndpoint, int32 MeasurementsToTake, const FOnGetPingMeasurementsDelegate& OnComplete) 
+void UHathoraPing::GetPingMeasurements(const FDiscoveredPingEndpoint& PingEndpoint, int32 MeasurementsToTake, const FOnGetPingMeasurementsDelegate& OnComplete)
 {
-	const FString& MessageTemplate = TEXT("PING-%d");
+	const FString& MessageText = TEXT("PING");
 	const FString& Url = FString::Printf(TEXT("wss://%s:%d/ws"), *PingEndpoint.Host, PingEndpoint.Port);
 
 	// Unfortunately, we can't nest the OnMessage handler inside OnConnected,
-	TSharedPtr<int32> MeasurementsTaken = MakeShared<int32>(0);
+	TSharedPtr<int32>          MeasurementsTaken = MakeShared<int32>(0);
 	TSharedPtr<TArray<double>> StartTimes = MakeShared<TArray<double>>();
 	StartTimes->SetNumZeroed(MeasurementsToTake);
 	TSharedPtr<TArray<double>> Measurements = MakeShared<TArray<double>>();
 	Measurements->SetNum(MeasurementsToTake);
 	TSharedPtr<IWebSocket> WebSocket = FWebSocketsModule::Get().CreateWebSocket(Url);
 
-	WebSocket->OnConnectionError().AddLambda([OnComplete, Measurements](const FString& Reason) {
-		UE_LOG(LogHathoraSDK, Warning, TEXT("failed to connect to ping server due to %s"), *Reason);
+	WebSocket->OnConnectionError().AddLambda([OnComplete, Measurements, PingEndpoint](const FString& Reason) {
+		UE_LOG(LogHathoraSDK, Warning, TEXT("Failed to connect to ping server in %s due to %s"), *PingEndpoint.Region, *Reason);
 		(void)OnComplete.ExecuteIfBound(*Measurements, false);
 	});
 
-	WebSocket->OnMessage().AddLambda([WebSocket, PingEndpoint, MeasurementsTaken, MeasurementsToTake, Measurements, StartTimes, OnComplete](const FString& Message) {
-		UE_LOG(LogHathoraSDK, Display, TEXT("received message %s from %s"), *Message, *PingEndpoint.Region);
-		if (Message == "PING")
+	WebSocket->OnMessage().AddLambda([WebSocket, MessageText, MeasurementsTaken, MeasurementsToTake, Measurements, StartTimes, OnComplete](const FString& Message) {
+		if (!Measurements.IsValid() || !MeasurementsTaken.IsValid() || !StartTimes.IsValid())
+		{
+			TArray<double> Empty = TArray<double>();
+			(void)OnComplete.ExecuteIfBound(Empty, false);
+		}
+
+		if (Message == MessageText)
 		{
 			// Convert s -> ms
 			(*Measurements)[*MeasurementsTaken] = (FPlatformTime::Seconds() - (*StartTimes)[*MeasurementsTaken]) * 1000;
-			UE_LOG(LogHathoraSDK, Display, TEXT("ping %d/%d to %s took %f ms"), *MeasurementsTaken, MeasurementsToTake, *PingEndpoint.Region, (*Measurements)[*MeasurementsTaken]);
-		}
 
-		// Ensure that all measurements happen sequentially by only sending the next message after the previous one has been received.
-		if (Measurements.IsValid() && MeasurementsTaken.IsValid() && ++(*MeasurementsTaken) == MeasurementsToTake)
-		{
-			WebSocket->Close();
-			(void)OnComplete.ExecuteIfBound(*Measurements, true);
-		}
-		else
-		{
-			(*StartTimes)[*MeasurementsTaken] = FPlatformTime::Seconds();
-			WebSocket->Send(FString::Printf(TEXT("PING")));
-			UE_LOG(LogHathoraSDK, Display, TEXT("sent message %d/%d to %s"), *MeasurementsTaken + 1, MeasurementsToTake, *PingEndpoint.Region);
+			// Ensure that all measurements happen sequentially by only sending the next message after the previous one has been received.
+			if (++(*MeasurementsTaken) == MeasurementsToTake)
+			{
+				WebSocket->Close();
+				(void)OnComplete.ExecuteIfBound(*Measurements, true);
+			}
+			else
+			{
+				(*StartTimes)[*MeasurementsTaken] = FPlatformTime::Seconds();
+				WebSocket->Send(MessageText);
+			}
 		}
 	});
-	
+
 	WebSocket->OnClosed().AddLambda([](int32 StatusCode, const FString& Reason, bool bWasClean) {
-		UE_LOG(LogHathoraSDK, VeryVerbose, TEXT("websocket closed %s with status code %d because %s"),
-			bWasClean ? TEXT("cleanly") : TEXT("uncleanly"), StatusCode, *Reason); 
+		UE_LOG(LogHathoraSDK, Verbose, TEXT("Websocket closed %s with status code %d because %s"),
+			bWasClean ? TEXT("cleanly") : TEXT("uncleanly"), StatusCode, *Reason);
 	});
-	
-	WebSocket->OnConnected().AddLambda([MeasurementsToTake, StartTimes, WebSocket, MessageTemplate, Url, PingEndpoint]() {
-		UE_LOG(LogHathoraSDK, VeryVerbose, TEXT("websocket connection to %s established"), *Url);
 
-			(*StartTimes)[0] = FPlatformTime::Seconds();
-			// Use 1-based attempt numbers to avoid overloading 0-based error condition for Strtoi
-			WebSocket->Send(FString::Printf(TEXT("PING")));
-			UE_LOG(LogHathoraSDK, Display, TEXT("sent message %d/%d to %s"), 1, MeasurementsToTake, *PingEndpoint.Region);
+	WebSocket->OnConnected().AddLambda([StartTimes, WebSocket, PingEndpoint, MessageText]() {
+		UE_LOG(LogHathoraSDK, Verbose, TEXT("Websocket connection to %s established"), *PingEndpoint.Region);
+		(*StartTimes)[0] = FPlatformTime::Seconds();
+		WebSocket->Send(MessageText);
 	});
-	
+
 	WebSocket->Connect();
 }
