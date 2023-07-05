@@ -19,7 +19,7 @@ inline void LogPingMeasurements(const FString& Region, TArray<double>& Measureme
 {
 	FString Formatted = "";
 	for (const auto& Var : Measurements) {
-		Formatted += FString::Printf(TEXT("%.1f ms, "), Var);
+		Formatted += FString::Printf(TEXT("%.2f ms, "), Var);
 	}
 	UE_LOG(LogHathoraSDK, Log, TEXT("Ping measurements to %s: %s"), *Region, *Formatted);
 }
