@@ -4,6 +4,7 @@
 #include "PingChecker.h"
 
 #include "HathoraSDK.h"
+#include "HAL/ThreadManager.h"
 #include "WebSocketsModule.h"
 
 FPingChecker::FPingChecker(const FDiscoveredPingEndpoint& PingEndpoint, const int32 MeasurementsToTake, const FOnPingCompletionDelegate& OnComplete)
@@ -24,6 +25,14 @@ inline double GetMedianNaively(TArray<double>& PingMeasurements)
 	return (NumMeasurements % 2) ? PingMeasurements[MiddleIndex] : (PingMeasurements[MiddleIndex - 1] + PingMeasurements[MiddleIndex]) / 2;
 }
 
+inline void LogPingMeasurements(const FString& Region, TArray<double>& Measurements)
+{
+	FString Formatted = "";
+	for (const auto& Var : Measurements) {
+		Formatted += FString::Printf(TEXT("%.2f ms, "), Var);
+	}
+	UE_LOG(LogHathoraSDK, Log, TEXT("Ping measurements to %s: %s"), *Region, *Formatted);
+}
 
 uint32 FPingChecker::Run()
 {
@@ -31,15 +40,16 @@ uint32 FPingChecker::Run()
 	const FString Url = FString::Printf(TEXT("wss://%s:%d/ws"), *PingEndpoint->Host, PingEndpoint->Port);
 	Socket = FWebSocketsModule::Get().CreateWebSocket(Url);
 
+	UE_LOG(LogHathoraSDK, Log, TEXT("Hello from %s!"), *FThreadManager::Get().GetThreadName(FPlatformTLS::GetCurrentThreadId()));
+
 	// Unfortunately, we can't nest the OnMessage handler inside OnConnected,
 
 	Socket->OnConnectionError().AddLambda([&](const FString& Reason) {
 		UE_LOG(LogHathoraSDK, Warning, TEXT("Failed to connect to ping server in %s due to %s"), *PingEndpoint->Region, *Reason);
 		(void)OnComplete.ExecuteIfBound(0, false);
-		// TODO How to signal error condition?
 	});
 
-	Socket->OnMessage().AddLambda([&](const FString& Message) mutable {
+	Socket->OnMessage().AddLambda([this, MessageText](const FString& Message ) mutable {
 		if (Message == MessageText)
 		{
 			// Convert s -> ms
@@ -49,7 +59,11 @@ uint32 FPingChecker::Run()
 			if (++MeasurementsTaken == MeasurementsToTake)
 			{
 				Socket->Close();
-				(void)OnComplete.ExecuteIfBound(GetMedianNaively(PingResults), true);
+				const double MedianPing = GetMedianNaively(PingResults);
+				LogPingMeasurements(PingEndpoint->Region, PingResults);
+				UE_LOG(LogHathoraSDK, Log, TEXT("ping to %s from thread %s: %.1f ms"), *PingEndpoint->Region,
+					*FThreadManager::Get().GetThreadName(FPlatformTLS::GetCurrentThreadId()), MedianPing)
+				(void)OnComplete.ExecuteIfBound(MedianPing, true);
 			}
 			else
 			{
@@ -64,11 +78,13 @@ uint32 FPingChecker::Run()
 			bWasClean ? TEXT("cleanly") : TEXT("uncleanly"), StatusCode, *Reason);
 	});
 
-	Socket->OnConnected().AddLambda([&]() {
+	Socket->OnConnected().AddLambda([this, MessageText]() {
 		UE_LOG(LogHathoraSDK, Verbose, TEXT("Websocket connection to %s established"), *PingEndpoint->Region);
 		LastPingStartTime = FPlatformTime::Seconds();
 		Socket->Send(MessageText);
 	});
 
 	Socket->Connect();
+	// TODO what is this return value used for?
+	return 0;
 }
