@@ -3,7 +3,7 @@
 
 #include "SDemoMenuWidget.h"
 
-#include "HathoraPing.h"
+#include "HathoraSDK.h"
 
 #define LOCTEXT_NAMESPACE "Menu"
 void SDemoMenuWidget::Construct(const FArguments& InArgs)
@@ -39,16 +39,18 @@ void SDemoMenuWidget::Construct(const FArguments& InArgs)
 
 FReply SDemoMenuWidget::OnClicked() const
 {
-	const UHathoraPing::FOnGetRegionalPingsDelegate OnComplete = UHathoraPing::FOnGetRegionalPingsDelegate::CreateLambda([](
-		TMap<FString, int32> Results) {
-		for (const auto& Pair : Results)
-		{
-			const FString& Region = Pair.Key;
-			UE_LOG(LogTemp, Display, TEXT("Ping in %s is %d ms"), *Region, Pair.Value);	
-		}
-	});
-	UHathoraPing* HathoraPing = NewObject<UHathoraPing>();
-	HathoraPing->GetRegionalPings(OnComplete);
+	if (auto hathoraSdk = FHathoraSDKModule::Get())
+	{
+		const FHathoraSDKModule::FOnGetRegionalPingsDelegate OnComplete = FHathoraSDKModule::FOnGetRegionalPingsDelegate::CreateWeakLambda(this, [this](TMap<FString, int32> Results) {
+			for (const auto& Pair : Results)
+			{
+				const FString& Region = Pair.Key;
+				UE_LOG(LogTemp, Display, TEXT("Ping in %s is %d ms"), *Region, Pair.Value);
+			}
+		});
+		hathoraSdk->GetRegionalPings(OnComplete);
+	}
+
 	return FReply::Handled();
 }
 #undef LOCTEXT_NAMESPACE

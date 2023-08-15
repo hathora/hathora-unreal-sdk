@@ -18,7 +18,8 @@
 		{
 			"Name": "HathoraSDK",
 			"Type": "Runtime",
-			"LoadingPhase": "Default"
+			"LoadingPhase": "PostConfigInit",
+			"AdditionalDependencies":  "HTTP"
 		}
 	]
 }
