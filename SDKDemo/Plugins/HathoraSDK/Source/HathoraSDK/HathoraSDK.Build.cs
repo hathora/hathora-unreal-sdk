@@ -1,4 +1,4 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
+// Copyright 2023 Hathora, Inc. All Rights Reserved.
 
 using UnrealBuildTool;
 
@@ -25,8 +25,8 @@ public class HathoraSDK : ModuleRules
 				"Core",
 			}
 			);
-			
-		
+
+
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{

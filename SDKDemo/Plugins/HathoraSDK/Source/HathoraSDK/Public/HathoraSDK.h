@@ -6,11 +6,13 @@
 #include "Modules/ModuleManager.h"
 #include "HttpRetrySystem.h"
 
+#include "DiscoveredPingEndpoint.h"
+
 DECLARE_LOG_CATEGORY_EXTERN(LogHathoraSDK, Log, All)
 
-class FHathoraSDKModule : public IModuleInterface
+class HATHORASDK_API FHathoraSDKModule : public IModuleInterface
 {
-public:	
+public:
 	virtual void StartupModule() override;
 	virtual void ShutdownModule() override;
 
@@ -24,20 +26,29 @@ public:
 	/// Provide an implementation of the Http Retry System Manager so underlying rest calls can be retried
 	/// on errors that are possibly temporary
 	/// </summary>
-	HATHORASDK_API void SetRetryManager(TSharedPtr<class FHttpRetrySystem::FManager>& httpRetryManager);
+	void SetRetryManager(TSharedPtr<class FHttpRetrySystem::FManager>& httpRetryManager);
 
 	/// <summary>
-	/// Asyncronous call to get a map of current Hathora regions to client pings
+	/// Asynchronous call to get a map of current Hathora regions to client pings
 	/// </summary>
 	typedef TDelegate<void(const TMap<FString, int32>& /* PingMap */)> FOnGetRegionalPingsDelegate;
-	HATHORASDK_API void GetRegionalPings(const FOnGetRegionalPingsDelegate& OnComplete);
+	void GetRegionalPings(TArray<FDiscoveredPingEndpoint> PingEndpoints, const FOnGetRegionalPingsDelegate& OnComplete);
+
+	void GetRegionalPings_Internal(TArray<FDiscoveredPingEndpoint> PingEndpoints, const FOnGetRegionalPingsDelegate& OnComplete);
+
+	/// <summary>
+	/// Asynchronous call to get a list of all the Hathora regions and their ping endpoints
+	/// </summary>
+	DECLARE_DELEGATE_OneParam(FPingServiceEndpointsDelegate, TArray<FDiscoveredPingEndpoint> /* PingEndpoints */);
+	void GetPingServiceEndpoints(const FPingServiceEndpointsDelegate& OnComplete);
 
 	/// <summary>
 	/// Get the hostname + port given an AppId and RoomId
 	/// This allows matchmaking services to return a result while the room is starting and not yet active
 	/// </summary>
 	DECLARE_DELEGATE_ThreeParams(FConnectionInfoDelegate, bool /* Success */, FString /* Host */, int32 /* Port */);
-	HATHORASDK_API void GetConnectionInfo(const FString& AppId, const FString& RoomId, const FConnectionInfoDelegate& OnComplete);
+	UFUNCTION(BlueprintCallable, Category = "HathoraSDK")
+	void GetConnectionInfo(const FString& AppId, const FString& RoomId, const FConnectionInfoDelegate& OnComplete);
 
 protected:
 
