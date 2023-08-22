@@ -29,7 +29,8 @@ public:
 	void SetRetryManager(TSharedPtr<class FHttpRetrySystem::FManager>& httpRetryManager);
 
 	/// <summary>
-	/// Asynchronous call to get a map of current Hathora regions to client pings
+	/// Asynchronous call to get a map of current Hathora regions to client pings. An empty array for
+	/// PingEndpoints will call GetPingServiceEndpoints and ping all regions.
 	/// </summary>
 	typedef TDelegate<void(const TMap<FString, int32>& /* PingMap */)> FOnGetRegionalPingsDelegate;
 	void GetRegionalPings(TArray<FDiscoveredPingEndpoint> PingEndpoints, const FOnGetRegionalPingsDelegate& OnComplete);
