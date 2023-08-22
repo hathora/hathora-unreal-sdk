@@ -6,7 +6,7 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 
 #include "HathoraSDK.h"
-#include "RegionalPings.h"
+#include "HathoraSDKTypes.h"
 
 #include "HathoraSDKBPLibrary.generated.h"
 

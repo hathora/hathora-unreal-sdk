@@ -6,7 +6,7 @@
 #include "Modules/ModuleManager.h"
 #include "HttpRetrySystem.h"
 
-#include "DiscoveredPingEndpoint.h"
+#include "HathoraSDKTypes.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(LogHathoraSDK, Log, All)
 

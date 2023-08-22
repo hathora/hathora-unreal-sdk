@@ -1,7 +1,7 @@
 // Copyright 2023 Hathora, Inc.
 #pragma once
 
-#include "DiscoveredPingEndpoint.generated.h"
+#include "HathoraSDKTypes.generated.h"
 
 USTRUCT(BlueprintType)
 struct HATHORASDK_API FDiscoveredPingEndpoint
@@ -16,4 +16,13 @@ struct HATHORASDK_API FDiscoveredPingEndpoint
 
 	UPROPERTY(BlueprintReadOnly)
 	int32 Port = 0;
+};
+
+USTRUCT(BlueprintType)
+struct HATHORASDK_API FRegionalPings
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadOnly)
+	TMap<FString, int32> PingMap;
 };
