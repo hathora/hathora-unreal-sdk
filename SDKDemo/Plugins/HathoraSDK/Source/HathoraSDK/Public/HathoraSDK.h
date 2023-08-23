@@ -35,8 +35,6 @@ public:
 	typedef TDelegate<void(const TMap<FString, int32>& /* PingMap */)> FOnGetRegionalPingsDelegate;
 	void GetRegionalPings(TArray<FDiscoveredPingEndpoint> PingEndpoints, const FOnGetRegionalPingsDelegate& OnComplete);
 
-	void GetRegionalPings_Internal(TArray<FDiscoveredPingEndpoint> PingEndpoints, const FOnGetRegionalPingsDelegate& OnComplete);
-
 	/// <summary>
 	/// Asynchronous call to get a list of all the Hathora regions and their ping endpoints
 	/// </summary>
@@ -74,6 +72,8 @@ protected:
 	TArray<FString> GetConnectionInfoDelaysSeconds;
 
 protected:
+
+	void GetRegionalPings_Internal(TArray<FDiscoveredPingEndpoint> PingEndpoints, const FOnGetRegionalPingsDelegate& OnComplete);
 
 	TSharedRef<IHttpRequest, ESPMode::ThreadSafe> NewRequest();
 	void GetConnectionInfo_Internal(const FString& AppId, const FString& RoomId, double StartTime, int32 RetryCount, const FConnectionInfoDelegate& OnComplete);

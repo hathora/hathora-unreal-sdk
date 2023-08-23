@@ -10,19 +10,13 @@
 
 #include "HathoraSDKBPLibrary.generated.h"
 
-UDELEGATE()
-DECLARE_DYNAMIC_DELEGATE_OneParam(FPingServiceEndpointsDynamicDelegate, const TArray<FDiscoveredPingEndpoint>&, PingEndpoints);
-
-UDELEGATE()
-DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetRegionalPingsDynamicDelegate, FRegionalPings, Result);
-
-UDELEGATE()
-DECLARE_DYNAMIC_DELEGATE_ThreeParams(FConnectionInfoDynamicDelegate, bool, Success, FString, Host, int32, Port);
-
 UCLASS()
 class UFHathoraSDKBPLibrary : public UBlueprintFunctionLibrary {
 	GENERATED_BODY()
 
+
+	UDELEGATE()
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FPingServiceEndpointsDynamicDelegate, const TArray<FDiscoveredPingEndpoint>&, PingEndpoints);
 	/**
 	 * Returns an array of all regions with a host and port that a client can directly ping.
 	 * Use the GetRegionalPings method to get the actual ping values.
@@ -30,16 +24,19 @@ class UFHathoraSDKBPLibrary : public UBlueprintFunctionLibrary {
 	UFUNCTION(BlueprintCallable, Category = "HathoraSDK")
 	static void GetPingServiceEndpoints(const FPingServiceEndpointsDynamicDelegate& OnComplete);
 
+
+	UDELEGATE()
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetRegionalPingsDynamicDelegate, FRegionalPings, Result);
 	/**
-	 * Opens a WebSocket connection with each of the provided PingEndpoints and returns
-	 * the latency in milliseconds for each endpoint in a map keyed by region name.
-	 *
-	 * @param PingEndpoints Array of PingEndpoints to ping; if empty, GetPingServiceEndpoints will be
-	 * called to get the list of endpoints to ping.
+	 * Calls GetPingServiceEndpoints to get all available regions, opens a WebSocket connection
+	 * with each, and returns the latency in milliseconds for each endpoint in a map keyed by region name.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "HathoraSDK")
-	static void GetRegionalPings(TArray<FDiscoveredPingEndpoint> PingEndpoints, const FOnGetRegionalPingsDynamicDelegate& OnComplete);
+	static void GetAllRegionalPings(const FOnGetRegionalPingsDynamicDelegate& OnComplete);
 
+
+	UDELEGATE()
+	DECLARE_DYNAMIC_DELEGATE_ThreeParams(FConnectionInfoDynamicDelegate, bool, Success, FString, Host, int32, Port);
 	/**
 	 * Get the hostname + port given an AppId and RoomId
 	 * This allows matchmaking services to return a result while the room is starting

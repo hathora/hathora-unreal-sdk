@@ -22,7 +22,7 @@ void UFHathoraSDKBPLibrary::GetPingServiceEndpoints(const FPingServiceEndpointsD
 	HathoraSDK->GetPingServiceEndpoints(Delegate);
 }
 
-void UFHathoraSDKBPLibrary::GetRegionalPings(TArray<FDiscoveredPingEndpoint> PingEndpoints, const FOnGetRegionalPingsDynamicDelegate& OnComplete)
+void UFHathoraSDKBPLibrary::GetAllRegionalPings(const FOnGetRegionalPingsDynamicDelegate& OnComplete)
 {
 	FHathoraSDKModule* HathoraSDK = FHathoraSDKModule::Get();
 
@@ -44,7 +44,7 @@ void UFHathoraSDKBPLibrary::GetRegionalPings(TArray<FDiscoveredPingEndpoint> Pin
 		}
 		OnComplete.ExecuteIfBound(Result);
 	});
-	HathoraSDK->GetRegionalPings(PingEndpoints, Delegate);
+	HathoraSDK->GetRegionalPings(TArray<FDiscoveredPingEndpoint>(), Delegate);
 }
 
 void UFHathoraSDKBPLibrary::GetConnectionInfo(const FString& AppId, const FString& RoomId, const FConnectionInfoDynamicDelegate& OnComplete)

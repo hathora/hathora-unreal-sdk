@@ -3,7 +3,6 @@
 #include "HathoraSDK.h"
 
 #include "HathoraSDKTypes.h"
-#include "HathoraSDK_Ping.h"
 
 #include "Async/Async.h"
 #include "HAL/RunnableThread.h"
@@ -25,6 +24,8 @@
 #include <string>
 
 #define LOCTEXT_NAMESPACE "FHathoraSDKModule"
+
+int CollectRegionPing(const FDiscoveredPingEndpoint& Endpoint);
 
 DEFINE_LOG_CATEGORY(LogHathoraSDK)
 void FHathoraSDKModule::StartupModule()
