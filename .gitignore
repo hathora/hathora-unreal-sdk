@@ -5,5 +5,8 @@
 
 .idea/
 .vscode/
+.ignore
+*.code-workspace
+*.sln
 
 .DS_Store
