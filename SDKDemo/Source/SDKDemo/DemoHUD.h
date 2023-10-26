@@ -14,8 +14,7 @@ class SDKDEMO_API ADemoHUD : public AHUD
 {
 	GENERATED_BODY()
 protected:
-	TSharedPtr<class SDemoMenuWidget> DemoMenuWidget;
-	TSharedPtr<SWidget>				  DemoMenuWidgetContainer;
+	class UDemoMenuWidget* DemoMenuWidget;
 
 	virtual void BeginPlay() override;
 };
