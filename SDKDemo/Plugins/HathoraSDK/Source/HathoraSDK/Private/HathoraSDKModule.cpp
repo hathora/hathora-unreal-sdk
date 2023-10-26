@@ -1,6 +1,6 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-#include "HathoraSDK.h"
+#include "HathoraSDKModule.h"
 
 #define LOCTEXT_NAMESPACE "FHathoraSDKModule"
 

@@ -5,7 +5,7 @@
 #include "JsonObjectConverter.h"
 #include "WebSocketsModule.h"
 #include "IWebSocket.h"
-#include "HathoraSDK.h"
+#include "HathoraSDKModule.h"
 #include "Interfaces/IHttpRequest.h"
 #include "Interfaces/IHttpResponse.h"
 
@@ -45,7 +45,7 @@ void UHathoraPing::PingUrlsAndAggregateTimes(
 {
 	TSharedPtr<TMap<FString, int32>> Pings = MakeShared<TMap<FString, int32>>();
 	TSharedPtr<int32>                CompletedPings = MakeShared<int32>(0);
-	
+
 	const int32 PingsToComplete = PingEndpoints.Num();
 
 	// aggregate the results of N asynchronous operations into a single TMap.
@@ -71,7 +71,7 @@ void UHathoraPing::PingUrlsAndAggregateTimes(
 
 DECLARE_DELEGATE_TwoParams(FOnGetPingDelegate, int32 /* Ping */, bool /* bWasSuccessful */);
 
-void UHathoraPing::GetPingTime(const FDiscoveredPingEndpoint& PingEndpoint, const FOnGetPingDelegate& OnComplete) 
+void UHathoraPing::GetPingTime(const FDiscoveredPingEndpoint& PingEndpoint, const FOnGetPingDelegate& OnComplete)
 {
 	const FString& MessageText = TEXT("PING");
 	const FString& Url = FString::Printf(TEXT("wss://%s:%d/ws"), *PingEndpoint.Host, PingEndpoint.Port);
@@ -93,17 +93,17 @@ void UHathoraPing::GetPingTime(const FDiscoveredPingEndpoint& PingEndpoint, cons
 			WebSocket->Close();
 		}
 	});
-	
+
 	WebSocket->OnClosed().AddLambda([](int32 StatusCode, const FString& Reason, bool bWasClean) {
 		UE_LOG(LogHathoraSDK, VeryVerbose, TEXT("websocket closed %s with status code %d because %s"),
-			bWasClean ? TEXT("cleanly") : TEXT("uncleanly"), StatusCode, *Reason); 
+			bWasClean ? TEXT("cleanly") : TEXT("uncleanly"), StatusCode, *Reason);
 	});
-	
+
 	WebSocket->OnConnected().AddLambda([StartTime, WebSocket, MessageText, Url]() {
 		UE_LOG(LogHathoraSDK, VeryVerbose, TEXT("websocket connection to %s established"), *Url);
 		*StartTime = FPlatformTime::Seconds();
 		WebSocket->Send(MessageText);
 	});
-	
+
 	WebSocket->Connect();
 }
