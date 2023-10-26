@@ -27,6 +27,7 @@ public class HathoraSDK : ModuleRules
 			new string[]
 			{
 				"Core",
+				"DeveloperSettings",
 			}
 			);
 			
