@@ -90,7 +90,7 @@ bool UDemoMenuWidget::Initialize()
 void UDemoMenuWidget::InitiatePing()
 {
 	RegionList->ClearChildren();
-	UHathoraSDK::FOnGetRegionalPingsDelegate OnComplete;
+	FHathoraOnGetRegionalPings OnComplete;
 	OnComplete.BindDynamic(this, &UDemoMenuWidget::OnPingResults);
 	UHathoraSDK::GetRegionalPings(OnComplete);
 }
