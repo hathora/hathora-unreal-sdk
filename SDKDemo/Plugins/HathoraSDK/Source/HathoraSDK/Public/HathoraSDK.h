@@ -15,14 +15,23 @@ class HATHORASDK_API UHathoraSDK : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 public:
-	// Get ping times to all available Hathora Cloud regions
-	// pings are returned in milliseconds
+	// Get ping times to all available Hathora Cloud regions.
+	// Each region is pinged NumPingsPerRegion times.
+	// Pings are returned in milliseconds.
+	// @param OnComplete The delegate to call when the request is complete with averaged ping times.
+	// @param NumPingsPerRegion The number of pings to send to each region.
 	UFUNCTION(BlueprintCallable, Category = "HathoraSDK")
 	static void GetRegionalPings(const FHathoraOnGetRegionalPings& OnComplete, int32 NumPingsPerRegion = 3);
 
+	// Create an instance of the Hathora SDK.
+	// @param AppId The ID of your Hathora App (e.g. "app-88871e9f-ca62-413c-beab-da226f2afd71").
+	// @param Security The security configuration for your Hathora App; primarily used to provide the Dev Token.
 	UFUNCTION(BlueprintCallable, Category = "HathoraSDK")
 	static UHathoraSDK* CreateHathoraSDK(FString AppId, FHathoraSDKSecurity Security);
 
+	// Set the credentials of this SDK instance.
+	// @param AppId The ID of your Hathora App (e.g. "app-88871e9f-ca62-413c-beab-da226f2afd71").
+	// @param Security The security configuration for your Hathora App; primarily used to provide the Dev Token.
 	UFUNCTION(BlueprintCallable, Category = "HathoraSDK")
 	void SetCredentials(FString AppId, FHathoraSDKSecurity Security);
 
