@@ -18,7 +18,7 @@ public:
 	// Get ping times to all available Hathora Cloud regions
 	// pings are returned in milliseconds
 	UFUNCTION(BlueprintCallable, Category = "HathoraSDK")
-	static void GetRegionalPings(const FHathoraOnGetRegionalPings& OnComplete);
+	static void GetRegionalPings(const FHathoraOnGetRegionalPings& OnComplete, int32 NumPingsPerRegion = 3);
 
 	UFUNCTION(BlueprintCallable, Category = "HathoraSDK")
 	static UHathoraSDK* CreateHathoraSDK(FString AppId, FHathoraSDKSecurity Security);

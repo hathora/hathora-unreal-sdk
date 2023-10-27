@@ -14,7 +14,7 @@ class HATHORASDK_API UHathoraSDKDiscoveryV1 : public UHathoraSDKAPI
 
 public:
 	UFUNCTION(BlueprintCallable, Category = "HathoraSDK | DiscoveryV1")
-	void GetRegionalPings(const FHathoraOnGetRegionalPings& OnComplete);
+	void GetRegionalPings(const FHathoraOnGetRegionalPings& OnComplete, int32 NumPingsPerRegion = 3);
 
 	UDELEGATE()
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FHathoraOnGetPingServiceEndpoints, const TArray<FHathoraDiscoveredPingEndpoint>&, Endpoints);
@@ -24,9 +24,15 @@ public:
 
 private:
 	FHathoraOnGetRegionalPings OnGetRegionalPingsComplete;
+	TArray<FHathoraDiscoveredPingEndpoint> PingEndpoints;
+	int32 NumPingsPerRegion;
+	int32 NumPingsPerRegionCompleted;
+	TSharedPtr<TMap<FString, TArray<int32>>> PingResults;
 
 	DECLARE_DELEGATE_TwoParams(FOnGetPingDelegate, int32 /* Ping */, bool /* bWasSuccessful */);
 
 	UFUNCTION()
-	void PingUrlsAndAggregateTimes(const TArray<FHathoraDiscoveredPingEndpoint>& PingEndpoints);
+	void InitiatePings(const TArray<FHathoraDiscoveredPingEndpoint>& PingEndpoints);
+
+	void PingEachRegion();
 };

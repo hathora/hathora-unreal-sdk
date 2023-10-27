@@ -7,10 +7,10 @@
 #include "Interfaces/IHttpRequest.h"
 #include "Interfaces/IHttpResponse.h"
 
-void UHathoraSDK::GetRegionalPings(const FHathoraOnGetRegionalPings& OnComplete)
+void UHathoraSDK::GetRegionalPings(const FHathoraOnGetRegionalPings& OnComplete, int32 NumPingsPerRegion)
 {
 	UHathoraSDK* SDK = UHathoraSDK::CreateHathoraSDK("", FHathoraSDKSecurity());
-	SDK->DiscoveryV1->GetRegionalPings(OnComplete);
+	SDK->DiscoveryV1->GetRegionalPings(OnComplete, NumPingsPerRegion);
 }
 
 UHathoraSDK* UHathoraSDK::CreateHathoraSDK(FString AppId, FHathoraSDKSecurity Security)
