@@ -59,7 +59,7 @@ void UHathoraSDKDiscoveryV1::PingEachRegion()
 	// the desired number of times, and then aggregate the results and return
 	// this ensures subsequent pings to a particular region are done sequentially
 	// instead of simultaneously
-	if (NumPingsPerRegion >= NumPingsPerRegionCompleted)
+	if (NumPingsPerRegionCompleted >= NumPingsPerRegion)
 	{
 		UE_LOG(LogHathoraSDK, Log, TEXT("Completed multiple pings to each Hathora region; returning the averages."));
 
@@ -67,12 +67,15 @@ void UHathoraSDKDiscoveryV1::PingEachRegion()
 
 		for (const TPair<FString, TArray<int32>>& PingResult : *PingResults)
 		{
-			int32 Sum = 0;
+			int32 Min = -1;
 			for (int32 PingTime : PingResult.Value)
 			{
-				Sum += PingTime;
+				if (Min == -1 || PingTime < Min)
+				{
+					Min = PingTime;
+				}
 			}
-			FinalResult.Pings.Add(PingResult.Key, FMath::RoundToInt(float(Sum) / float(PingResult.Value.Num())));
+			FinalResult.Pings.Add(PingResult.Key, Min);
 		}
 
 		OnGetRegionalPingsComplete.ExecuteIfBound(FinalResult);

@@ -16,7 +16,8 @@ class HATHORASDK_API UHathoraSDK : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 public:
 	// Get ping times to all available Hathora Cloud regions.
-	// Each region is pinged NumPingsPerRegion times.
+	// Each region is pinged NumPingsPerRegion times and the
+	// minimum is returned.
 	// Pings are returned in milliseconds.
 	// @param OnComplete The delegate to call when the request is complete with averaged ping times.
 	// @param NumPingsPerRegion The number of pings to send to each region.
