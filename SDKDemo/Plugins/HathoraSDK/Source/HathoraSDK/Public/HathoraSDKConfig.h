@@ -22,12 +22,12 @@ public:
 
 	const FString& GetBaseUrl() const { return BaseUrl; };
 
-	const float& GetPingTimeoutMs() const { return PingTimeoutMs; };
+	const float& GetPingTimeoutSeconds() const { return PingTimeoutSeconds; };
 
 private:
 	UPROPERTY(Config, EditAnywhere, Category = "Network")
 	FString BaseUrl = "https://api.hathora.dev";
 
 	UPROPERTY(Config, EditAnywhere, Category = "Network")
-	float PingTimeoutMs = 1000;
+	float PingTimeoutSeconds = 1.0f;
 };

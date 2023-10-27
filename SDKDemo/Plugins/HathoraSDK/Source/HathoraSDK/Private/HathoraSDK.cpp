@@ -66,7 +66,7 @@ void UHathoraSDK::GetPingTime(const FDiscoveredPingEndpoint& PingEndpoint, const
 {
 	FIcmp::IcmpEcho(
 		PingEndpoint.Host,
-		GetDefault<UHathoraSDKConfig>()->GetPingTimeoutMs(),
+		GetDefault<UHathoraSDKConfig>()->GetPingTimeoutSeconds(),
 		[OnComplete](FIcmpEchoResult Result) {
 			OnComplete.ExecuteIfBound(Result.Time * 1000, Result.Status == EIcmpResponseStatus::Success);
 		}
