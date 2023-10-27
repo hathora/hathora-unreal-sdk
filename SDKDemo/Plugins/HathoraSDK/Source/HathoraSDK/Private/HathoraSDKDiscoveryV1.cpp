@@ -32,6 +32,12 @@ void UHathoraSDKDiscoveryV1::GetPingServiceEndpoints(const FHathoraOnGetPingServ
 
 void UHathoraSDKDiscoveryV1::GetRegionalPings(const FHathoraOnGetRegionalPings& OnComplete, int32 InNumPingsPerRegion)
 {
+	if (InNumPingsPerRegion <= 0)
+	{
+		UE_LOG(LogHathoraSDK, Warning, TEXT("Cannot ping a region less than 1 time; defaulting to 3 pings per region."));
+		InNumPingsPerRegion = 3;
+	}
+
 	OnGetRegionalPingsComplete = OnComplete;
 	NumPingsPerRegion = InNumPingsPerRegion;
 	FHathoraOnGetPingServiceEndpoints OnGetEndpointsComplete;
@@ -53,7 +59,7 @@ void UHathoraSDKDiscoveryV1::PingEachRegion()
 	// the desired number of times, and then aggregate the results and return
 	// this ensures subsequent pings to a particular region are done sequentially
 	// instead of simultaneously
-	if (NumPingsPerRegion == NumPingsPerRegionCompleted)
+	if (NumPingsPerRegion >= NumPingsPerRegionCompleted)
 	{
 		UE_LOG(LogHathoraSDK, Log, TEXT("Completed multiple pings to each Hathora region; returning the averages."));
 
