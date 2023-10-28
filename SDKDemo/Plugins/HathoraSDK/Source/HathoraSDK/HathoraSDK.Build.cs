@@ -27,6 +27,7 @@ public class HathoraSDK : ModuleRules
 			{
 				"Core",
 				"DeveloperSettings",
+				"Json"
 			}
 			);
 
@@ -36,7 +37,6 @@ public class HathoraSDK : ModuleRules
 			{
 				"CoreUObject",
 				"Engine",
-				"Json",
 				"JsonUtilities",
 				"HTTP",
 				"Icmp",

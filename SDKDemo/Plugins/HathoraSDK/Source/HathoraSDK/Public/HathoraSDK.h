@@ -9,6 +9,7 @@
 #include "HathoraSDK.generated.h"
 
 class UHathoraSDKDiscoveryV1;
+class UHathoraSDKRoomV2;
 
 UCLASS()
 class HATHORASDK_API UHathoraSDK : public UBlueprintFunctionLibrary
@@ -38,6 +39,9 @@ public:
 
 	UPROPERTY(BlueprintReadOnly)
 	UHathoraSDKDiscoveryV1* DiscoveryV1;
+
+	UPROPERTY(BlueprintReadOnly)
+	UHathoraSDKRoomV2* RoomV2;
 
 private:
 	FHathoraOnGetRegionalPings OnGetRegionalPingsComplete;

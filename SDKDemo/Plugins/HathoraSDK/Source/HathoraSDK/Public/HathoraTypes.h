@@ -48,3 +48,18 @@ struct FHathoraSDKSecurity
 
 UDELEGATE()
 DECLARE_DYNAMIC_DELEGATE_OneParam(FHathoraOnGetRegionalPings, FHathoraRegionPings, Result);
+
+UENUM(BlueprintType)
+enum class EHathoraCloudRegion : uint8
+{
+	Seattle,
+	Washington_DC,
+	Chicago,
+	London,
+	Frankfurt,
+	Mumbai,
+	Singapore,
+	Tokyo,
+	Sydney,
+	Sao_Paulo
+};

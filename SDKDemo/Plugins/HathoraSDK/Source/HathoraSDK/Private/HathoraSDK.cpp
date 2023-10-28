@@ -3,6 +3,7 @@
 #include "HathoraSDK.h"
 #include "HathoraSDKModule.h"
 #include "HathoraSDKDiscoveryV1.h"
+#include "HathoraSDKRoomV2.h"
 #include "HttpModule.h"
 #include "Interfaces/IHttpRequest.h"
 #include "Interfaces/IHttpResponse.h"
@@ -21,6 +22,7 @@ UHathoraSDK* UHathoraSDK::CreateHathoraSDK(FString AppId, FHathoraSDKSecurity Se
 {
 	UHathoraSDK* SDK = NewObject<UHathoraSDK>();
 	SDK->DiscoveryV1 = NewObject<UHathoraSDKDiscoveryV1>();
+	SDK->RoomV2 = NewObject<UHathoraSDKRoomV2>();
 
 	SDK->SetCredentials(AppId, Security);
 
@@ -30,6 +32,7 @@ UHathoraSDK* UHathoraSDK::CreateHathoraSDK(FString AppId, FHathoraSDKSecurity Se
 void UHathoraSDK::SetCredentials(FString AppId, FHathoraSDKSecurity Security)
 {
 	DiscoveryV1->SetCredentials(AppId, Security);
+	RoomV2->SetCredentials(AppId, Security);
 }
 
 void UHathoraSDK::OnGetRegionalPingsCompleteWrapper(FHathoraRegionPings Result)
