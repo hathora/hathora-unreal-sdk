@@ -58,7 +58,7 @@ bool UDemoMenuWidget::Initialize()
 
 	BorderWidget->SetHorizontalAlignment(EHorizontalAlignment::HAlign_Fill);
 	BorderWidget->SetVerticalAlignment(EVerticalAlignment::VAlign_Fill);
-	BorderWidget->SetBrushColor(FColor::Black);
+	BorderWidget->SetBrushColor(FLinearColor(0, 0, 0, 0.2));
 
 	UVerticalBox* ContainerBox = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass());
 	check(ContainerBox);
