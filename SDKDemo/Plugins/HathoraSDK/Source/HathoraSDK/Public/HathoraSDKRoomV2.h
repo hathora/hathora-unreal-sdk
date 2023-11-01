@@ -26,7 +26,7 @@ struct FHathoraExposedPort
 };
 
 USTRUCT(BlueprintType)
-struct FHathoraCreateRoomResult
+struct FHathoraCreateRoomData
 {
 	GENERATED_BODY()
 
@@ -41,6 +41,21 @@ struct FHathoraCreateRoomResult
 
 	UPROPERTY(BlueprintReadOnly, Category = "Default")
 	TArray<FHathoraExposedPort> AdditionalExposedPorts;
+};
+
+USTRUCT(BlueprintType)
+struct FHathoraCreateRoomResult
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadOnly, Category = "Default")
+	int32 StatusCode;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Default")
+	FString ErrorMessage;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Default")
+	FHathoraCreateRoomData Data;
 };
 
 UCLASS()

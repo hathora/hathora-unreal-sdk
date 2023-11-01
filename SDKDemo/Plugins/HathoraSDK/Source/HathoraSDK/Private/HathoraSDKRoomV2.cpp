@@ -31,13 +31,22 @@ void UHathoraSDKRoomV2::CreateRoom(EHathoraCloudRegion Region, FString RoomConfi
 			FHathoraCreateRoomResult Result;
 			if (bSuccess && Response.IsValid())
 			{
-				int32 ResponseCode = Response->GetResponseCode();
+				Result.StatusCode = Response->GetResponseCode();
 				FString Content = Response->GetContentAsString();
-				FJsonObjectConverter::JsonObjectStringToUStruct(Content, &Result, 0, 0);
+
+				if (Result.StatusCode == 201)
+				{
+					FJsonObjectConverter::JsonObjectStringToUStruct(Content, &Result.Data, 0, 0);
+				}
+				else
+				{
+					Result.ErrorMessage = Content;
+				}
 			}
 			else
 			{
-				UE_LOG(LogHathoraSDK, Error, TEXT("Could not create room: %s"), *Response->GetContentAsString());
+				Result.ErrorMessage = TEXT("Could not create room, unknown error");
+				UE_LOG(LogHathoraSDK, Error, TEXT("%s"), *Result.ErrorMessage);
 			}
 
 			if (!OnComplete.ExecuteIfBound(Result))
