@@ -17,7 +17,7 @@ struct FHathoraExposedPort
 	FString TransportType;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Default")
-	int32 Port;
+	int32 Port = 0;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Default")
 	FString Host;
@@ -33,7 +33,7 @@ struct FHathoraAllocation
 
 	// If the API returns null for unscheduledAt, this will be false.
 	UPROPERTY(BlueprintReadOnly, Category = "Default")
-	bool bUnscheduled;
+	bool bUnscheduled = false;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Default")
 	FDateTime UnscheduledAt;
@@ -76,7 +76,7 @@ struct FHathoraRoomConnectionInfoResult
 	GENERATED_BODY()
 
 	UPROPERTY(BlueprintReadOnly, Category = "Default")
-	int32 StatusCode;
+	int32 StatusCode = 0;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Default")
 	FString ErrorMessage;
@@ -118,7 +118,7 @@ struct FHathoraGetRoomInfoData
 
 	// The allocation status of a room.
 	UPROPERTY(BlueprintReadOnly, Category = "Default")
-	EHathoraRoomStatus Status;
+	EHathoraRoomStatus Status = EHathoraRoomStatus::Unknown;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Default")
 	TArray<FHathoraAllocation> Allocations;
@@ -144,7 +144,7 @@ struct FHathoraGetRoomInfoResult
 	GENERATED_BODY()
 
 	UPROPERTY(BlueprintReadOnly, Category = "Default")
-	int32 StatusCode;
+	int32 StatusCode = 0;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Default")
 	FString ErrorMessage;
@@ -165,7 +165,7 @@ struct FHathoraProcessRoomInfo
 
 	// The allocation status of a room.
 	UPROPERTY(BlueprintReadOnly, Category = "Default")
-	EHathoraRoomStatus Status;
+	EHathoraRoomStatus Status = EHathoraRoomStatus::Unknown;
 
 	// Optional configuration parameters for the room.
 	// Can be any string including stringified JSON.
@@ -188,7 +188,7 @@ struct FHathoraGetRoomsForProcessResult
 	GENERATED_BODY()
 
 	UPROPERTY(BlueprintReadOnly, Category = "Default")
-	int32 StatusCode;
+	int32 StatusCode = 0;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Default")
 	FString ErrorMessage;
@@ -203,13 +203,13 @@ struct FHathoraDestroyRoomResult
 	GENERATED_BODY()
 
 	UPROPERTY(BlueprintReadOnly, Category = "Default")
-	int32 StatusCode;
+	int32 StatusCode = 0;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Default")
 	FString ErrorMessage;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Default")
-	bool bDestroyed;
+	bool bDestroyed = false;
 };
 
 USTRUCT(BlueprintType)
@@ -218,13 +218,13 @@ struct FHathoraSuspendRoomResult
 	GENERATED_BODY()
 
 	UPROPERTY(BlueprintReadOnly, Category = "Default")
-	int32 StatusCode;
+	int32 StatusCode = 0;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Default")
 	FString ErrorMessage;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Default")
-	bool bSuspended;
+	bool bSuspended = false;
 };
 
 USTRUCT(BlueprintType)
@@ -233,13 +233,13 @@ struct FHathoraUpdateRoomConfigResult
 	GENERATED_BODY()
 
 	UPROPERTY(BlueprintReadOnly, Category = "Default")
-	int32 StatusCode;
+	int32 StatusCode = 0;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Default")
 	FString ErrorMessage;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Default")
-	bool bUpdated;
+	bool bUpdated = false;
 };
 
 UCLASS(BlueprintType)
@@ -253,11 +253,11 @@ public:
 
 	// Create a new room for an existing application. Poll the GetConnectionInfo()
 	// endpoint to get connection details for an active room.
-	// @param Region: The region to create the room in.
-	// @param RoomConfig: Optional configuration parameters for the room. Can be
+	// @param Region The region to create the room in.
+	// @param RoomConfig Optional configuration parameters for the room. Can be
 	//                    any string including stringified JSON. It is accessible
 	//                    from the room via GetRoomInfo().
-	// @param RoomId: Unique identifier to a game session or match. Leave empty to
+	// @param RoomId Unique identifier to a game session or match. Leave empty to
 	//                use the default system generated ID.
 	UFUNCTION(BlueprintCallable, Category = "HathoraSDK | RoomV2")
 	void CreateRoom(EHathoraCloudRegion Region, FString RoomConfig, FString RoomId, FHathoraOnRoomConnectionInfo OnComplete);
@@ -266,7 +266,7 @@ public:
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FHathoraOnGetRoomInfo, FHathoraGetRoomInfoResult, Result);
 
 	// Retrieve current and historical allocation data for a room.
-	// @param RoomId: Unique identifier to a game session or match.
+	// @param RoomId Unique identifier to a game session or match.
 	UFUNCTION(BlueprintCallable, Category = "HathoraSDK | RoomV2")
 	void GetRoomInfo(FString RoomId, FHathoraOnGetRoomInfo OnComplete);
 
@@ -274,13 +274,13 @@ public:
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FHathoraOnGetRoomsForProcess, FHathoraGetRoomsForProcessResult, Result);
 
 	// Get all active rooms for a given process.
-	// @param ProcessId: System generated unique identifier to a runtime instance
+	// @param ProcessId System generated unique identifier to a runtime instance
 	//                   of your game server.
 	UFUNCTION(BlueprintCallable, Category = "HathoraSDK | RoomV2")
 	void GetActiveRoomsForProcess(FString ProcessId, FHathoraOnGetRoomsForProcess OnComplete);
 
 	// Get all inactive rooms for a given process.
-	// @param ProcessId: System generated unique identifier to a runtime instance
+	// @param ProcessId System generated unique identifier to a runtime instance
 	//                   of your game server.
 	UFUNCTION(BlueprintCallable, Category = "HathoraSDK | RoomV2")
 	void GetInactiveRoomsForProcess(FString ProcessId, FHathoraOnGetRoomsForProcess OnComplete);
@@ -289,7 +289,7 @@ public:
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FHathoraOnDestroyRoom, FHathoraDestroyRoomResult, Result);
 
 	// Destroy a room. All associated metadata is deleted.
-	// @param RoomId: Unique identifier to a game session or match.
+	// @param RoomId Unique identifier to a game session or match.
 	UFUNCTION(BlueprintCallable, Category = "HathoraSDK | RoomV2")
 	void DestroyRoom(FString RoomId, FHathoraOnDestroyRoom OnComplete);
 
@@ -298,13 +298,13 @@ public:
 
 	// Suspend a room. The room is unallocated from the process but
 	// can be rescheduled later using the same roomId.
-	// @param RoomId: Unique identifier to a game session or match.
+	// @param RoomId Unique identifier to a game session or match.
 	UFUNCTION(BlueprintCallable, Category = "HathoraSDK | RoomV2")
 	void SuspendRoom(FString RoomId, FHathoraOnSuspendRoom OnComplete);
 
 	// Poll this endpoint to get connection details to a room.
 	// Clients can call this endpoint without authentication.
-	// @param RoomId: Unique identifier to a game session or match.
+	// @param RoomId Unique identifier to a game session or match.
 	UFUNCTION(BlueprintCallable, Category = "HathoraSDK | RoomV2")
 	void GetConnectionInfo(FString RoomId, FHathoraOnRoomConnectionInfo OnComplete);
 
@@ -312,8 +312,8 @@ public:
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FHathoraOnUpdateRoomConfig, FHathoraUpdateRoomConfigResult, Result);
 
 	// Update the roomConfig variable for a room.
-	// @param RoomId: Unique identifier to a game session or match.
-	// @param RoomConfig: Optional configuration parameters for the room. Can be
+	// @param RoomId Unique identifier to a game session or match.
+	// @param RoomConfig Optional configuration parameters for the room. Can be
 	//                    any string including stringified JSON. It is accessible
 	//                    from the room via GetRoomInfo().
 	UFUNCTION(BlueprintCallable, Category = "HathoraSDK | RoomV2")

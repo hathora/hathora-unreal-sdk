@@ -3,14 +3,15 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Kismet/BlueprintFunctionLibrary.h"
 #include "HathoraTypes.h"
 #include "Interfaces/IHttpRequest.h"
 #include "Interfaces/IHttpResponse.h"
 #include "Dom/JsonObject.h"
 #include "HathoraSDKAPI.generated.h"
 
-UCLASS()
-class HATHORASDK_API UHathoraSDKAPI : public UObject
+UCLASS(BlueprintType)
+class HATHORASDK_API UHathoraSDKAPI : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 
