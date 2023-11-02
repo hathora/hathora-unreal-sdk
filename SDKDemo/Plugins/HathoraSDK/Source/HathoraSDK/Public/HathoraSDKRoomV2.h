@@ -175,6 +175,8 @@ public:
 	UDELEGATE()
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FHathoraOnGetRoomInfo, FHathoraGetRoomInfoResult, Result);
 
+	// Retrieve current and historical allocation data for a room.
+	// @param RoomId: Unique identifier to a game session or match.
 	UFUNCTION(BlueprintCallable, Category = "HathoraSDK | RoomV2")
 	void GetRoomInfo(FString RoomId, FHathoraOnGetRoomInfo OnComplete);
 
