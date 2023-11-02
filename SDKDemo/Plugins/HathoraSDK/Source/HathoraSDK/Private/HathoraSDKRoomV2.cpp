@@ -5,7 +5,7 @@
 #include "JsonUtilities.h"
 #include "Serialization/JsonSerializer.h"
 
-void UHathoraSDKRoomV2::CreateRoom(EHathoraCloudRegion Region, FString RoomConfig, FString RoomId, FHathoraOnCreateRoom OnComplete)
+void UHathoraSDKRoomV2::CreateRoom(EHathoraCloudRegion Region, FString RoomConfig, FString RoomId, FHathoraOnRoomConnectionInfo OnComplete)
 {
 	FString RegionString = GetRegionString(Region);
 
@@ -29,7 +29,7 @@ void UHathoraSDKRoomV2::CreateRoom(EHathoraCloudRegion Region, FString RoomConfi
 		Body,
 		[&, OnComplete](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccess) mutable
 		{
-			FHathoraCreateRoomResult Result;
+			FHathoraRoomConnectionInfoResult Result;
 			if (bSuccess && Response.IsValid())
 			{
 				Result.StatusCode = Response->GetResponseCode();
@@ -317,6 +317,45 @@ void UHathoraSDKRoomV2::SuspendRoom(FString RoomId, FHathoraOnSuspendRoom OnComp
 			if (!OnComplete.ExecuteIfBound(Result))
 			{
 				UE_LOG(LogHathoraSDK, Warning, TEXT("[SuspendRoom] function pointer was not valid, so OnComplete will not be called"));
+			}
+		});
+}
+
+void UHathoraSDKRoomV2::GetConnectionInfo(FString RoomId, FHathoraOnRoomConnectionInfo OnComplete)
+{
+	SendRequest(
+		TEXT("GET"),
+		FString::Printf(TEXT("/rooms/v2/%s/connectioninfo/%s"), *AppId, *RoomId),
+		[&, OnComplete](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccess) mutable
+		{
+			FHathoraRoomConnectionInfoResult Result;
+			if (bSuccess && Response.IsValid())
+			{
+				Result.StatusCode = Response->GetResponseCode();
+				FString Content = Response->GetContentAsString();
+
+				if (Result.StatusCode == 200)
+				{
+					FJsonObjectConverter::JsonObjectStringToUStruct(Content, &Result.Data, 0, 0);
+				}
+				else
+				{
+					Result.ErrorMessage = Content;
+				}
+			}
+			else
+			{
+				Result.ErrorMessage = TEXT("Could not get connection info, unknown error");
+			}
+
+			if (!Result.ErrorMessage.IsEmpty())
+			{
+				UE_LOG(LogHathoraSDK, Error, TEXT("[GetConnectionInfo] Error: %s"), *Result.ErrorMessage);
+			}
+
+			if (!OnComplete.ExecuteIfBound(Result))
+			{
+				UE_LOG(LogHathoraSDK, Warning, TEXT("[GetConnectionInfo] function pointer was not valid, so OnComplete will not be called"));
 			}
 		});
 }

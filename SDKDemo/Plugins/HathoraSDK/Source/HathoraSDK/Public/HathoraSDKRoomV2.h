@@ -53,7 +53,7 @@ struct FHathoraAllocation
 };
 
 USTRUCT(BlueprintType)
-struct FHathoraCreateRoomData
+struct FHathoraConnectionInfo
 {
 	GENERATED_BODY()
 
@@ -71,7 +71,7 @@ struct FHathoraCreateRoomData
 };
 
 USTRUCT(BlueprintType)
-struct FHathoraCreateRoomResult
+struct FHathoraRoomConnectionInfoResult
 {
 	GENERATED_BODY()
 
@@ -82,7 +82,7 @@ struct FHathoraCreateRoomResult
 	FString ErrorMessage;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Default")
-	FHathoraCreateRoomData Data;
+	FHathoraConnectionInfo Data;
 };
 
 UENUM(BlueprintType)
@@ -234,7 +234,7 @@ class HATHORASDK_API UHathoraSDKRoomV2 : public UHathoraSDKAPI
 
 public:
 	UDELEGATE()
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FHathoraOnCreateRoom, FHathoraCreateRoomResult, Result);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FHathoraOnRoomConnectionInfo, FHathoraRoomConnectionInfoResult, Result);
 
 	// Create a new room for an existing application. Poll the GetConnectionInfo()
 	// endpoint to get connection details for an active room.
@@ -245,7 +245,7 @@ public:
 	// @param RoomId: Unique identifier to a game session or match. Leave empty to
 	//                use the default system generated ID.
 	UFUNCTION(BlueprintCallable, Category = "HathoraSDK | RoomV2")
-	void CreateRoom(EHathoraCloudRegion Region, FString RoomConfig, FString RoomId, FHathoraOnCreateRoom OnComplete);
+	void CreateRoom(EHathoraCloudRegion Region, FString RoomConfig, FString RoomId, FHathoraOnRoomConnectionInfo OnComplete);
 
 	UDELEGATE()
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FHathoraOnGetRoomInfo, FHathoraGetRoomInfoResult, Result);
@@ -286,6 +286,12 @@ public:
 	// @param RoomId: Unique identifier to a game session or match.
 	UFUNCTION(BlueprintCallable, Category = "HathoraSDK | RoomV2")
 	void SuspendRoom(FString RoomId, FHathoraOnSuspendRoom OnComplete);
+
+	// Poll this endpoint to get connection details to a room.
+	// Clients can call this endpoint without authentication.
+	// @param RoomId: Unique identifier to a game session or match.
+	UFUNCTION(BlueprintCallable, Category = "HathoraSDK | RoomV2")
+	void GetConnectionInfo(FString RoomId, FHathoraOnRoomConnectionInfo OnComplete);
 
 private:
 	static FHathoraAllocation ParseAllocation(const TSharedPtr<FJsonObject>& AllocationJson);
