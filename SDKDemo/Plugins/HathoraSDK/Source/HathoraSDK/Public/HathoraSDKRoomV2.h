@@ -112,6 +112,7 @@ struct FHathoraGetRoomInfoData
 	GENERATED_BODY()
 
 	// Metadata on an allocated instance of a room.
+	// Use Status to determine if this value is valid.
 	UPROPERTY(BlueprintReadOnly, Category = "Default")
 	FHathoraAllocation CurrentAllocation;
 
@@ -152,6 +153,50 @@ struct FHathoraGetRoomInfoResult
 	FHathoraGetRoomInfoData Data;
 };
 
+USTRUCT(BlueprintType)
+struct FHathoraProcessRoomInfo
+{
+	GENERATED_BODY()
+
+	// Metadata on an allocated instance of a room.
+	// Use Status to determine if this value is valid.
+	UPROPERTY(BlueprintReadOnly, Category = "Default")
+	FHathoraAllocation CurrentAllocation;
+
+	// The allocation status of a room.
+	UPROPERTY(BlueprintReadOnly, Category = "Default")
+	EHathoraRoomStatus Status;
+
+	// Optional configuration parameters for the room.
+	// Can be any string including stringified JSON.
+	// String is empty if null or not set.
+	UPROPERTY(BlueprintReadOnly, Category = "Default")
+	FString RoomConfig;
+
+	// Unique identifier to a game session or match.
+	UPROPERTY(BlueprintReadOnly, Category = "Default")
+	FString RoomId;
+
+	// System generated unique identifier for an application.
+	UPROPERTY(BlueprintReadOnly, Category = "Default")
+	FString AppId;
+};
+
+USTRUCT(BlueprintType)
+struct FHathoraGetRoomsForProcessResult
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadOnly, Category = "Default")
+	int32 StatusCode;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Default")
+	FString ErrorMessage;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Default")
+	TArray<FHathoraProcessRoomInfo> Data;
+};
+
 UCLASS(BlueprintType)
 class HATHORASDK_API UHathoraSDKRoomV2 : public UHathoraSDKAPI
 {
@@ -180,7 +225,24 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "HathoraSDK | RoomV2")
 	void GetRoomInfo(FString RoomId, FHathoraOnGetRoomInfo OnComplete);
 
+	UDELEGATE()
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FHathoraOnGetRoomsForProcess, FHathoraGetRoomsForProcessResult, Result);
+
+	// Get all active rooms for a given process.
+	// @param ProcessId: System generated unique identifier to a runtime instance
+	//                   of your game server.
+	UFUNCTION(BlueprintCallable, Category = "HathoraSDK | RoomV2")
+	void GetActiveRoomsForProcess(FString ProcessId, FHathoraOnGetRoomsForProcess OnComplete);
+
+	// Get all inactive rooms for a given process.
+	// @param ProcessId: System generated unique identifier to a runtime instance
+	//                   of your game server.
+	UFUNCTION(BlueprintCallable, Category = "HathoraSDK | RoomV2")
+	void GetInactiveRoomsForProcess(FString ProcessId, FHathoraOnGetRoomsForProcess OnComplete);
+
 private:
 	static FHathoraAllocation ParseAllocation(const TSharedPtr<FJsonObject>& AllocationJson);
 	static EHathoraRoomStatus ParseRoomStatus(const FString& StatusString);
+
+	void GetRoomsForProcess(FString ProcessId, bool bActive, FHathoraOnGetRoomsForProcess OnComplete);
 };

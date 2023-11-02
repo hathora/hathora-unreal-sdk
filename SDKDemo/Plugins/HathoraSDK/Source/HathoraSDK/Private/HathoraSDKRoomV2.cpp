@@ -177,3 +177,76 @@ void UHathoraSDKRoomV2::GetRoomInfo(FString RoomId, FHathoraOnGetRoomInfo OnComp
 			}
 		});
 }
+
+void UHathoraSDKRoomV2::GetActiveRoomsForProcess(FString ProcessId, FHathoraOnGetRoomsForProcess OnComplete)
+{
+	GetRoomsForProcess(ProcessId, true, OnComplete);
+}
+
+void UHathoraSDKRoomV2::GetInactiveRoomsForProcess(FString ProcessId, FHathoraOnGetRoomsForProcess OnComplete)
+{
+	GetRoomsForProcess(ProcessId, false, OnComplete);
+}
+
+void UHathoraSDKRoomV2::GetRoomsForProcess(FString ProcessId, bool bActive, FHathoraOnGetRoomsForProcess OnComplete)
+{
+	SendRequest(
+		TEXT("GET"),
+		FString::Printf(TEXT("/rooms/v2/%s/list/%s/%s"), *AppId, *ProcessId, bActive ? TEXT("active") : TEXT("inactive")),
+		[&, OnComplete](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccess) mutable
+		{
+			FHathoraGetRoomsForProcessResult Result;
+			if (bSuccess && Response.IsValid())
+			{
+				Result.StatusCode = Response->GetResponseCode();
+				FString Content = Response->GetContentAsString();
+
+				if (Result.StatusCode == 200)
+				{
+					TArray<TSharedPtr<FJsonValue>> OutArray;
+					TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(Content);
+					FJsonSerializer::Deserialize(Reader, OutArray);
+
+					for (TSharedPtr<FJsonValue> Value : OutArray)
+					{
+						TSharedPtr<FJsonObject> Object = Value->AsObject();
+						FHathoraProcessRoomInfo RoomInfo;
+
+						TSharedPtr<FJsonValue> CurrentAllocation = Object->TryGetField(TEXT("currentAllocation"));
+						if (CurrentAllocation.IsValid() && !CurrentAllocation->IsNull())
+						{
+							RoomInfo.CurrentAllocation = ParseAllocation(CurrentAllocation->AsObject());
+						}
+
+						RoomInfo.Status = ParseRoomStatus(Object->GetStringField(TEXT("status")));
+
+						// roomConfig can be null; this will keep it empty if it is
+						Object->TryGetStringField(TEXT("roomConfig"), RoomInfo.RoomConfig);
+
+						RoomInfo.RoomId = Object->GetStringField(TEXT("roomId"));
+						RoomInfo.AppId = Object->GetStringField(TEXT("appId"));
+
+						Result.Data.Add(RoomInfo);
+					}
+				}
+				else
+				{
+					Result.ErrorMessage = Content;
+				}
+			}
+			else
+			{
+				Result.ErrorMessage = TEXT("Could not get active rooms for process, unknown error");
+			}
+
+			if (!Result.ErrorMessage.IsEmpty())
+			{
+				UE_LOG(LogHathoraSDK, Error, TEXT("[GetActiveRoomsForProcess] Error: %s"), *Result.ErrorMessage);
+			}
+
+			if (!OnComplete.ExecuteIfBound(Result))
+			{
+				UE_LOG(LogHathoraSDK, Warning, TEXT("[GetActiveRoomsForProcess] function pointer was not valid, so OnComplete will not be called"));
+			}
+		});
+}
