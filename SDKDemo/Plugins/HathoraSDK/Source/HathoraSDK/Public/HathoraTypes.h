@@ -39,7 +39,14 @@ struct FHathoraRegionPings
 USTRUCT(BlueprintType)
 struct FHathoraSDKSecurity
 {
-	GENERATED_BODY()
+	GENERATED_USTRUCT_BODY()
+
+	FHathoraSDKSecurity() {}
+
+	FHathoraSDKSecurity(FString HathoraDevToken)
+	{
+		this->HathoraDevToken = HathoraDevToken;
+	}
 
 	// The HathoraDevToken used for the Authorization HTTP header.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
