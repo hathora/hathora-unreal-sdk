@@ -285,3 +285,38 @@ void UHathoraSDKRoomV2::DestroyRoom(FString RoomId, FHathoraOnDestroyRoom OnComp
 			}
 		});
 }
+
+void UHathoraSDKRoomV2::SuspendRoom(FString RoomId, FHathoraOnSuspendRoom OnComplete)
+{
+	SendRequest(
+		TEXT("POST"),
+		FString::Printf(TEXT("/rooms/v2/%s/suspend/%s"), *AppId, *RoomId),
+		[&, OnComplete](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccess) mutable
+		{
+			FHathoraSuspendRoomResult Result;
+			if (bSuccess && Response.IsValid())
+			{
+				Result.StatusCode = Response->GetResponseCode();
+				Result.bSuspended = Result.StatusCode == 204;
+
+				if (!Result.bSuspended)
+				{
+					Result.ErrorMessage = Response->GetContentAsString();
+				}
+			}
+			else
+			{
+				Result.ErrorMessage = TEXT("Could not suspend room, unknown error");
+			}
+
+			if (!Result.ErrorMessage.IsEmpty())
+			{
+				UE_LOG(LogHathoraSDK, Error, TEXT("[SuspendRoom] Error: %s"), *Result.ErrorMessage);
+			}
+
+			if (!OnComplete.ExecuteIfBound(Result))
+			{
+				UE_LOG(LogHathoraSDK, Warning, TEXT("[SuspendRoom] function pointer was not valid, so OnComplete will not be called"));
+			}
+		});
+}

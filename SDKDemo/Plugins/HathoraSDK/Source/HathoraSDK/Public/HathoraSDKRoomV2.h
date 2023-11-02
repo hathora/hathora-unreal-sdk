@@ -212,6 +212,21 @@ struct FHathoraDestroyRoomResult
 	bool bDestroyed;
 };
 
+USTRUCT(BlueprintType)
+struct FHathoraSuspendRoomResult
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadOnly, Category = "Default")
+	int32 StatusCode;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Default")
+	FString ErrorMessage;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Default")
+	bool bSuspended;
+};
+
 UCLASS(BlueprintType)
 class HATHORASDK_API UHathoraSDKRoomV2 : public UHathoraSDKAPI
 {
@@ -259,9 +274,18 @@ public:
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FHathoraOnDestroyRoom, FHathoraDestroyRoomResult, Result);
 
 	// Destroy a room. All associated metadata is deleted.
-	// @param ProcessId: Unique identifier to a game session or match.
+	// @param RoomId: Unique identifier to a game session or match.
 	UFUNCTION(BlueprintCallable, Category = "HathoraSDK | RoomV2")
 	void DestroyRoom(FString RoomId, FHathoraOnDestroyRoom OnComplete);
+
+	UDELEGATE()
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FHathoraOnSuspendRoom, FHathoraSuspendRoomResult, Result);
+
+	// Suspend a room. The room is unallocated from the process but
+	// can be rescheduled later using the same roomId.
+	// @param RoomId: Unique identifier to a game session or match.
+	UFUNCTION(BlueprintCallable, Category = "HathoraSDK | RoomV2")
+	void SuspendRoom(FString RoomId, FHathoraOnSuspendRoom OnComplete);
 
 private:
 	static FHathoraAllocation ParseAllocation(const TSharedPtr<FJsonObject>& AllocationJson);
