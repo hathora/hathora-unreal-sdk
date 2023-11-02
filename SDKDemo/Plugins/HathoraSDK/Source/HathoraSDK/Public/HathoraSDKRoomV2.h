@@ -197,6 +197,21 @@ struct FHathoraGetRoomsForProcessResult
 	TArray<FHathoraProcessRoomInfo> Data;
 };
 
+USTRUCT(BlueprintType)
+struct FHathoraDestroyRoomResult
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadOnly, Category = "Default")
+	int32 StatusCode;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Default")
+	FString ErrorMessage;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Default")
+	bool bDestroyed;
+};
+
 UCLASS(BlueprintType)
 class HATHORASDK_API UHathoraSDKRoomV2 : public UHathoraSDKAPI
 {
@@ -239,6 +254,14 @@ public:
 	//                   of your game server.
 	UFUNCTION(BlueprintCallable, Category = "HathoraSDK | RoomV2")
 	void GetInactiveRoomsForProcess(FString ProcessId, FHathoraOnGetRoomsForProcess OnComplete);
+
+	UDELEGATE()
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FHathoraOnDestroyRoom, FHathoraDestroyRoomResult, Result);
+
+	// Destroy a room. All associated metadata is deleted.
+	// @param ProcessId: Unique identifier to a game session or match.
+	UFUNCTION(BlueprintCallable, Category = "HathoraSDK | RoomV2")
+	void DestroyRoom(FString RoomId, FHathoraOnDestroyRoom OnComplete);
 
 private:
 	static FHathoraAllocation ParseAllocation(const TSharedPtr<FJsonObject>& AllocationJson);

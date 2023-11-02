@@ -250,3 +250,38 @@ void UHathoraSDKRoomV2::GetRoomsForProcess(FString ProcessId, bool bActive, FHat
 			}
 		});
 }
+
+void UHathoraSDKRoomV2::DestroyRoom(FString RoomId, FHathoraOnDestroyRoom OnComplete)
+{
+	SendRequest(
+		TEXT("POST"),
+		FString::Printf(TEXT("/rooms/v2/%s/destroy/%s"), *AppId, *RoomId),
+		[&, OnComplete](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccess) mutable
+		{
+			FHathoraDestroyRoomResult Result;
+			if (bSuccess && Response.IsValid())
+			{
+				Result.StatusCode = Response->GetResponseCode();
+				Result.bDestroyed = Result.StatusCode == 204;
+
+				if (!Result.bDestroyed)
+				{
+					Result.ErrorMessage = Response->GetContentAsString();
+				}
+			}
+			else
+			{
+				Result.ErrorMessage = TEXT("Could not destroy room, unknown error");
+			}
+
+			if (!Result.ErrorMessage.IsEmpty())
+			{
+				UE_LOG(LogHathoraSDK, Error, TEXT("[DestroyRoom] Error: %s"), *Result.ErrorMessage);
+			}
+
+			if (!OnComplete.ExecuteIfBound(Result))
+			{
+				UE_LOG(LogHathoraSDK, Warning, TEXT("[DestroyRoom] function pointer was not valid, so OnComplete will not be called"));
+			}
+		});
+}
