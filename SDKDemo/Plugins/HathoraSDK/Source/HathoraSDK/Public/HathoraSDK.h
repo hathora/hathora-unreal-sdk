@@ -11,7 +11,7 @@
 class UHathoraSDKDiscoveryV1;
 class UHathoraSDKRoomV2;
 
-UCLASS()
+UCLASS(BlueprintType)
 class HATHORASDK_API UHathoraSDK : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
