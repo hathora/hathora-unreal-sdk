@@ -10,6 +10,7 @@
 
 class UHathoraSDKDiscoveryV1;
 class UHathoraSDKRoomV2;
+class UHathoraSDKLobbyV3;
 
 UCLASS(BlueprintType)
 class HATHORASDK_API UHathoraSDK : public UBlueprintFunctionLibrary
@@ -42,6 +43,9 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, Category="HathoraSDK")
 	UHathoraSDKRoomV2* RoomV2;
+
+	UPROPERTY(BlueprintReadOnly)
+	UHathoraSDKLobbyV3* LobbyV3;
 
 private:
 	FHathoraOnGetRegionalPings OnGetRegionalPingsComplete;

@@ -43,14 +43,16 @@ struct FHathoraSDKSecurity
 
 	FHathoraSDKSecurity() {}
 
-	FHathoraSDKSecurity(FString HathoraDevToken)
+	FHathoraSDKSecurity(FString InAuthToken)
 	{
-		this->HathoraDevToken = HathoraDevToken;
+		this->AuthToken = InAuthToken;
 	}
 
-	// The HathoraDevToken used for the Authorization HTTP header.
+	// The token to use in the Authorization HTTP header in API calls.
+	// This can be either the HathoraDevToken for server/trusted calls,
+	// or the player auth token for client/untrusted calls.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
-	FString HathoraDevToken;
+	FString AuthToken;
 };
 
 UDELEGATE()
@@ -59,6 +61,8 @@ DECLARE_DYNAMIC_DELEGATE_OneParam(FHathoraOnGetRegionalPings, FHathoraRegionPing
 UENUM(BlueprintType)
 enum class EHathoraCloudRegion : uint8
 {
+	// Could not parse the region from the API.
+	Unknown,
 	Seattle,
 	Washington_DC,
 	Chicago,
