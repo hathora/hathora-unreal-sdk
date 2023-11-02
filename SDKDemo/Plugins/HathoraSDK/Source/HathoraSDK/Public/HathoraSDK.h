@@ -8,9 +8,10 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "HathoraSDK.generated.h"
 
+class UHathoraSDKAuthV1;
 class UHathoraSDKDiscoveryV1;
-class UHathoraSDKRoomV2;
 class UHathoraSDKLobbyV3;
+class UHathoraSDKRoomV2;
 
 UCLASS(BlueprintType)
 class HATHORASDK_API UHathoraSDK : public UBlueprintFunctionLibrary
@@ -39,13 +40,16 @@ public:
 	void SetCredentials(FString AppId, FHathoraSDKSecurity Security);
 
 	UPROPERTY(BlueprintReadOnly, Category="HathoraSDK")
+	UHathoraSDKAuthV1* AuthV1;
+
+	UPROPERTY(BlueprintReadOnly, Category="HathoraSDK")
 	UHathoraSDKDiscoveryV1* DiscoveryV1;
 
 	UPROPERTY(BlueprintReadOnly, Category="HathoraSDK")
-	UHathoraSDKRoomV2* RoomV2;
-
-	UPROPERTY(BlueprintReadOnly)
 	UHathoraSDKLobbyV3* LobbyV3;
+
+	UPROPERTY(BlueprintReadOnly, Category="HathoraSDK")
+	UHathoraSDKRoomV2* RoomV2;
 
 private:
 	FHathoraOnGetRegionalPings OnGetRegionalPingsComplete;

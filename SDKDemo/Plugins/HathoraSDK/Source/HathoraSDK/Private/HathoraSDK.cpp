@@ -2,9 +2,10 @@
 
 #include "HathoraSDK.h"
 #include "HathoraSDKModule.h"
+#include "HathoraSDKAuthV1.h"
 #include "HathoraSDKDiscoveryV1.h"
-#include "HathoraSDKRoomV2.h"
 #include "HathoraSDKLobbyV3.h"
+#include "HathoraSDKRoomV2.h"
 #include "HttpModule.h"
 #include "Interfaces/IHttpRequest.h"
 #include "Interfaces/IHttpResponse.h"
@@ -22,9 +23,10 @@ void UHathoraSDK::GetRegionalPings(const FHathoraOnGetRegionalPings& OnComplete,
 UHathoraSDK* UHathoraSDK::CreateHathoraSDK(FString AppId, FHathoraSDKSecurity Security)
 {
 	UHathoraSDK* SDK = NewObject<UHathoraSDK>();
+	SDK->AuthV1 = NewObject<UHathoraSDKAuthV1>();
 	SDK->DiscoveryV1 = NewObject<UHathoraSDKDiscoveryV1>();
-	SDK->RoomV2 = NewObject<UHathoraSDKRoomV2>();
 	SDK->LobbyV3 = NewObject<UHathoraSDKLobbyV3>();
+	SDK->RoomV2 = NewObject<UHathoraSDKRoomV2>();
 
 	SDK->SetCredentials(AppId, Security);
 
@@ -33,9 +35,10 @@ UHathoraSDK* UHathoraSDK::CreateHathoraSDK(FString AppId, FHathoraSDKSecurity Se
 
 void UHathoraSDK::SetCredentials(FString AppId, FHathoraSDKSecurity Security)
 {
+	AuthV1->SetCredentials(AppId, Security);
 	DiscoveryV1->SetCredentials(AppId, Security);
-	RoomV2->SetCredentials(AppId, Security);
 	LobbyV3->SetCredentials(AppId, Security);
+	RoomV2->SetCredentials(AppId, Security);
 }
 
 void UHathoraSDK::OnGetRegionalPingsCompleteWrapper(FHathoraRegionPings Result)
