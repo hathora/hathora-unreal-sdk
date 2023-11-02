@@ -359,3 +359,42 @@ void UHathoraSDKRoomV2::GetConnectionInfo(FString RoomId, FHathoraOnRoomConnecti
 			}
 		});
 }
+
+void UHathoraSDKRoomV2::UpdateRoomConfig(FString RoomId, FString RoomConfig, FHathoraOnUpdateRoomConfig OnComplete)
+{
+	FJsonObject Body;
+	Body.SetStringField(TEXT("roomConfig"), RoomConfig);
+
+	SendRequest(
+		TEXT("POST"),
+		FString::Printf(TEXT("/rooms/v2/%s/update/%s"), *AppId, *RoomId),
+		Body,
+		[&, OnComplete](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccess) mutable
+		{
+			FHathoraUpdateRoomConfigResult Result;
+			if (bSuccess && Response.IsValid())
+			{
+				Result.StatusCode = Response->GetResponseCode();
+				Result.bUpdated = Result.StatusCode == 204;
+
+				if (!Result.bUpdated)
+				{
+					Result.ErrorMessage = Response->GetContentAsString();
+				}
+			}
+			else
+			{
+				Result.ErrorMessage = TEXT("Could not update room config, unknown error");
+			}
+
+			if (!Result.ErrorMessage.IsEmpty())
+			{
+				UE_LOG(LogHathoraSDK, Error, TEXT("[UpdateRoomConfig] Error: %s"), *Result.ErrorMessage);
+			}
+
+			if (!OnComplete.ExecuteIfBound(Result))
+			{
+				UE_LOG(LogHathoraSDK, Warning, TEXT("[UpdateRoomConfig] function pointer was not valid, so OnComplete will not be called"));
+			}
+		});
+}

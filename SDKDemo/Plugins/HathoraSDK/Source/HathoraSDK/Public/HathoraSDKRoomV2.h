@@ -227,6 +227,21 @@ struct FHathoraSuspendRoomResult
 	bool bSuspended;
 };
 
+USTRUCT(BlueprintType)
+struct FHathoraUpdateRoomConfigResult
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadOnly, Category = "Default")
+	int32 StatusCode;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Default")
+	FString ErrorMessage;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Default")
+	bool bUpdated;
+};
+
 UCLASS(BlueprintType)
 class HATHORASDK_API UHathoraSDKRoomV2 : public UHathoraSDKAPI
 {
@@ -292,6 +307,17 @@ public:
 	// @param RoomId: Unique identifier to a game session or match.
 	UFUNCTION(BlueprintCallable, Category = "HathoraSDK | RoomV2")
 	void GetConnectionInfo(FString RoomId, FHathoraOnRoomConnectionInfo OnComplete);
+
+	UDELEGATE()
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FHathoraOnUpdateRoomConfig, FHathoraUpdateRoomConfigResult, Result);
+
+	// Update the roomConfig variable for a room.
+	// @param RoomId: Unique identifier to a game session or match.
+	// @param RoomConfig: Optional configuration parameters for the room. Can be
+	//                    any string including stringified JSON. It is accessible
+	//                    from the room via GetRoomInfo().
+	UFUNCTION(BlueprintCallable, Category = "HathoraSDK | RoomV2")
+	void UpdateRoomConfig(FString RoomId, FString RoomConfig, FHathoraOnUpdateRoomConfig OnComplete);
 
 private:
 	static FHathoraAllocation ParseAllocation(const TSharedPtr<FJsonObject>& AllocationJson);
