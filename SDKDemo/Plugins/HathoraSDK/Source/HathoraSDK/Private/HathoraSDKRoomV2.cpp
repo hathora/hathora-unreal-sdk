@@ -2,7 +2,7 @@
 
 #include "HathoraSDKRoomV2.h"
 #include "HathoraSDKModule.h"
-#include "JsonUtilities.h"
+#include "JsonObjectConverter.h"
 #include "Serialization/JsonSerializer.h"
 
 void UHathoraSDKRoomV2::CreateRoom(EHathoraCloudRegion Region, FString RoomConfig, FString RoomId, FHathoraOnRoomConnectionInfo OnComplete)

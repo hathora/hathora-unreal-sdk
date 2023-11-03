@@ -3,7 +3,7 @@
 #include "HathoraSDKAPI.h"
 #include "HathoraSDKConfig.h"
 #include "HttpModule.h"
-#include "JsonUtilities.h"
+#include "JsonObjectWrapper.h"
 
 void UHathoraSDKAPI::SetCredentials(FString InAppId, FHathoraSDKSecurity InSecurity)
 {

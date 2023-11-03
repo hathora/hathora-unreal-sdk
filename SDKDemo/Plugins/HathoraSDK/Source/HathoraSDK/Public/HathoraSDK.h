@@ -37,10 +37,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "HathoraSDK")
 	void SetCredentials(FString AppId, FHathoraSDKSecurity Security);
 
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, Category="HathoraSDK")
 	UHathoraSDKDiscoveryV1* DiscoveryV1;
 
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, Category="HathoraSDK")
 	UHathoraSDKRoomV2* RoomV2;
 
 private:
