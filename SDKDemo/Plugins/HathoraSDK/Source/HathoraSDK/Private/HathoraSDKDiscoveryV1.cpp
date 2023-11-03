@@ -11,21 +11,21 @@ void UHathoraSDKDiscoveryV1::GetPingServiceEndpoints(const FHathoraOnGetPingServ
 	SendRequest(
 		TEXT("GET"),
 		TEXT("/discovery/v1/ping"),
-		[&, OnComplete](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccess) mutable
+		[OnComplete](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccess) mutable
 	{
-		TArray<FHathoraDiscoveredPingEndpoint> PingEndpoints;
+		TArray<FHathoraDiscoveredPingEndpoint> PingEndpointsResult;
 		if (bSuccess && Response.IsValid())
 		{
-			FJsonObjectConverter::JsonArrayStringToUStruct(Response->GetContentAsString(), &PingEndpoints);
+			FJsonObjectConverter::JsonArrayStringToUStruct(Response->GetContentAsString(), &PingEndpointsResult);
 		}
 		else
 		{
 			UE_LOG(LogHathoraSDK, Warning, TEXT("Could not retrieve ping endpoints"));
 		}
 
-		if (!OnComplete.ExecuteIfBound(PingEndpoints))
+		if (!OnComplete.ExecuteIfBound(PingEndpointsResult))
 		{
-			UE_LOG(LogHathoraSDK, Warning, TEXT("[GetRegionalPings] function pointer was not valid, so OnComplete will not be called"));
+			UE_LOG(LogHathoraSDK, Warning, TEXT("[GetPingServiceEndpoints] function pointer was not valid, so OnComplete will not be called"));
 		}
 	});
 }
@@ -94,7 +94,7 @@ void UHathoraSDKDiscoveryV1::PingEachRegion()
 		FIcmp::IcmpEcho(
 			PingEndpoint.Host,
 			GetDefault<UHathoraSDKConfig>()->GetPingTimeoutSeconds(),
-			[&, PingEndpoint, CompletedPings, PingsToComplete](FIcmpEchoResult Result)
+			[this, PingEndpoint, CompletedPings, PingsToComplete](FIcmpEchoResult Result)
 			{
 				if (Result.Status == EIcmpResponseStatus::Success)
 				{

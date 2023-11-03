@@ -38,4 +38,10 @@ public:
 
 	UPROPERTY(BlueprintReadOnly)
 	UHathoraSDKDiscoveryV1* DiscoveryV1;
+
+private:
+	FHathoraOnGetRegionalPings OnGetRegionalPingsComplete;
+
+	UFUNCTION()
+	void OnGetRegionalPingsCompleteWrapper(FHathoraRegionPings Result);
 };
