@@ -27,6 +27,7 @@ EHathoraLobbyVisibility UHathoraSDKLobbyV3::ParseVisibility(const FString& Visib
 	}
 	else
 	{
+		UE_LOG(LogHathoraSDK, Error, TEXT("[ParseVisibility] Unknown visibility: %s"), *VisibilityString);
 		return EHathoraLobbyVisibility::Unknown;
 	}
 }
@@ -77,10 +78,7 @@ void UHathoraSDKLobbyV3::CreateLobby(
 
 	FJsonObject Body;
 	Body.SetStringField(TEXT("visibility"), GetVisibilityString(Visibility));
-	if (RoomConfig.Len() > 0)
-	{
-		Body.SetStringField(TEXT("roomConfig"), RoomConfig);
-	}
+	Body.SetStringField(TEXT("roomConfig"), RoomConfig);
 	Body.SetStringField(TEXT("region"), GetRegionString(Region));
 
 	SendRequest(
@@ -133,13 +131,57 @@ void UHathoraSDKLobbyV3::CreateLobby(
 		});
 }
 
-void UHathoraSDKLobbyV3::ListActivePublicLobbies(EHathoraCloudRegion Region, FHathoraOnLobbyInfos OnComplete)
+void UHathoraSDKLobbyV3::ListAllActivePublicLobbies(FHathoraOnLobbyInfos OnComplete)
+{
+	SendRequest(
+		TEXT("GET"),
+		FString::Printf(TEXT("/lobby/v3/%s/list/public"), *AppId),
+		[&, OnComplete](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccess) mutable
+		{
+			FHathoraLobbyInfosResult Result;
+			if (bSuccess && Response.IsValid())
+			{
+				Result.StatusCode = Response->GetResponseCode();
+				FString Content = Response->GetContentAsString();
+
+				if (Result.StatusCode == 200)
+				{
+					TArray<TSharedPtr<FJsonValue>> OutArray;
+					TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(Content);
+					FJsonSerializer::Deserialize(Reader, OutArray);
+
+					for (TSharedPtr<FJsonValue> Value : OutArray)
+					{
+						TSharedPtr<FJsonObject> Object = Value->AsObject();
+						Result.Data.Add(ParseLobbyInfo(Object));
+					}
+				}
+				else
+				{
+					Result.ErrorMessage = Content;
+				}
+			}
+			else
+			{
+				Result.ErrorMessage = TEXT("Could not list active public lobbies, unknown error");
+			}
+
+			if (!Result.ErrorMessage.IsEmpty())
+			{
+				UE_LOG(LogHathoraSDK, Error, TEXT("[ListActivePublicLobbies] Error: %s"), *Result.ErrorMessage);
+			}
+
+			if (!OnComplete.ExecuteIfBound(Result))
+			{
+				UE_LOG(LogHathoraSDK, Warning, TEXT("[ListActivePublicLobbies] function pointer was not valid, so OnComplete will not be called"));
+			}
+		});
+}
+
+void UHathoraSDKLobbyV3::ListRegionActivePublicLobbies(EHathoraCloudRegion Region, FHathoraOnLobbyInfos OnComplete)
 {
 	TArray<TPair<FString, FString>> QueryOptions;
-	if (Region != EHathoraCloudRegion::Unknown)
-	{
-		QueryOptions.Add(TPair<FString, FString>(TEXT("region"), GetRegionString(Region)));
-	}
+	QueryOptions.Add(TPair<FString, FString>(TEXT("region"), GetRegionString(Region)));
 
 	SendRequest(
 		TEXT("GET"),

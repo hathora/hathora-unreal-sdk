@@ -2,6 +2,7 @@
 
 #include "HathoraSDKAPI.h"
 #include "HathoraSDKConfig.h"
+#include "HathoraSDKModule.h"
 #include "HttpModule.h"
 #include "JsonObjectWrapper.h"
 
@@ -137,6 +138,7 @@ EHathoraCloudRegion UHathoraSDKAPI::ParseRegion(FString RegionString)
 	}
 	else
 	{
+		UE_LOG(LogHathoraSDK, Error, TEXT("[ParseRegion] Unknown region: %s"), *RegionString);
 		return EHathoraCloudRegion::Unknown;
 	}
 }

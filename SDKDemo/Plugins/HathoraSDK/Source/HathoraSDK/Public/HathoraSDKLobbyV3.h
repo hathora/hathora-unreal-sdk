@@ -11,9 +11,6 @@
 UENUM(BlueprintType)
 enum class EHathoraLobbyVisibility : uint8
 {
-	// Could not parse the API response.
-	Unknown,
-
 	// The player who created the room must share the roomId with their friends.
 	Private,
 
@@ -22,6 +19,8 @@ enum class EHathoraLobbyVisibility : uint8
 
 	// For testing with a server running locally.
 	Local,
+
+	Unknown UMETA(Hidden)
 };
 
 USTRUCT(BlueprintType)
@@ -50,11 +49,11 @@ struct FHathoraLobbyInfo
 
 	// Types of lobbies a player can create.
 	UPROPERTY(BlueprintReadOnly, Category = "Default")
-	EHathoraLobbyVisibility Visibility;
+	EHathoraLobbyVisibility Visibility = EHathoraLobbyVisibility::Unknown;
 
 	// Which region the lobby is in.
 	UPROPERTY(BlueprintReadOnly, Category = "Default")
-	EHathoraCloudRegion Region;
+	EHathoraCloudRegion Region = EHathoraCloudRegion::Unknown;
 
 	// Unique identifier to a game session or match.
 	UPROPERTY(BlueprintReadOnly, Category = "Default")
@@ -109,8 +108,8 @@ public:
 	// managing the state of a match, and retrieving a list of public lobbies to display to players.
 	// @param Visibility Types of lobbies a player can create.
 	// @param RoomConfig Optional configuration parameters for the room. Can be
-	//                    any string including stringified JSON. It is accessible
-	//                    from the room via GetRoomInfo().
+	//                   any string including stringified JSON. It is accessible
+	//                   from the room via GetRoomInfo().
 	// @param Region The region to create the room in.
 	// @param ShortCode Optional user-defined identifier for a lobby. Leave empty
 	//                  to reference the lobby using the RoomId only.
@@ -129,14 +128,18 @@ public:
 	UDELEGATE()
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FHathoraOnLobbyInfos, FHathoraLobbyInfosResult, Result);
 
-	// Get all active lobbies for a given application. Filter the array by optionally passing
-	// in a `Region`. Use this endpoint to display all public lobbies that a player can join
-	// in the game client.
-	// @param Region Filter the returned lobbies by the provided region. Use
-	//               EHathoraCloudRegion::Unknown to return active public lobbies
-	//               in all regions.
+	// Get all public active lobbies for a given application. Use this endpoint to display
+	// all public lobbies that a player can join in the game client. Use
+	// ListRegionActivePublicLobbies() to only see lobbies in a specific region.
 	UFUNCTION(BlueprintCallable, Category = "HathoraSDK | LobbyV3")
-	void ListActivePublicLobbies(EHathoraCloudRegion Region, FHathoraOnLobbyInfos OnComplete);
+	void ListAllActivePublicLobbies(FHathoraOnLobbyInfos OnComplete);
+
+	// Get all active lobbies for a given application, filtered by Region.
+	// Use this endpoint to display all public lobbies that a player can join
+	// in the game client. Use ListAllActivePublicLobbies() to see all lobbies.
+	// @param Region Filter the returned lobbies by the provided region.
+	UFUNCTION(BlueprintCallable, Category = "HathoraSDK | LobbyV3")
+	void ListRegionActivePublicLobbies(EHathoraCloudRegion Region, FHathoraOnLobbyInfos OnComplete);
 
 	// Get details for a lobby.
 	// @param RoomId Unique identifier to a game session or match.

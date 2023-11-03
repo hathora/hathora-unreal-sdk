@@ -61,8 +61,6 @@ DECLARE_DYNAMIC_DELEGATE_OneParam(FHathoraOnGetRegionalPings, FHathoraRegionPing
 UENUM(BlueprintType)
 enum class EHathoraCloudRegion : uint8
 {
-	// Could not parse the region from the API.
-	Unknown,
 	Seattle,
 	Washington_DC,
 	Chicago,
@@ -72,5 +70,6 @@ enum class EHathoraCloudRegion : uint8
 	Singapore,
 	Tokyo,
 	Sydney,
-	Sao_Paulo
+	Sao_Paulo,
+	Unknown UMETA(Hidden)
 };
