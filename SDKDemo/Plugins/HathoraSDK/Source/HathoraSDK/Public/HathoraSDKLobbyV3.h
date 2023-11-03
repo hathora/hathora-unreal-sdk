@@ -156,5 +156,7 @@ private:
 	static FString GetVisibilityString(EHathoraLobbyVisibility Visibility);
 	static EHathoraLobbyVisibility ParseVisibility(const FString& VisibilityString);
 
+	void ListActivePublicLobbies(TArray<TPair<FString, FString>> QueryOptions, FHathoraOnLobbyInfos OnComplete);
+
 	static FHathoraLobbyInfo ParseLobbyInfo(TSharedPtr<FJsonObject> LobbyInfoJson);
 };

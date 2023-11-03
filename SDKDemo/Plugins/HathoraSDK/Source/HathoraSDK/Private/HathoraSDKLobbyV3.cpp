@@ -133,56 +133,19 @@ void UHathoraSDKLobbyV3::CreateLobby(
 
 void UHathoraSDKLobbyV3::ListAllActivePublicLobbies(FHathoraOnLobbyInfos OnComplete)
 {
-	SendRequest(
-		TEXT("GET"),
-		FString::Printf(TEXT("/lobby/v3/%s/list/public"), *AppId),
-		[&, OnComplete](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccess) mutable
-		{
-			FHathoraLobbyInfosResult Result;
-			if (bSuccess && Response.IsValid())
-			{
-				Result.StatusCode = Response->GetResponseCode();
-				FString Content = Response->GetContentAsString();
-
-				if (Result.StatusCode == 200)
-				{
-					TArray<TSharedPtr<FJsonValue>> OutArray;
-					TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(Content);
-					FJsonSerializer::Deserialize(Reader, OutArray);
-
-					for (TSharedPtr<FJsonValue> Value : OutArray)
-					{
-						TSharedPtr<FJsonObject> Object = Value->AsObject();
-						Result.Data.Add(ParseLobbyInfo(Object));
-					}
-				}
-				else
-				{
-					Result.ErrorMessage = Content;
-				}
-			}
-			else
-			{
-				Result.ErrorMessage = TEXT("Could not list active public lobbies, unknown error");
-			}
-
-			if (!Result.ErrorMessage.IsEmpty())
-			{
-				UE_LOG(LogHathoraSDK, Error, TEXT("[ListActivePublicLobbies] Error: %s"), *Result.ErrorMessage);
-			}
-
-			if (!OnComplete.ExecuteIfBound(Result))
-			{
-				UE_LOG(LogHathoraSDK, Warning, TEXT("[ListActivePublicLobbies] function pointer was not valid, so OnComplete will not be called"));
-			}
-		});
+	TArray<TPair<FString, FString>> QueryOptions;
+	ListActivePublicLobbies(QueryOptions, OnComplete);
 }
 
 void UHathoraSDKLobbyV3::ListRegionActivePublicLobbies(EHathoraCloudRegion Region, FHathoraOnLobbyInfos OnComplete)
 {
 	TArray<TPair<FString, FString>> QueryOptions;
 	QueryOptions.Add(TPair<FString, FString>(TEXT("region"), GetRegionString(Region)));
+	ListActivePublicLobbies(QueryOptions, OnComplete);
+}
 
+void UHathoraSDKLobbyV3::ListActivePublicLobbies(TArray<TPair<FString, FString>> QueryOptions, FHathoraOnLobbyInfos OnComplete)
+{
 	SendRequest(
 		TEXT("GET"),
 		FString::Printf(TEXT("/lobby/v3/%s/list/public"), *AppId),
