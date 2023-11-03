@@ -73,3 +73,23 @@ enum class EHathoraCloudRegion : uint8
 	Sao_Paulo,
 	Unknown UMETA(Hidden)
 };
+
+USTRUCT(BlueprintType)
+struct FHathoraExposedPort
+{
+	GENERATED_BODY()
+
+	// Transport type specifies the underlying communication
+	// protocol to the exposed port. "tcp", "udp", or "tls".
+	UPROPERTY(BlueprintReadOnly, Category = "Default")
+	FString TransportType;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Default")
+	int32 Port = 0;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Default")
+	FString Host;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Default")
+	FString Name;
+};

@@ -9,24 +9,6 @@
 #include "HathoraSDKRoomV2.generated.h"
 
 USTRUCT(BlueprintType)
-struct FHathoraExposedPort
-{
-	GENERATED_BODY()
-
-	UPROPERTY(BlueprintReadOnly, Category = "Default")
-	FString TransportType;
-
-	UPROPERTY(BlueprintReadOnly, Category = "Default")
-	int32 Port = 0;
-
-	UPROPERTY(BlueprintReadOnly, Category = "Default")
-	FString Host;
-
-	UPROPERTY(BlueprintReadOnly, Category = "Default")
-	FString Name;
-};
-
-USTRUCT(BlueprintType)
 struct FHathoraAllocation
 {
 	GENERATED_BODY()
