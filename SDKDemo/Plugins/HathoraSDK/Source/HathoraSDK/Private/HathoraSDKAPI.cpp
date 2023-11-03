@@ -6,8 +6,8 @@
 
 void UHathoraSDKAPI::SetCredentials(FString InAppId, FHathoraSDKSecurity InSecurity)
 {
-	this->AppId = AppId;
-	this->Security = Security;
+	this->AppId = InAppId;
+	this->Security = InSecurity;
 }
 
 void UHathoraSDKAPI::SendRequest(FString Method, FString Endpoint, TFunction<void(FHttpRequestPtr, FHttpResponsePtr, bool)> OnComplete)
