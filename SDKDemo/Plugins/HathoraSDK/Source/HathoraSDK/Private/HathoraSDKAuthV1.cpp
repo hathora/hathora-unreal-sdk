@@ -2,6 +2,7 @@
 
 #include "HathoraSDKAuthV1.h"
 #include "HathoraSDKModule.h"
+#include "Serialization/JsonSerializer.h"
 
 void UHathoraSDKAuthV1::LoginAnonymous(FHathoraOnLogin OnComplete)
 {
