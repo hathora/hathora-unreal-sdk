@@ -2,7 +2,7 @@
 
 #include "HathoraSDKProcessesV1.h"
 #include "HathoraSDKModule.h"
-#include "JsonUtilities.h"
+#include "Serialization/JsonSerializer.h"
 
 void UHathoraSDKProcessesV1::GetAllRunningProcesses(FHathoraOnProcessInfos OnComplete)
 {
