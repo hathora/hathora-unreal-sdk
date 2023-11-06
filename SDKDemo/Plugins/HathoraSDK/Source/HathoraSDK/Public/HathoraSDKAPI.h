@@ -49,6 +49,7 @@ protected:
 	);
 
 	static FString GetRegionString(EHathoraCloudRegion Region);
+	static EHathoraCloudRegion ParseRegion(FString RegionString);
 
 	FString AppId;
 	FHathoraSDKSecurity Security;

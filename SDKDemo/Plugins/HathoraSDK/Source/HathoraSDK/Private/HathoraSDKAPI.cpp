@@ -2,6 +2,7 @@
 
 #include "HathoraSDKAPI.h"
 #include "HathoraSDKConfig.h"
+#include "HathoraSDKModule.h"
 #include "HttpModule.h"
 #include "JsonObjectWrapper.h"
 
@@ -77,9 +78,9 @@ void UHathoraSDKAPI::SendRequest(
 
 	Request->SetHeader(TEXT("Content-Type"), TEXT("application/json"));
 
-	if (Security.HathoraDevToken.Len() > 0)
+	if (Security.AuthToken.Len() > 0)
 	{
-		Request->SetHeader(TEXT("Authorization"), FString::Printf(TEXT("Bearer %s"), *Security.HathoraDevToken));
+		Request->SetHeader(TEXT("Authorization"), FString::Printf(TEXT("Bearer %s"), *Security.AuthToken));
 	}
 
 	Request->ProcessRequest();
@@ -91,4 +92,53 @@ FString UHathoraSDKAPI::GetRegionString(EHathoraCloudRegion Region)
 	RegionString = RegionString.RightChop(RegionString.Find("::") + 2);
 
 	return RegionString;
+}
+
+EHathoraCloudRegion UHathoraSDKAPI::ParseRegion(FString RegionString)
+{
+	if (RegionString == TEXT("Seattle"))
+	{
+		return EHathoraCloudRegion::Seattle;
+	}
+	else if (RegionString == TEXT("Washington_DC"))
+	{
+		return EHathoraCloudRegion::Washington_DC;
+	}
+	else if (RegionString == TEXT("Chicago"))
+	{
+		return EHathoraCloudRegion::Chicago;
+	}
+	else if (RegionString == TEXT("London"))
+	{
+		return EHathoraCloudRegion::London;
+	}
+	else if (RegionString == TEXT("Frankfurt"))
+	{
+		return EHathoraCloudRegion::Frankfurt;
+	}
+	else if (RegionString == TEXT("Mumbai"))
+	{
+		return EHathoraCloudRegion::Mumbai;
+	}
+	else if (RegionString == TEXT("Singapore"))
+	{
+		return EHathoraCloudRegion::Singapore;
+	}
+	else if (RegionString == TEXT("Tokyo"))
+	{
+		return EHathoraCloudRegion::Tokyo;
+	}
+	else if (RegionString == TEXT("Sydney"))
+	{
+		return EHathoraCloudRegion::Sydney;
+	}
+	else if (RegionString == TEXT("Sao_Paulo"))
+	{
+		return EHathoraCloudRegion::Sao_Paulo;
+	}
+	else
+	{
+		UE_LOG(LogHathoraSDK, Error, TEXT("[ParseRegion] Unknown region: %s"), *RegionString);
+		return EHathoraCloudRegion::Unknown;
+	}
 }

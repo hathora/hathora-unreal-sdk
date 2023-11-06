@@ -88,9 +88,6 @@ struct FHathoraRoomConnectionInfoResult
 UENUM(BlueprintType)
 enum class EHathoraRoomStatus : uint8
 {
-	// Could not parse the API response.
-	Unknown,
-
 	// A process is not allocated yet and the room is
 	// waiting to be scheduled.
 	Scheduling,
@@ -103,7 +100,9 @@ enum class EHathoraRoomStatus : uint8
 	Suspended,
 
 	// All associated metadata is deleted.
-	Destroyed
+	Destroyed,
+
+	Unknown UMETA(Hidden)
 };
 
 USTRUCT(BlueprintType)
