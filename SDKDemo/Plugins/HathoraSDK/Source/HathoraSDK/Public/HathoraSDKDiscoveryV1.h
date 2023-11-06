@@ -7,7 +7,7 @@
 #include "HathoraTypes.h"
 #include "HathoraSDKDiscoveryV1.generated.h"
 
-UCLASS()
+UCLASS(BlueprintType)
 class HATHORASDK_API UHathoraSDKDiscoveryV1 : public UHathoraSDKAPI
 {
 	GENERATED_BODY()

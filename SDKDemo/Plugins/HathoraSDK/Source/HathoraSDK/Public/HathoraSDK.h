@@ -9,8 +9,9 @@
 #include "HathoraSDK.generated.h"
 
 class UHathoraSDKDiscoveryV1;
+class UHathoraSDKRoomV2;
 
-UCLASS()
+UCLASS(BlueprintType)
 class HATHORASDK_API UHathoraSDK : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
@@ -36,8 +37,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "HathoraSDK")
 	void SetCredentials(FString AppId, FHathoraSDKSecurity Security);
 
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, Category="HathoraSDK")
 	UHathoraSDKDiscoveryV1* DiscoveryV1;
+
+	UPROPERTY(BlueprintReadOnly, Category="HathoraSDK")
+	UHathoraSDKRoomV2* RoomV2;
 
 private:
 	FHathoraOnGetRegionalPings OnGetRegionalPingsComplete;

@@ -10,3 +10,5 @@
 *.sln
 
 .DS_Store
+
+builds/

@@ -39,7 +39,14 @@ struct FHathoraRegionPings
 USTRUCT(BlueprintType)
 struct FHathoraSDKSecurity
 {
-	GENERATED_BODY()
+	GENERATED_USTRUCT_BODY()
+
+	FHathoraSDKSecurity() {}
+
+	FHathoraSDKSecurity(FString HathoraDevToken)
+	{
+		this->HathoraDevToken = HathoraDevToken;
+	}
 
 	// The HathoraDevToken used for the Authorization HTTP header.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Default")
@@ -48,3 +55,18 @@ struct FHathoraSDKSecurity
 
 UDELEGATE()
 DECLARE_DYNAMIC_DELEGATE_OneParam(FHathoraOnGetRegionalPings, FHathoraRegionPings, Result);
+
+UENUM(BlueprintType)
+enum class EHathoraCloudRegion : uint8
+{
+	Seattle,
+	Washington_DC,
+	Chicago,
+	London,
+	Frankfurt,
+	Mumbai,
+	Singapore,
+	Tokyo,
+	Sydney,
+	Sao_Paulo
+};
