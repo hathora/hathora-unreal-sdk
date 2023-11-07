@@ -62,6 +62,7 @@ UENUM(BlueprintType)
 enum class EHathoraCloudRegion : uint8
 {
 	Seattle,
+	Los_Angeles,
 	Washington_DC,
 	Chicago,
 	London,
