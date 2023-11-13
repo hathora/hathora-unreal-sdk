@@ -16,7 +16,6 @@ class HATHORASDK_API UHathoraSDKAPI : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintCallable, Category = "HathoraSDK")
 	void SetCredentials(FString AppId, FHathoraSDKSecurity Security);
 
 protected:
@@ -47,9 +46,6 @@ protected:
 		FJsonObject Body,
 		TFunction<void(FHttpRequestPtr, FHttpResponsePtr, bool)> OnProcessRequestComplete
 	);
-
-	static FString GetRegionString(EHathoraCloudRegion Region);
-	static EHathoraCloudRegion ParseRegion(FString RegionString);
 
 	FString AppId;
 	FHathoraSDKSecurity Security;

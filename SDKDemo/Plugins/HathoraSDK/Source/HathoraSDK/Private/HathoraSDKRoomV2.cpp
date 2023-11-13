@@ -2,12 +2,13 @@
 
 #include "HathoraSDKRoomV2.h"
 #include "HathoraSDKModule.h"
+#include "HathoraSDK.h"
 #include "JsonObjectConverter.h"
 #include "Serialization/JsonSerializer.h"
 
 void UHathoraSDKRoomV2::CreateRoom(EHathoraCloudRegion Region, FString RoomConfig, FString RoomId, FHathoraOnRoomConnectionInfo OnComplete)
 {
-	FString RegionString = GetRegionString(Region);
+	FString RegionString = UHathoraSDK::GetRegionString(Region);
 
 	TArray<TPair<FString, FString>> QueryOptions;
 	if (RoomId.Len() > 0)

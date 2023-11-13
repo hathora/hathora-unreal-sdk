@@ -28,17 +28,28 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "HathoraSDK")
 	static void GetRegionalPings(const FHathoraOnGetRegionalPings& OnComplete, int32 NumPingsPerRegion = 3);
 
-	// Create an instance of the Hathora SDK.
-	// @param AppId The ID of your Hathora App (e.g. "app-88871e9f-ca62-413c-beab-da226f2afd71").
-	// @param Security The security configuration for your Hathora App; primarily used to provide the Dev Token.
+	// Create an instance of the Hathora SDK using the AppId, and DevToken if specified,
+	// from Game.ini. See Project Settings > Plugins > HathoraSDK for more information.
 	UFUNCTION(BlueprintCallable, Category = "HathoraSDK")
-	static UHathoraSDK* CreateHathoraSDK(FString AppId, FHathoraSDKSecurity Security);
+	static UHathoraSDK* CreateHathoraSDK();
 
-	// Set the credentials of this SDK instance.
-	// @param AppId The ID of your Hathora App (e.g. "app-88871e9f-ca62-413c-beab-da226f2afd71").
-	// @param Security The security configuration for your Hathora App; primarily used to provide the Dev Token.
+	// Get the `HATHORA_*` environment variables that are injected into the game server.
 	UFUNCTION(BlueprintCallable, Category = "HathoraSDK")
-	void SetCredentials(FString AppId, FHathoraSDKSecurity Security);
+	static FHathoraServerEnvironment GetServerEnvironment();
+
+	// Get the string representation of the region enum value.
+	UFUNCTION(BlueprintPure, Category = "HathoraSDK")
+	static FString GetRegionString(EHathoraCloudRegion Region);
+
+	// Parse the string representation to get the enum value.
+	UFUNCTION(BlueprintPure, Category = "HathoraSDK")
+	static EHathoraCloudRegion ParseRegion(FString RegionString);
+
+	// Set the auth token to use for all requests; primarily on the
+	// client after the player has logged in.
+	// @param Token The JWT auth token to use for all requests.
+	UFUNCTION(BlueprintCallable, Category = "HathoraSDK")
+	void SetAuthToken(FString Token);
 
 	UPROPERTY(BlueprintReadOnly, Category="HathoraSDK")
 	UHathoraSDKAuthV1* AuthV1;
@@ -60,4 +71,6 @@ private:
 
 	UFUNCTION()
 	void OnGetRegionalPingsCompleteWrapper(FHathoraRegionPings Result);
+
+	void SetCredentials(FString AppId, FHathoraSDKSecurity Security);
 };

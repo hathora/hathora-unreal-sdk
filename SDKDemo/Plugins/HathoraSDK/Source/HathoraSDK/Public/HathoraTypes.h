@@ -94,3 +94,23 @@ struct FHathoraExposedPort
 	UPROPERTY(BlueprintReadOnly, Category = "Default")
 	FString Name;
 };
+
+struct FHathoraServerEnvironment
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadOnly, Category = "Default")
+	FString AppId;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Default")
+	FString AppSecret;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Default")
+	FString ProcessId;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Default")
+	EHathoraCloudRegion Region = EHathoraCloudRegion::Unknown;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Default")
+	int32 RoomsPerProcess = 0;
+};

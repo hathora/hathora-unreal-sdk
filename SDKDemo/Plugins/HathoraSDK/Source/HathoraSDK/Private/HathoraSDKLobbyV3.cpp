@@ -2,6 +2,7 @@
 
 #include "HathoraSDKLobbyV3.h"
 #include "HathoraSDKModule.h"
+#include "HathoraSDK.h"
 
 FString UHathoraSDKLobbyV3::GetVisibilityString(EHathoraLobbyVisibility Visibility)
 {
@@ -50,7 +51,7 @@ FHathoraLobbyInfo UHathoraSDKLobbyV3::ParseLobbyInfo(TSharedPtr<FJsonObject> Lob
 
 	LobbyInfo.Visibility = ParseVisibility(LobbyInfoJson->GetStringField(TEXT("visibility")));
 
-	LobbyInfo.Region = ParseRegion(LobbyInfoJson->GetStringField(TEXT("region")));
+	LobbyInfo.Region = UHathoraSDK::ParseRegion(LobbyInfoJson->GetStringField(TEXT("region")));
 
 	LobbyInfo.RoomId = LobbyInfoJson->GetStringField(TEXT("roomId"));
 	LobbyInfo.AppId = LobbyInfoJson->GetStringField(TEXT("appId"));
@@ -79,7 +80,7 @@ void UHathoraSDKLobbyV3::CreateLobby(
 	FJsonObject Body;
 	Body.SetStringField(TEXT("visibility"), GetVisibilityString(Visibility));
 	Body.SetStringField(TEXT("roomConfig"), RoomConfig);
-	Body.SetStringField(TEXT("region"), GetRegionString(Region));
+	Body.SetStringField(TEXT("region"), UHathoraSDK::GetRegionString(Region));
 
 	SendRequest(
 		TEXT("POST"),
@@ -140,7 +141,7 @@ void UHathoraSDKLobbyV3::ListAllActivePublicLobbies(FHathoraOnLobbyInfos OnCompl
 void UHathoraSDKLobbyV3::ListRegionActivePublicLobbies(EHathoraCloudRegion Region, FHathoraOnLobbyInfos OnComplete)
 {
 	TArray<TPair<FString, FString>> QueryOptions;
-	QueryOptions.Add(TPair<FString, FString>(TEXT("region"), GetRegionString(Region)));
+	QueryOptions.Add(TPair<FString, FString>(TEXT("region"), UHathoraSDK::GetRegionString(Region)));
 	ListActivePublicLobbies(QueryOptions, OnComplete);
 }
 
