@@ -20,5 +20,4 @@ COPY --chown=nonroot:nonroot --from=0 /home/nonroot/server /home/nonroot/server
 # Expose the Unreal game server port
 EXPOSE 7777/udp
 
-# We launch the sidecar first which will manage the unreal process
 ENTRYPOINT ["/home/nonroot/server/SDKDemo/Binaries/Linux/SDKDemoServer"]

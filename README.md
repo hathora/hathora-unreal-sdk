@@ -1,11 +1,17 @@
 # Hathora Unreal Engine 5 Cloud SDK (and Demo)
 
-This directory contains the source code for the Hathora SDK plugin for Unreal Engine 5. Currently the only functionality implemented here is client
-ping calculation.
+This repository includes the source code for the [Hathora SDK plugin](./SDKDemo/Plugins/HathoraSDK) for Unreal Engine 5 as well as an Unreal project that provides examples on how to use the SDK plugin.
+
+This README covers:
+- [SDK Plugin Usage](#sdk-plugin-usage)
+- [Lobby Example](#lobby-example)
+- [Packaging Server and Client Builds and creating a Hathora deployment](#packaging)
+- [Development Setup](#development-setup)
+- [Development code Formatting and style](#code-formatting-and-style)
 
 ## SDK Plugin Usage
 
-The SDK currently only supports retrieving and pinging each region. The easiest method is to call the [Get Regional Pings](#get-regional-pings) function, but if you would prefer to send the ICMP pings manually, you can optionally only call the [GetPingServiceEndpoints](#manually-calling-getpingserviceendpoints) API call.
+The SDK supports most Hathora Cloud API endpoints, which you can [call manually](#manually-calling-api-endpoints). The SDK also provides an easy interface to automatically fetch and ping all available Hathora Cloud regions with the [Get Regional Pings](#get-regional-pings) function.
 
 ### Get Regional Pings
 
@@ -21,7 +27,7 @@ The ICMP pings have a default timeout of `1.0 seconds`; you can change this in t
 
 If you want to save the change for your entire project/team, make sure to click the **Set as Default** button at the top; this will save the setting in `Config/DefaultGame.ini` which you can add to your version control. If you don't do this, the setting will only apply to your instance of the Unreal project.
 
-If you [manually call](#manually-calling-api-endpoints) `GetPingServiceEndpoints()`, you will need to execute the ICMP echos yourself. You can see an example of this in  [HathoraSDKDiscoveryV1.cpp](./SDKDemo/Plugins/HathoraSDK/Source/HathoraSDK/Private/HathoraSDKDiscoveryV1.cpp#L94-L97).
+If you [manually call](#manually-calling-api-endpoints) `GetPingServiceEndpoints()`, you will need to execute the ICMP echos yourself. You can see an example of this in [HathoraSDKDiscoveryV1.cpp](./SDKDemo/Plugins/HathoraSDK/Source/HathoraSDK/Private/HathoraSDKDiscoveryV1.cpp#L94-L97).
 
 #### C++
 
@@ -66,6 +72,67 @@ All API calls have an `OnComplete` delegate callback like `OnGetEndpointsComplet
 To create an instance of `UHathoraSDK`, call the `Create Hathora SDK` BP node. There's no need to provide an AppID or the Hathora Dev Token, so those are left blank in the call (but can be provided if you need them to access other APIs). From there, you can find API endpoint function nodes (e.g. `Get Ping Service Endpoints`) on the respective variable (e.g. `DiscoveryV1`):
 
 ![image](https://github.com/hathora/hathora-unreal-sdk/assets/549323/2558043c-7814-4264-a949-a4fd2dd37fbb)
+
+## Packaging
+
+There are several steps necessary before you're able to package the correct builds:
+- [Compiling Unreal from source](#unreal-source-build)
+- [Adding Server and Client targets](#preparing-build-targets)
+- [Compiling a Linux server](#linux-cross-compilation)
+- [Setting up default maps](#default-maps)
+- [Packaging the builds](#packaging-the-builds)
+
+### Unreal Source Build
+
+To be able to package a Dedicated Server build, you need to compile Unreal Engine from source. You can find a complete [guide from Epic](https://docs.unrealengine.com/5.3/en-US/building-unreal-engine-from-source/) on how to do this.
+
+Once you have successfully compiled Unreal Engine from source, you can [convert](https://docs.unrealengine.com/5.3/en-US/updating-projects-to-newer-versions-of-unreal-engine/) your project to the source version. You can also optionally Right Click on the `uproject` file, select `Switch Unreal Engine version...` (under `Show more options` for Windows 11), and pick the corresponding "Source build...". This will generate a new Visual Studio project file which you'll be able to open and compile your project again.
+
+### Preparing Build Targets
+
+Packaging your project for Hathora will require you to package a Dedicated Server build and a Client build. Your client build could include server logic if you're supporting peer-to-peer hosted servers, but this documentation will assume you'll be using a Client target that excludes the server logic.
+
+To be able to add Server and Client build targets, you'll need to add a `.Target.cs` file for each in your `Source` directory. See [SDKDemoServer.Target.cs](./SDKDemo/Source/SDKDemoServer.Target.cs) and [SDKDemoClient.Target.cs](./SDKDemo/Source/SDKDemoClient.Target.cs) in this sample project as a reference. Mainly, you're just changing `Type` to `TargetType.Server` and `TargetType.Client` respectively. Make sure regenerate your project files after doing this (Right Click on the `uproject` file and select `Generate Visual Studio project files` (under `Show more options` for Windows 11)). Recompile and launch the editor; you should now see Server and Client targets available in the Platforms dropdown in the editor:
+
+![Image showing server and client build targets in the Platforms dropdown in the editor](./Images/ServerClient_TargetsInEditor.png)
+
+### Linux Cross Compilation
+
+Hathora Cloud servers run on Linux, so you must compile the Server target for Linux. You can either build on a Linux machine or you can cross-compile for Linux on a Windows machine. See Epic's [guide on setting up cross-compilation](https://docs.unrealengine.com/5.3/en-US/linux-development-requirements-for-unreal-engine/#cross-compiletoolchain). If you're compiling on a Linux machine, you'll need the Native Toolchain; if you're compiling on a Windows machine for Linux, you'll need the Cross-Compile Toolchain. Cross-compiling for Linux on Mac is not currently supported by Epic.
+
+If cross-compiling, you may need to set the `LINUX_MULTIARCH_ROOT` environment variable to point to your Toolchain install. You will need to restart the editor, and even maybe Visual Studio for the environment variable to take effect. Here is an example of the UE 5.3 toolchain being used in an environment variable on Windows:
+
+![Image showing Windows environment variable for setting up the Linux toolchain](./Images/Linux_CrossCompilation_EnvVar.png)
+
+You'll know if you have set up cross-compilation correctly once you see under the Linux submenu under Platforms that the Installed SDK version matches the Allowed one:
+
+![Image showing the Linux SDK properly installed](./Images/Linux_CrossCompilation.png)
+
+### Default Maps
+
+You're likely familiar with setting a default map for when an Unreal game starts under `Project Settings > Maps & Modes`, but now that we have two separate targets we need to make sure the Client target opens the main menu and the Server target opens the match map. Under the `Project Settings > Maps & Modes`, there is a `Server Default Map` setting under `Advanced` which will get loaded instead of the `Game Default Map` for the Server build:
+
+![Image showing the Server Default Map option](./Images/Server_DefaultMap.png)
+
+The Client build will open the `Game Default Map` option.
+
+### Packaging the Builds
+
+Now that you have Linux cross-compilation set up on a source build of Unreal with Server and Client targets opening the correct maps on startup, you're ready to package the builds. While you can create scripts to do automate this process, you can easily build the two targets under the Platforms menu in the Editor. Once you have selected the correct target and build configuration, you can select `Package Project`. In the below images, you'll see we're packaging a Linux Server (Development) and a Windows Client (Development):
+
+![Image showing packaging a Linux Server](./Images/Server_PackageLinux.png)
+
+![Image showing packaging a Windows Client](./Images/Client_PackageWindows.png)
+
+When selecting `Package Project`, you'll be prompted to select a folder. This can go anywhere, but we're selecting a new `builds` folder in our Unreal project folder which we have prepared a script to help us create the Deployment for Hathora:
+
+![Image showing folder to pick](./Images/Package_SelectFolder.png)
+
+This will create `LinuxServer` and `WindowsClient` folders in the directory we selected. You can distribute `WindowsClient` however you plan to your players, but to prepare `LinuxServer` for Hathora, you need to create a tarball with a `Dockerfile` and the contents of that.
+
+We have provided a sample [Dockerfile](./SDKDemo/Dockerfile) and a script [prepare-deployment.sh](./SDKDemo/prepare-deployment.sh) that work with this sample project. You will need to adjust both for your project. In the `Dockerfile`, make sure that the paths are correct (i.e. look for `SDKDemo`, `SDKDemoServer`, and `./builds/LinuxServer`). Note that if you're building for anything other than `Development` configuration, the path to the binary changes to include a suffix (i.e. `SDKDemoServer-Linux-Shipping`). The `prepare-deployment.sh` script works in a Git Bash terminal environment on Windows.
+
+Ultimately, you need to create a gzipped tarball that has a `Dockerfile` in the root folder that prepares the server properly. If you have any questions about this step, reach out on our [Discord server](https://discord.gg/hathora).
 
 ## Supported Cloud API Endpoints
 
