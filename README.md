@@ -43,17 +43,12 @@ The SDK provides functions that provide access to the Hathora Cloud API endpoint
 
 #### C++
 
-To create an instance of `UHathoraSDK`, call the static `UHathoraSDK::CreateHathoraSDK` function. There's no need to provide an AppID or the Hathora Dev Token, so those are left blank in the call (but can be provided if you need them to access other APIs):
+To create an instance of `UHathoraSDK`, call the static `UHathoraSDK::CreateHathoraSDK` function:
 
 ``` c++
-// Below is an example on how to instantiate the SDK with no authentication
-UHathoraSDK* SDK = UHathoraSDK::CreateHathoraSDK("", FHathoraSDKSecurity());
-
-// Below is an example on how to instantiate the SDK with all authentication
-// You can provide the AppId but omit the dev token for client-based calls
-FString AppId = TEXT("app-12345-67890");
-FString HathoraDevToken = TEXT("GA_1234567890");
-UHathoraSDK* SDK = UHathoraSDK::CreateHathoraSDK(AppId, FHathoraSDKSecurity(HathoraDevToken));
+// Below is an example on how to instantiate the SDK. The AppId and DevToken
+// are automatically retrieved from the Project Settings / Game.ini
+UHathoraSDK* SDK = UHathoraSDK::CreateHathoraSDK();
 ```
 
 From there, you can get access to the supported API calls (e.g. `GetPingServiceEndpoints`) function via the respective `UHathoraSDK` property (e.g. `DiscoveryV1`):
@@ -74,6 +69,21 @@ To create an instance of `UHathoraSDK`, call the `Create Hathora SDK` BP node. T
 
 ## Supported Cloud API Endpoints
 
+- AuthV1
+  - LoginAnonymous
+  - LoginNickname
+  - LoginGoogle
+- DiscoveryV1
+  - GetPingServiceEndpoints (helper function `Get Regional Pings` will call this and execute multiple pings for you, providing the minimum)
+- LobbyV3
+  - CreateLobby
+  - ListActivePublicLobbies
+  - GetLobbyInfoByRoomId
+  - GetLobbyInfoByShortCode
+- ProcessesV1
+  - GetRunningProcesses
+  - GetStoppedProcesses
+  - GetProcessInfo
 - RoomV2
   - CreateRoom
   - GetRoomInfo
@@ -83,8 +93,6 @@ To create an instance of `UHathoraSDK`, call the `Create Hathora SDK` BP node. T
   - SuspendRoom
   - GetConnectionInfo
   - UpdateRoomConfig
-- DiscoveryV1
-  - GetPingServiceEndpoints (helper function `Get Regional Pings` will call this and execute multiple pings for you, providing the minimum)
 
 ## Development Setup
 
