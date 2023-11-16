@@ -73,6 +73,16 @@ To create an instance of `UHathoraSDK`, call the `Create Hathora SDK` BP node. T
 
 ![image](https://github.com/hathora/hathora-unreal-sdk/assets/549323/2558043c-7814-4264-a949-a4fd2dd37fbb)
 
+## Lobby Example
+
+The sample project provides a complete example of using the Hathora Lobby service, including:
+- Client menu to create and join lobbies with a custom `roomConfig`, which also shows corresponding region ping results
+  - See `Content/W_Lobby` which uses `Content/B_LobbyComponent` as an easy to use interface to the SDK
+- Server code to fetch, update, and replicate the `roomConfig` and `shortCode`
+  - See `Content/ThirdPerson/Blueprints/B_MatchGameState`
+- Client facing HUD to display the in-match replicated `roomConfig` and `shortCode`
+  - See `Content/ThirdPerson/Blueprints/W_MatchHUD`
+
 ## Packaging
 
 There are several steps necessary before you're able to package the correct builds:
