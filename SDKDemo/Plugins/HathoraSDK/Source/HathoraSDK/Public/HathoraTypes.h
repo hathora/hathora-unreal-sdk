@@ -95,6 +95,7 @@ struct FHathoraExposedPort
 	FString Name;
 };
 
+USTRUCT(BlueprintType)
 struct FHathoraServerEnvironment
 {
 	GENERATED_BODY()
