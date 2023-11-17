@@ -90,36 +90,36 @@ bool UDemoMenuWidget::Initialize()
 void UDemoMenuWidget::InitiatePing()
 {
 	RegionList->ClearChildren();
-	FHathoraOnGetRegionalPings OnComplete;
-	OnComplete.BindDynamic(this, &UDemoMenuWidget::OnPingResults);
-	UHathoraSDK::GetRegionalPings(OnComplete);
-}
+	UHathoraSDK::GetRegionalPings(
+		FHathoraOnGetRegionalPings::CreateLambda(
+			[this](const FHathoraRegionPings& Result)
+			{
+				for (const auto& Pair : Result.Pings)
+				{
+					FString Region = Pair.Key;
+					int32 RTT = Pair.Value;
+					UE_LOG(LogTemp, Display, TEXT("Ping in %s is %d ms"), *Region, RTT);
 
-void UDemoMenuWidget::OnPingResults(FHathoraRegionPings Result)
-{
-	for (const auto& Pair : Result.Pings)
-	{
-		FString Region = Pair.Key;
-		int32 RTT = Pair.Value;
-		UE_LOG(LogTemp, Display, TEXT("Ping in %s is %d ms"), *Region, RTT);
+					UHorizontalBox* RegionBox = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass());
+					check(RegionBox);
 
-		UHorizontalBox* RegionBox = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass());
-		check(RegionBox);
+					UTextBlock* RegionLabel = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass());
+					check(RegionLabel);
+					RegionLabel->SetText(FText::FromString(Region));
 
-		UTextBlock* RegionLabel = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass());
-		check(RegionLabel);
-		RegionLabel->SetText(FText::FromString(Region));
+					UTextBlock* RegionPing = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass());
+					check(RegionPing);
+					RegionPing->SetText(FText::FromString(FString::Printf(TEXT("%dms"), RTT)));
 
-		UTextBlock* RegionPing = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass());
-		check(RegionPing);
-		RegionPing->SetText(FText::FromString(FString::Printf(TEXT("%dms"), RTT)));
+					UHorizontalBoxSlot* LabelSlot = RegionBox->AddChildToHorizontalBox(RegionLabel);
+					LabelSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
+					RegionBox->AddChildToHorizontalBox(RegionPing);
 
-		UHorizontalBoxSlot* LabelSlot = RegionBox->AddChildToHorizontalBox(RegionLabel);
-		LabelSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
-		RegionBox->AddChildToHorizontalBox(RegionPing);
-
-		RegionList->AddChildToVerticalBox(RegionBox);
-	}
+					RegionList->AddChildToVerticalBox(RegionBox);
+				}
+			}
+		)
+	);
 }
 
 #undef LOCTEXT_NAMESPACE

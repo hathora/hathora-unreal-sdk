@@ -126,36 +126,28 @@ class HATHORASDK_API UHathoraSDKProcessesV1 : public UHathoraSDKAPI
 	GENERATED_BODY()
 
 public:
-	UDELEGATE()
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FHathoraOnProcessInfo, FHathoraProcessInfoResult, Result);
-
-	UDELEGATE()
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FHathoraOnProcessInfos, FHathoraProcessInfosResult, Result);
+	typedef TDelegate<void(const FHathoraProcessInfoResult&)> FHathoraOnProcessInfo;
+	typedef TDelegate<void(const FHathoraProcessInfosResult&)> FHathoraOnProcessInfos;
 
 	// Retrieve 10 most recently started process objects for an application.
-	UFUNCTION(BlueprintCallable, Category = "HathoraSDK | ProcessV1")
 	void GetAllRunningProcesses(FHathoraOnProcessInfos OnComplete);
 
 	// Retrieve 10 most recently started process objects for an application,
 	// filtered by Region.
 	// @param Region Filter the returned processes by the provided region.
-	UFUNCTION(BlueprintCallable, Category = "HathoraSDK | ProcessV1")
 	void GetRegionRunningProcesses(EHathoraCloudRegion Region, FHathoraOnProcessInfos OnComplete);
 
 	// Retrieve 10 most recently stopped process objects for an application.
-	UFUNCTION(BlueprintCallable, Category = "HathoraSDK | ProcessV1")
 	void GetAllStoppedProcesses(FHathoraOnProcessInfos OnComplete);
 
 	// Retrieve 10 most recently stopped process objects for an application.
 	// filtered by Region.
 	// @param Region Filter the returned processes by the provided region.
-	UFUNCTION(BlueprintCallable, Category = "HathoraSDK | ProcessV1")
 	void GetRegionStoppedProcesses(EHathoraCloudRegion Region, FHathoraOnProcessInfos OnComplete);
 
 	// Get details for a process.
 	// @param ProcessId System generated unique identifier to a runtime
 	//                  instance of your game server.
-	UFUNCTION(BlueprintCallable, Category = "HathoraSDK | ProcessV1")
 	void GetProcessInfo(FString ProcessId, FHathoraOnProcessInfo OnComplete);
 
 private:

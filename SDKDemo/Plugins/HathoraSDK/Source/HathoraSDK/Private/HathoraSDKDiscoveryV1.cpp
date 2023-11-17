@@ -41,16 +41,17 @@ void UHathoraSDKDiscoveryV1::GetRegionalPings(const FHathoraOnGetRegionalPings& 
 	OnGetRegionalPingsComplete = OnComplete;
 	NumPingsPerRegion = InNumPingsPerRegion;
 	FHathoraOnGetPingServiceEndpoints OnGetEndpointsComplete;
-	OnGetEndpointsComplete.BindDynamic(this, &UHathoraSDKDiscoveryV1::InitiatePings);
-	GetPingServiceEndpoints(OnGetEndpointsComplete);
-}
-
-void UHathoraSDKDiscoveryV1::InitiatePings(const TArray<FHathoraDiscoveredPingEndpoint>& InPingEndpoints)
-{
-	PingEndpoints = InPingEndpoints;
-	NumPingsPerRegionCompleted = 0;
-	PingResults = MakeShared<TMap<FString, TArray<int32>>>();
-	PingEachRegion();
+	GetPingServiceEndpoints(
+		UHathoraSDKDiscoveryV1::FHathoraOnGetPingServiceEndpoints::CreateLambda(
+			[this](const TArray<FHathoraDiscoveredPingEndpoint>& Endpoints)
+			{
+				PingEndpoints = Endpoints;
+				NumPingsPerRegionCompleted = 0;
+				PingResults = MakeShared<TMap<FString, TArray<int32>>>();
+				PingEachRegion();
+			}
+		)
+	);
 }
 
 void UHathoraSDKDiscoveryV1::PingEachRegion()

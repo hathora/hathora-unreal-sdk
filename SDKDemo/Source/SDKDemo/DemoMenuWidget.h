@@ -18,9 +18,6 @@ public:
 	UFUNCTION()
 	void InitiatePing();
 
-	UFUNCTION()
-	void OnPingResults(FHathoraRegionPings Result);
-
 protected:
 	virtual void NativeConstruct() override;
 	virtual bool Initialize() override;

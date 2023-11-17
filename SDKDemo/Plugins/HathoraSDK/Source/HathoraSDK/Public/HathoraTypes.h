@@ -55,8 +55,7 @@ struct FHathoraSDKSecurity
 	FString AuthToken;
 };
 
-UDELEGATE()
-DECLARE_DYNAMIC_DELEGATE_OneParam(FHathoraOnGetRegionalPings, FHathoraRegionPings, Result);
+typedef TDelegate<void(const FHathoraRegionPings&)> FHathoraOnGetRegionalPings;
 
 UENUM(BlueprintType)
 enum class EHathoraCloudRegion : uint8

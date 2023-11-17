@@ -16,10 +16,16 @@ void UHathoraSDK::GetRegionalPings(const FHathoraOnGetRegionalPings& OnComplete,
 {
 	UHathoraSDK* SDK = UHathoraSDK::CreateHathoraSDK();
 	SDK->AddToRoot(); // make sure this doesn't get garbage collected
-	SDK->OnGetRegionalPingsComplete = OnComplete;
-	FHathoraOnGetRegionalPings WrapperCallback;
-	WrapperCallback.BindDynamic(SDK, &UHathoraSDK::OnGetRegionalPingsCompleteWrapper);
-	SDK->DiscoveryV1->GetRegionalPings(WrapperCallback, NumPingsPerRegion);
+	SDK->DiscoveryV1->GetRegionalPings(
+		FHathoraOnGetRegionalPings::CreateLambda(
+			[OnComplete, SDK](const FHathoraRegionPings& Result)
+			{
+				OnComplete.ExecuteIfBound(Result);
+				SDK->RemoveFromRoot(); // Allow this SDK reference to be garbage collected
+			}
+		),
+		NumPingsPerRegion
+	);
 }
 
 UHathoraSDK* UHathoraSDK::CreateHathoraSDK()
@@ -132,10 +138,4 @@ void UHathoraSDK::SetCredentials(FString AppId, FHathoraSDKSecurity Security)
 	LobbyV3->SetCredentials(AppId, Security);
 	ProcessesV1->SetCredentials(AppId, Security);
 	RoomV2->SetCredentials(AppId, Security);
-}
-
-void UHathoraSDK::OnGetRegionalPingsCompleteWrapper(FHathoraRegionPings Result)
-{
-	OnGetRegionalPingsComplete.ExecuteIfBound(Result);
-	RemoveFromRoot(); // Allow this SDK reference to be garbage collected
 }
