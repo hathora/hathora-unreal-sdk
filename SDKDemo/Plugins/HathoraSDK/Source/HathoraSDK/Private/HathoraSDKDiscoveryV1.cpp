@@ -40,7 +40,6 @@ void UHathoraSDKDiscoveryV1::GetRegionalPings(const FHathoraOnGetRegionalPings& 
 
 	OnGetRegionalPingsComplete = OnComplete;
 	NumPingsPerRegion = InNumPingsPerRegion;
-	FHathoraOnGetPingServiceEndpoints OnGetEndpointsComplete;
 	GetPingServiceEndpoints(
 		UHathoraSDKDiscoveryV1::FHathoraOnGetPingServiceEndpoints::CreateLambda(
 			[this](const TArray<FHathoraDiscoveredPingEndpoint>& Endpoints)

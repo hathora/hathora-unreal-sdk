@@ -61,11 +61,26 @@ From there, you can get access to the supported API calls (e.g. `GetPingServiceE
 
 ``` c++
 FHathoraOnGetPingServiceEndpoints OnGetEndpointsComplete;
-OnGetEndpointsComplete.BindDynamic(this, &UYourClass::YourCallback);
+OnGetEndpointsComplete.BindUFunction(this, TEXT("YourCallback")); // assumes this is a UObject
 SDK->DiscoveryV1->GetPingServiceEndpoints(OnGetEndpointsComplete);
 ```
 
 All API calls have an `OnComplete` delegate callback like `OnGetEndpointsComplete` in the above example; make sure the function you provide (e.g. `UYourClass::YourCallback`) has the matching signature (e.g. `void (const TArray<FHathoraDiscoveredPingEndpoint>& PingEndpoints)`). You can find the appropriate signature in the respective `Plugins/HathoraSDK/Source/HathoraSDK/Public/HathoraSDK<API>.h` file (e.g [HathoraSDKDiscoveryV1.h](./SDKDemo/Plugins/HathoraSDK/Source/HathoraSDK/Public/HathoraSDKDiscoveryV1.h)).
+
+You can also use C++ lambdas:
+
+``` c++
+FHathoraOnGetPingServiceEndpoints OnGetEndpointsComplete;
+OnGetEndpointsComplete.BindUFunction(this, TEXT("YourCallback"));
+SDK->DiscoveryV1->GetPingServiceEndpoints(
+  UHathoraSDKDiscoveryV1::FHathoraOnGetPingServiceEndpoints::CreateLambda(
+    [this](const TArray<FHathoraDiscoveredPingEndpoint>& Endpoints)
+    {
+      // handle the response here
+    }
+  )
+);
+```
 
 #### Blueprint
 
