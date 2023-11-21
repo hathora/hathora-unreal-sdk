@@ -123,12 +123,16 @@ EHathoraCloudRegion UHathoraSDK::ParseRegion(FString RegionString)
 
 void UHathoraSDK::SetAuthToken(FString Token)
 {
-
 	const UHathoraSDKConfig* Config = GetDefault<UHathoraSDKConfig>();
 	FString AppId = Config->GetAppId();
 	FHathoraSDKSecurity Security(Token);
 
 	SetCredentials(Config->GetAppId(), Security);
+}
+
+bool UHathoraSDK::IsLoggedIn()
+{
+	return AuthV1->IsLoggedIn();
 }
 
 void UHathoraSDK::SetCredentials(FString AppId, FHathoraSDKSecurity Security)

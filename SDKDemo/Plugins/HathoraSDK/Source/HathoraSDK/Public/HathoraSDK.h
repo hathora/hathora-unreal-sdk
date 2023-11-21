@@ -50,6 +50,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "HathoraSDK")
 	void SetAuthToken(FString Token);
 
+	UFUNCTION(BlueprintPure, Category = "HathoraSDK")
+	bool IsLoggedIn();
+
 	UPROPERTY(BlueprintReadOnly, Category="HathoraSDK")
 	UHathoraSDKAuthV1* AuthV1;
 

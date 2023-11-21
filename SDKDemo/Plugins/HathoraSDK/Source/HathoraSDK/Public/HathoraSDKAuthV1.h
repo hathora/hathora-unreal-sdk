@@ -44,6 +44,9 @@ public:
 	//                [here](https://cloud.google.com/docs/authentication/get-id-token).
 	void LoginGoogle(FString IdToken, FHathoraOnLogin OnComplete);
 
+	UFUNCTION(BlueprintPure, Category = "HathoraSDK | AuthV1")
+	bool IsLoggedIn();
+
 private:
 	void Login(FString Path, FJsonObject Body, FHathoraOnLogin OnComplete);
 };

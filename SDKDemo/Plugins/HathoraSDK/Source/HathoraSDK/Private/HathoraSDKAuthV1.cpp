@@ -88,3 +88,8 @@ void UHathoraSDKAuthV1::Login(FString Path, FJsonObject Body, FHathoraOnLogin On
 		}
 	);
 }
+
+bool UHathoraSDKAuthV1::IsLoggedIn()
+{
+	return !Security.AuthToken.IsEmpty();
+}
