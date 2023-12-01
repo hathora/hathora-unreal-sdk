@@ -7,22 +7,6 @@
 
 void SDemoLobbyWidget::Construct(const FArguments& InArgs)
 {
-	FSlateBrush BorderBrush;
-	BorderBrush.TintColor = FLinearColor(1.0f, 1.0f, 1.0f, 0.0f);
-	BorderBrush.DrawAs = ESlateBrushDrawType::Type::RoundedBox;
-
-	FSlateBrush ToggleButtonBrushLeft;
-	ToggleButtonBrushLeft.DrawAs = ESlateBrushDrawType::Type::RoundedBox;
-	ToggleButtonBrushLeft.OutlineSettings = FSlateBrushOutlineSettings(FVector4(10.0f, 0.0f, 0.0f, 10.0f));
-	FButtonStyle LobbyVisibilityButtonLeftStyle;
-	LobbyVisibilityButtonLeftStyle.SetNormal(ToggleButtonBrushLeft);
-
-	FSlateBrush ToggleButtonBrushRight;
-	ToggleButtonBrushRight.DrawAs = ESlateBrushDrawType::Type::RoundedBox;
-	ToggleButtonBrushRight.OutlineSettings = FSlateBrushOutlineSettings(FVector4(0.0f, 10.0f, 10.0f, 0.0f));
-	FButtonStyle LobbyVisibilityButtonRightStyle;
-	LobbyVisibilityButtonRightStyle.SetNormal(ToggleButtonBrushRight);
-
 	ChildSlot
 	[
 		SNew(SOverlay)
@@ -44,8 +28,7 @@ void SDemoLobbyWidget::Construct(const FArguments& InArgs)
 			.VAlign(VAlign_Fill)
 			.AutoHeight()
 			[
-				SNew(STextBlock)
-				.Text(FText::FromString(InArgs._ErrorMessage))
+				SAssignNew(ErrorMessageBlock, STextBlock)
 				.Font(FCoreStyle::GetDefaultFontStyle("Bold", 24))
 				.Justification(ETextJustify::Center)
 				.ColorAndOpacity(FLinearColor(0.692708f, 0.054118f, 0.054118f, 1.0f))
@@ -63,7 +46,6 @@ void SDemoLobbyWidget::Construct(const FArguments& InArgs)
 				.Padding(FMargin(15.0f, 15.0f, 15.0f, 15.0f))
 				[
 					SNew(SBorder)
-					// .BorderImage(&BorderBrush)
 					[
 						SNew(SVerticalBox)
 						+ SVerticalBox::Slot()
@@ -82,6 +64,7 @@ void SDemoLobbyWidget::Construct(const FArguments& InArgs)
 						.Padding(FMargin(0.0f, 0.0f, 10.0f, 0.0f))
 						[
 							SNew(SButton)
+							.OnClicked(InArgs._OnRefreshClicked)
 							[
 								SNew(STextBlock)
 								.Text(FText::FromString("Refresh"))
@@ -129,6 +112,17 @@ void SDemoLobbyWidget::Construct(const FArguments& InArgs)
 							.HAlign(HAlign_Fill)
 							.VAlign(VAlign_Fill)
 						]
+						+ SVerticalBox::Slot()
+						.HAlign(HAlign_Fill)
+						.VAlign(VAlign_Fill)
+						.Padding(FMargin(10.0f, 0.0f, 10.0f, 10.0f))
+						[
+							SAssignNew(LobbiesGrid, SGridPanel)
+							.FillColumn(0, 1.5f)
+							.FillColumn(1, 2.0f)
+							.FillColumn(2, 1.0f)
+							.FillColumn(3, 1.0f)
+						]
 					]
 				]
 				+ SHorizontalBox::Slot()
@@ -144,10 +138,9 @@ void SDemoLobbyWidget::Construct(const FArguments& InArgs)
 					.Padding(FMargin(15.0f, 15.0f, 15.0f, 15.0f))
 					[
 						SNew(SBorder)
-						// .BorderImage(&BorderBrush)
 						[
-							SNew(SWidgetSwitcher)
-							.WidgetIndex(1)
+							SAssignNew(LoginSwitcher, SWidgetSwitcher)
+							.WidgetIndex(0)
 							+ SWidgetSwitcher::Slot()
 							[
 								SNew(SVerticalBox)
@@ -181,6 +174,7 @@ void SDemoLobbyWidget::Construct(const FArguments& InArgs)
 								.Padding(0.0f, 10.0f, 0.0f, 20.0f)
 								[
 									SNew(SButton)
+									.OnClicked(InArgs._OnLoginClicked)
 									[
 										SNew(STextBlock)
 										.Text(FText::FromString("Login"))
@@ -217,11 +211,11 @@ void SDemoLobbyWidget::Construct(const FArguments& InArgs)
 									.VAlign(VAlign_Fill)
 									[
 										SNew(SButton)
-										// .ButtonStyle(&LobbyVisibilityButtonLeftStyle)
+										.OnClicked(InArgs._OnSwitchToPublicLobbyClicked)
 										[
-											SNew(STextBlock)
+											SAssignNew(PublicButtonTextBlock, STextBlock)
 											.Text(FText::FromString("Public"))
-											.Font(FCoreStyle::GetDefaultFontStyle(InArgs._bCreatePublicLobby ? "Bold" : "Regular", 16))
+											.Font(FCoreStyle::GetDefaultFontStyle("Bold", 16))
 										]
 									]
 									+ SHorizontalBox::Slot()
@@ -229,11 +223,11 @@ void SDemoLobbyWidget::Construct(const FArguments& InArgs)
 									.VAlign(VAlign_Fill)
 									[
 										SNew(SButton)
-										// .ButtonStyle(&LobbyVisibilityButtonRightStyle)
+										.OnClicked(InArgs._OnSwitchToPrivateLobbyClicked)
 										[
-											SNew(STextBlock)
+											SAssignNew(PrivateButtonTextBlock, STextBlock)
 											.Text(FText::FromString("Private"))
-											.Font(FCoreStyle::GetDefaultFontStyle(InArgs._bCreatePublicLobby ? "Regular" : "Bold", 16))
+											.Font(FCoreStyle::GetDefaultFontStyle("Regular", 16))
 										]
 									]
 								]
@@ -248,8 +242,13 @@ void SDemoLobbyWidget::Construct(const FArguments& InArgs)
 									.VAlign(VAlign_Fill)
 									.FillWidth(1.0f)
 									[
-										SNew(SComboBox<TSharedPtr<FString>>)
-										.OptionsSource(&InArgs._RegionList)
+										SAssignNew(RegionComboBox, SRegionComboBox)
+										.OptionsSource(InArgs._RegionList)
+										.OnSelectionChanged(InArgs._OnRegionSelected)
+										.OnGenerateWidget(this, &SDemoLobbyWidget::HandleGenerateWidget)
+										[
+											SNew(SBox)
+										]
 									]
 									+ SHorizontalBox::Slot()
 									.HAlign(HAlign_Fill)
@@ -259,8 +258,7 @@ void SDemoLobbyWidget::Construct(const FArguments& InArgs)
 										SNew(SBox)
 										.WidthOverride(100.0f)
 										[
-											SNew(STextBlock)
-											.Text(FText::FromString(FString::Printf(TEXT("%dms"), 0))) // todo region ping
+											SAssignNew(RegionPingTextBlock, STextBlock)
 											.Font(FCoreStyle::GetDefaultFontStyle("Bold", 16))
 											.Justification(ETextJustify::Right)
 										]
@@ -271,11 +269,9 @@ void SDemoLobbyWidget::Construct(const FArguments& InArgs)
 								.VAlign(VAlign_Fill)
 								.Padding(FMargin(15.0f, 0.0f, 15.0f, 10.0f))
 								[
-									SNew(SEditableTextBox)
+									SAssignNew(RoomNameTextBox, SEditableTextBox)
 									.HintText(FText::FromString("Room Name"))
 									.Font(FCoreStyle::GetDefaultFontStyle("Regular", 18))
-									.ForegroundColor(FLinearColor::Black)
-									.FocusedForegroundColor(FLinearColor::Black)
 									.Justification(ETextJustify::Center)
 								]
 								+ SVerticalBox::Slot()
@@ -283,9 +279,10 @@ void SDemoLobbyWidget::Construct(const FArguments& InArgs)
 								.VAlign(VAlign_Fill)
 								.Padding(FMargin(0.0f, 10.0f, 0.0f, 20.0f))
 								[
-									SNew(SButton)
+									SAssignNew(CreateButton, SButton)
+									.OnClicked(InArgs._OnCreateLobbyClicked)
 									[
-										SNew(STextBlock)
+										SAssignNew(CreateButtonTextBlock, STextBlock)
 										.Text(FText::FromString("Create"))
 										.Font(FCoreStyle::GetDefaultFontStyle("Bold", 18))
 									]
@@ -300,7 +297,6 @@ void SDemoLobbyWidget::Construct(const FArguments& InArgs)
 					.Padding(FMargin(15.0f, 15.0f, 15.0f, 15.0f))
 					[
 						SNew(SBorder)
-						// .BorderImage(&BorderBrush)
 						[
 							SNew(SVerticalBox)
 							+ SVerticalBox::Slot()
@@ -323,11 +319,9 @@ void SDemoLobbyWidget::Construct(const FArguments& InArgs)
 							.VAlign(VAlign_Fill)
 							.Padding(FMargin(15.0f, 0.0f, 15.0f, 10.0f))
 							[
-								SNew(SEditableTextBox)
+								SAssignNew(RoomCodeTextBox, SEditableTextBox)
 								.HintText(FText::FromString("Room Code"))
 								.Font(FCoreStyle::GetDefaultFontStyle("Regular", 18))
-								.ForegroundColor(FLinearColor::Black)
-								.FocusedForegroundColor(FLinearColor::Black)
 								.Justification(ETextJustify::Center)
 							]
 							+ SVerticalBox::Slot()
@@ -335,9 +329,10 @@ void SDemoLobbyWidget::Construct(const FArguments& InArgs)
 							.VAlign(VAlign_Fill)
 							.Padding(FMargin(0.0f, 10.0f, 0.0f, 20.0f))
 							[
-								SNew(SButton)
+								SAssignNew(JoinButton, SButton)
+								.OnClicked(InArgs._OnJoinClicked)
 								[
-									SNew(STextBlock)
+									SAssignNew(JoinButtonTextBlock, STextBlock)
 									.Text(FText::FromString("Join"))
 									.Font(FCoreStyle::GetDefaultFontStyle("Bold", 18))
 								]
@@ -348,4 +343,46 @@ void SDemoLobbyWidget::Construct(const FArguments& InArgs)
 			]
 		]
 	];
+}
+
+void SDemoLobbyWidget::SetErrorMessage(const FString& Message)
+{
+	ErrorMessageBlock->SetText(FText::FromString(Message));
+}
+
+void SDemoLobbyWidget::SetLoggedIn()
+{
+	LoginSwitcher->SetActiveWidgetIndex(1);
+}
+
+void SDemoLobbyWidget::SetLobbyVisibility(bool bPublic)
+{
+	PublicButtonTextBlock->SetFont(FCoreStyle::GetDefaultFontStyle(bPublic ? "Bold" : "Regular", 16));
+	PrivateButtonTextBlock->SetFont(FCoreStyle::GetDefaultFontStyle(bPublic ? "Regular" : "Bold", 16));
+}
+
+void SDemoLobbyWidget::SetCreatingLobby(bool bCreating)
+{
+	CreateButton->SetEnabled(!bCreating);
+	CreateButtonTextBlock->SetText(FText::FromString(bCreating ? "Creating..." : "Create"));
+	JoinButton->SetEnabled(!bCreating);
+}
+
+void SDemoLobbyWidget::SetJoiningLobby(bool bJoining)
+{
+	CreateButton->SetEnabled(!bJoining);
+	JoinButton->SetEnabled(!bJoining);
+	JoinButtonTextBlock->SetText(FText::FromString(bJoining ? "Joining..." : "Join"));
+}
+
+void SDemoLobbyWidget::SetRegionPing(int32 Ping)
+{
+	RegionPingTextBlock->SetText(FText::FromString(FString::Printf(TEXT("%dms"), Ping)));
+}
+
+TSharedRef<SWidget> SDemoLobbyWidget::HandleGenerateWidget(TSharedPtr<FString> Item) const
+{
+	return SNew(STextBlock)
+		.Text(FText::FromString(*Item))
+		.Font(FCoreStyle::GetDefaultFontStyle("Regular", 16));
 }
