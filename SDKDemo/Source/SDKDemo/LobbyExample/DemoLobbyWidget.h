@@ -40,6 +40,9 @@ private:
 		EHathoraCloudRegion Region
 	);
 
+	FTimerHandle ErrorTimerHandle;
+	FTimerHandle PingTimerHandle;
+
 	int32 NumPublicLobbies = 0;
 	TMap<FString, int32> Pings;
 	void StartPings();

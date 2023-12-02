@@ -115,8 +115,7 @@ void UDemoLobbyWidget::OnError(FString InErrorMessage)
 
 	LobbyWidget->SetErrorMessage(InErrorMessage);
 
-	FTimerHandle TimerHandle;
-	GetWorld()->GetTimerManager().SetTimer(TimerHandle, [&]()
+	GetWorld()->GetTimerManager().SetTimer(ErrorTimerHandle, [&]()
 	{
 		if (LobbyWidget.IsValid())
 		{
@@ -179,8 +178,7 @@ void UDemoLobbyWidget::StartPings()
 				UpdateSelectedRegionPing();
 
 				// Ping again in 20 seconds
-				FTimerHandle TimerHandle;
-				GetWorld()->GetTimerManager().SetTimer(TimerHandle, [&]()
+				GetWorld()->GetTimerManager().SetTimer(PingTimerHandle, [&]()
 				{
 					StartPings();
 				}, 20.0f, false);
@@ -280,6 +278,9 @@ void UDemoLobbyWidget::CreateLobby()
 				}
 			}
 
+			GetWorld()->GetTimerManager().ClearTimer(ErrorTimerHandle);
+			GetWorld()->GetTimerManager().ClearTimer(PingTimerHandle);
+
 			FString SerializedLobbyConfig = UDemoRoomConfigFunctionLibrary::SerializeRoomConfigToString(LobbyConfig);
 			HathoraLobby->CreateAndJoinLobby(
 				bCreatePublicLobby ? EHathoraLobbyVisibility::Public : EHathoraLobbyVisibility::Private,
@@ -304,6 +305,9 @@ void UDemoLobbyWidget::JoinLobby()
 		}
 		else
 		{
+			GetWorld()->GetTimerManager().ClearTimer(ErrorTimerHandle);
+			GetWorld()->GetTimerManager().ClearTimer(PingTimerHandle);
+
 			HathoraLobby->JoinLobbyWithShortCode(RoomCode);
 
 			LobbyWidget->SetJoiningLobby(true);

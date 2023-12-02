@@ -106,7 +106,7 @@ By default, this sample project uses the Blueprint example, but you can switch t
 
 ![Change the menu level game mode for C++ example](./Images/DemoGameModeMenuCpp.png)
 
-2. In the level `Content/ThirdPerson/Maps/ThirdPersonMap`, change the **GameMode Override** option in the **World Settings** to `DemoLobbyGameMode`.
+2. In the level `Content/ThirdPerson/Maps/ThirdPersonMap`, change the **GameMode Override** option in the **World Settings** to `B_MatchGameModeCpp`.
 
 ![Change the match level game mode for C++ example](./Images/DemoGameModeMatchCpp.png)
 
