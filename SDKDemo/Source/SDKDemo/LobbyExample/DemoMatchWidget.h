@@ -29,5 +29,6 @@ private:
 	UTextBlock* RoomCode;
 	UTextBlock* MatchTime;
 
+	UFUNCTION()
 	void ProcessMatchTime(int32 InMatchTime);
 };
