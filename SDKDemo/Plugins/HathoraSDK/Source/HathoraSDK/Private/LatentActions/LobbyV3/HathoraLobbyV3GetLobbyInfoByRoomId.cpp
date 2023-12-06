@@ -1,6 +1,7 @@
 // Copyright 2023 Hathora, Inc.
 
 #include "LatentActions/LobbyV3/HathoraLobbyV3GetLobbyInfoByRoomId.h"
+#include "HathoraSDKModule.h"
 
 UHathoraLobbyV3GetLobbyInfoByRoomId *UHathoraLobbyV3GetLobbyInfoByRoomId::GetLobbyInfoByRoomId(
 	UHathoraSDKLobbyV3 *HathoraSDKLobbyV3,
@@ -16,6 +17,18 @@ UHathoraLobbyV3GetLobbyInfoByRoomId *UHathoraLobbyV3GetLobbyInfoByRoomId::GetLob
 
 void UHathoraLobbyV3GetLobbyInfoByRoomId::Activate()
 {
+	if (!IsValid(this) || !IsValid(HathoraSDKLobbyV3))
+	{
+		UE_LOG(LogHathoraSDK, Error, TEXT("GetLobbyInfoByRoomId failed because the underlying Hathora API is not valid."));
+
+		if (IsValid(this))
+		{
+			SetReadyToDestroy();
+		}
+
+		return;
+	}
+
 	HathoraSDKLobbyV3->GetLobbyInfoByRoomId(
 		RoomId,
 		UHathoraSDKLobbyV3::FHathoraOnLobbyInfo::CreateLambda(

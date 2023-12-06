@@ -45,6 +45,12 @@ void UHathoraSDKAPI::SendRequest(
 	FJsonObject Body,
 	TFunction<void(FHttpRequestPtr, FHttpResponsePtr, bool)> OnComplete)
 {
+	if (!IsValid(this))
+	{
+		UE_LOG(LogHathoraSDK, Error, TEXT("Could not make %s request to %s because the underlying Hathora API object is not valid."), *Method, *Endpoint);
+		return;
+	}
+
 	FHttpRequestRef Request = FHttpModule::Get().CreateRequest();
 
 	Request->SetVerb(Method);

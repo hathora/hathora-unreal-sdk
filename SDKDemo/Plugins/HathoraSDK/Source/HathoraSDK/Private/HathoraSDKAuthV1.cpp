@@ -44,7 +44,7 @@ void UHathoraSDKAuthV1::Login(FString Path, FJsonObject Body, FHathoraOnLogin On
 		TEXT("POST"),
 		Path,
 		Body,
-		[&, OnComplete](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccess) mutable
+		[OnComplete](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccess) mutable
 		{
 			FHathoraLoginResult Result;
 			if (bSuccess && Response.IsValid())

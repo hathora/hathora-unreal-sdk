@@ -1,6 +1,7 @@
 // Copyright 2023 Hathora, Inc.
 
 #include "LatentActions/RoomV2/HathoraRoomV2GetRoomInfo.h"
+#include "HathoraSDKModule.h"
 
 UHathoraRoomV2GetRoomInfo *UHathoraRoomV2GetRoomInfo::GetRoomInfo(
 	UHathoraSDKRoomV2 *HathoraSDKRoomV2,
@@ -16,6 +17,18 @@ UHathoraRoomV2GetRoomInfo *UHathoraRoomV2GetRoomInfo::GetRoomInfo(
 
 void UHathoraRoomV2GetRoomInfo::Activate()
 {
+	if (!IsValid(this) || !IsValid(HathoraSDKRoomV2))
+	{
+		UE_LOG(LogHathoraSDK, Error, TEXT("GetRoomInfo failed because the underlying Hathora API is not valid."));
+
+		if (IsValid(this))
+		{
+			SetReadyToDestroy();
+		}
+
+		return;
+	}
+
 	HathoraSDKRoomV2->GetRoomInfo(
 		RoomId,
 		UHathoraSDKRoomV2::FHathoraOnGetRoomInfo::CreateLambda(

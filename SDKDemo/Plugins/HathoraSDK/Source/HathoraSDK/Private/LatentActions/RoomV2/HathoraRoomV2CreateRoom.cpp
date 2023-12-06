@@ -1,6 +1,7 @@
 // Copyright 2023 Hathora, Inc.
 
 #include "LatentActions/RoomV2/HathoraRoomV2CreateRoom.h"
+#include "HathoraSDKModule.h"
 
 UHathoraRoomV2CreateRoom *UHathoraRoomV2CreateRoom::CreateRoom(
 	UHathoraSDKRoomV2 *HathoraSDKRoomV2,
@@ -20,6 +21,18 @@ UHathoraRoomV2CreateRoom *UHathoraRoomV2CreateRoom::CreateRoom(
 
 void UHathoraRoomV2CreateRoom::Activate()
 {
+	if (!IsValid(this) || !IsValid(HathoraSDKRoomV2))
+	{
+		UE_LOG(LogHathoraSDK, Error, TEXT("CreateRoom failed because the underlying Hathora API is not valid."));
+
+		if (IsValid(this))
+		{
+			SetReadyToDestroy();
+		}
+
+		return;
+	}
+
 	HathoraSDKRoomV2->CreateRoom(
 		Region,
 		RoomConfig,

@@ -65,7 +65,9 @@ public:
 	FLobbyComponentLobbyReady OnLobbyReady;
 
 private:
+	UPROPERTY()
 	UHathoraSDK* SDK = nullptr;
+
 	FString JoinRoomIdWhenReady;
 	TMap<FString, FHathoraConnectionInfo> PreReadyLobbies;
 

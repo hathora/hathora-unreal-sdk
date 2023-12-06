@@ -1,6 +1,7 @@
 // Copyright 2023 Hathora, Inc.
 
 #include "LatentActions/RoomV2/HathoraRoomV2GetConnectionInfo.h"
+#include "HathoraSDKModule.h"
 
 UHathoraRoomV2GetConnectionInfo *UHathoraRoomV2GetConnectionInfo::GetConnectionInfo(
 	UHathoraSDKRoomV2 *HathoraSDKRoomV2,
@@ -16,6 +17,18 @@ UHathoraRoomV2GetConnectionInfo *UHathoraRoomV2GetConnectionInfo::GetConnectionI
 
 void UHathoraRoomV2GetConnectionInfo::Activate()
 {
+	if (!IsValid(this) || !IsValid(HathoraSDKRoomV2))
+	{
+		UE_LOG(LogHathoraSDK, Error, TEXT("GetConnectionInfo failed because the underlying Hathora API is not valid."));
+
+		if (IsValid(this))
+		{
+			SetReadyToDestroy();
+		}
+
+		return;
+	}
+
 	HathoraSDKRoomV2->GetConnectionInfo(
 		RoomId,
 		UHathoraSDKRoomV2::FHathoraOnRoomConnectionInfo::CreateLambda(
