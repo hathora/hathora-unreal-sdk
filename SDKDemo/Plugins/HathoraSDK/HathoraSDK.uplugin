@@ -19,6 +19,11 @@
 			"Name": "HathoraSDK",
 			"Type": "Runtime",
 			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "HathoraSDKEditor",
+			"Type": "Editor",
+			"LoadingPhase": "PostDefault"
 		}
 	]
 }
