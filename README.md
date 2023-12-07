@@ -90,13 +90,25 @@ To create an instance of `UHathoraSDK`, call the `Create Hathora SDK` BP node. T
 
 ## Lobby Example
 
-The sample project provides a complete example of using the Hathora Lobby service, including:
+The sample project provides a complete example of using the Hathora Lobby service, with examples in both Blueprints and C++, including:
 - Client menu to create and join lobbies with a custom `roomConfig`, which also shows corresponding region ping results
-  - See `Content/W_Lobby` which uses the [Hathora Lobby Component](#hathora-lobby-component) as an easy to use interface to the SDK
+  - **Blueprints:** See `Content/W_LobbyMenu` which uses the [Hathora Lobby Component](#hathora-lobby-component) as an easy to use interface to the SDK
+  - **C++:** See `Source/SDKDemo/LobbyExample/DemoLobbyWidget.cpp` which uses the [Hathora Lobby Component](#hathora-lobby-component) as an easy to use interface to the SDK. This UWidget controls an underlying Slate widget `Source/SDKDemo/LobbyExample/SDemoLobbyWidget.cpp` that handles the visual aspects.
 - Server code to fetch, update, and replicate the `roomConfig` and `shortCode`
-  - See `Content/ThirdPerson/Blueprints/B_MatchGameState`
+  - **Blueprints:** See `Content/ThirdPerson/Blueprints/B_MatchGameState`
+  - **C++**: See `Source/SDKDemo/LobbyExample/DemoMatchGameState.cpp`
 - Client facing HUD to display the in-match replicated `roomConfig` and `shortCode`
-  - See `Content/ThirdPerson/Blueprints/W_MatchHUD`
+  - **Blueprint:** See `Content/ThirdPerson/Blueprints/W_MatchHUD`
+  - **C++:** See `Source/SDKDemo/LobbyExample/DemoMatchWidget.cpp`
+
+By default, this sample project uses the Blueprint example, but you can switch to the C++ example with the following steps:
+1. In the level `Content/MenuLevel`, change the **GameMode Override** option in the **World Settings** to `DemoLobbyGameMode`.
+
+![Change the menu level game mode for C++ example](./Images/DemoGameModeMenuCpp.png)
+
+2. In the level `Content/ThirdPerson/Maps/ThirdPersonMap`, change the **GameMode Override** option in the **World Settings** to `B_MatchGameModeCpp`.
+
+![Change the match level game mode for C++ example](./Images/DemoGameModeMatchCpp.png)
 
 ### Hathora Lobby Component
 

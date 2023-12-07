@@ -75,51 +75,23 @@ FString UHathoraSDK::GetRegionString(EHathoraCloudRegion Region)
 
 EHathoraCloudRegion UHathoraSDK::ParseRegion(FString RegionString)
 {
-	if (RegionString == TEXT("Seattle"))
+	EHathoraCloudRegion Region = EHathoraCloudRegion::Unknown;
+	for (uint32 i = 0; i < static_cast<uint8>(EHathoraCloudRegion::Unknown); i++)
 	{
-		return EHathoraCloudRegion::Seattle;
+		FString CurrentRegion = UHathoraSDK::GetRegionString(static_cast<EHathoraCloudRegion>(i));
+		if (CurrentRegion == RegionString)
+		{
+			Region = static_cast<EHathoraCloudRegion>(i);
+			break;
+		}
 	}
-	else if (RegionString == TEXT("Washington_DC"))
-	{
-		return EHathoraCloudRegion::Washington_DC;
-	}
-	else if (RegionString == TEXT("Chicago"))
-	{
-		return EHathoraCloudRegion::Chicago;
-	}
-	else if (RegionString == TEXT("London"))
-	{
-		return EHathoraCloudRegion::London;
-	}
-	else if (RegionString == TEXT("Frankfurt"))
-	{
-		return EHathoraCloudRegion::Frankfurt;
-	}
-	else if (RegionString == TEXT("Mumbai"))
-	{
-		return EHathoraCloudRegion::Mumbai;
-	}
-	else if (RegionString == TEXT("Singapore"))
-	{
-		return EHathoraCloudRegion::Singapore;
-	}
-	else if (RegionString == TEXT("Tokyo"))
-	{
-		return EHathoraCloudRegion::Tokyo;
-	}
-	else if (RegionString == TEXT("Sydney"))
-	{
-		return EHathoraCloudRegion::Sydney;
-	}
-	else if (RegionString == TEXT("Sao_Paulo"))
-	{
-		return EHathoraCloudRegion::Sao_Paulo;
-	}
-	else
+
+	if (Region == EHathoraCloudRegion::Unknown)
 	{
 		UE_LOG(LogHathoraSDK, Error, TEXT("[ParseRegion] Unknown region: %s"), *RegionString);
-		return EHathoraCloudRegion::Unknown;
 	}
+
+	return Region;
 }
 
 FString UHathoraSDK::ParseErrorMessage(FString Content)
