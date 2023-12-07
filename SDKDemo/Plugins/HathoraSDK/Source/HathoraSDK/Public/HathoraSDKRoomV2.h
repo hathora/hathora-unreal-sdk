@@ -229,75 +229,61 @@ class HATHORASDK_API UHathoraSDKRoomV2 : public UHathoraSDKAPI
 	GENERATED_BODY()
 
 public:
-	UDELEGATE()
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FHathoraOnRoomConnectionInfo, FHathoraRoomConnectionInfoResult, Result);
+	typedef TDelegate<void(const FHathoraRoomConnectionInfoResult&)> FHathoraOnRoomConnectionInfo;
 
 	// Create a new room for an existing application. Poll the GetConnectionInfo()
 	// endpoint to get connection details for an active room.
 	// @param Region The region to create the room in.
 	// @param RoomConfig Optional configuration parameters for the room. Can be
-	//                    any string including stringified JSON. It is accessible
-	//                    from the room via GetRoomInfo().
+	//                   any string including stringified JSON. It is accessible
+	//                   from the room via GetRoomInfo().
 	// @param RoomId Unique identifier to a game session or match. Leave empty to
-	//                use the default system generated ID.
-	UFUNCTION(BlueprintCallable, Category = "HathoraSDK | RoomV2")
+	//               use the default system generated ID.
 	void CreateRoom(EHathoraCloudRegion Region, FString RoomConfig, FString RoomId, FHathoraOnRoomConnectionInfo OnComplete);
 
-	UDELEGATE()
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FHathoraOnGetRoomInfo, FHathoraGetRoomInfoResult, Result);
+	typedef TDelegate<void(const FHathoraGetRoomInfoResult&)> FHathoraOnGetRoomInfo;
 
 	// Retrieve current and historical allocation data for a room.
 	// @param RoomId Unique identifier to a game session or match.
-	UFUNCTION(BlueprintCallable, Category = "HathoraSDK | RoomV2")
 	void GetRoomInfo(FString RoomId, FHathoraOnGetRoomInfo OnComplete);
 
-	UDELEGATE()
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FHathoraOnGetRoomsForProcess, FHathoraGetRoomsForProcessResult, Result);
+	typedef TDelegate<void(const FHathoraGetRoomsForProcessResult&)> FHathoraOnGetRoomsForProcess;
 
 	// Get all active rooms for a given process.
 	// @param ProcessId System generated unique identifier to a runtime instance
-	//                   of your game server.
-	UFUNCTION(BlueprintCallable, Category = "HathoraSDK | RoomV2")
+	//                  of your game server.
 	void GetActiveRoomsForProcess(FString ProcessId, FHathoraOnGetRoomsForProcess OnComplete);
 
 	// Get all inactive rooms for a given process.
 	// @param ProcessId System generated unique identifier to a runtime instance
-	//                   of your game server.
-	UFUNCTION(BlueprintCallable, Category = "HathoraSDK | RoomV2")
+	//                  of your game server.
 	void GetInactiveRoomsForProcess(FString ProcessId, FHathoraOnGetRoomsForProcess OnComplete);
 
-	UDELEGATE()
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FHathoraOnDestroyRoom, FHathoraDestroyRoomResult, Result);
+	typedef TDelegate<void(const FHathoraDestroyRoomResult&)> FHathoraOnDestroyRoom;
 
 	// Destroy a room. All associated metadata is deleted.
 	// @param RoomId Unique identifier to a game session or match.
-	UFUNCTION(BlueprintCallable, Category = "HathoraSDK | RoomV2")
 	void DestroyRoom(FString RoomId, FHathoraOnDestroyRoom OnComplete);
 
-	UDELEGATE()
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FHathoraOnSuspendRoom, FHathoraSuspendRoomResult, Result);
+	typedef TDelegate<void(const FHathoraSuspendRoomResult&)> FHathoraOnSuspendRoom;
 
 	// Suspend a room. The room is unallocated from the process but
 	// can be rescheduled later using the same roomId.
 	// @param RoomId Unique identifier to a game session or match.
-	UFUNCTION(BlueprintCallable, Category = "HathoraSDK | RoomV2")
 	void SuspendRoom(FString RoomId, FHathoraOnSuspendRoom OnComplete);
 
 	// Poll this endpoint to get connection details to a room.
 	// Clients can call this endpoint without authentication.
 	// @param RoomId Unique identifier to a game session or match.
-	UFUNCTION(BlueprintCallable, Category = "HathoraSDK | RoomV2")
 	void GetConnectionInfo(FString RoomId, FHathoraOnRoomConnectionInfo OnComplete);
 
-	UDELEGATE()
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FHathoraOnUpdateRoomConfig, FHathoraUpdateRoomConfigResult, Result);
+	typedef TDelegate<void(const FHathoraUpdateRoomConfigResult&)> FHathoraOnUpdateRoomConfig;
 
 	// Update the roomConfig variable for a room.
 	// @param RoomId Unique identifier to a game session or match.
 	// @param RoomConfig Optional configuration parameters for the room. Can be
-	//                    any string including stringified JSON. It is accessible
-	//                    from the room via GetRoomInfo().
-	UFUNCTION(BlueprintCallable, Category = "HathoraSDK | RoomV2")
+	//                   any string including stringified JSON. It is accessible
+	//                   from the room via GetRoomInfo().
 	void UpdateRoomConfig(FString RoomId, FString RoomConfig, FHathoraOnUpdateRoomConfig OnComplete);
 
 private:

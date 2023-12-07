@@ -100,8 +100,8 @@ class HATHORASDK_API UHathoraSDKLobbyV3 : public UHathoraSDKAPI
 	GENERATED_BODY()
 
 public:
-	UDELEGATE()
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FHathoraOnLobbyInfo, FHathoraLobbyInfoResult, Result);
+	typedef TDelegate<void(const FHathoraLobbyInfoResult&)> FHathoraOnLobbyInfo;
+	typedef TDelegate<void(const FHathoraLobbyInfosResult&)> FHathoraOnLobbyInfos;
 
 	// Create a new lobby for an application. A lobby object is a wrapper around a room object.
 	// With a lobby, you get additional functionality like configuring the visibility of the room,
@@ -115,7 +115,6 @@ public:
 	//                  to reference the lobby using the RoomId only.
 	// @param RoomId Unique identifier to a game session or match. Leave empty to
 	//               use the default system generated ID.
-	UFUNCTION(BlueprintCallable, Category = "HathoraSDK | LobbyV3")
 	void CreateLobby(
 		EHathoraLobbyVisibility Visibility,
 		FString RoomConfig,
@@ -125,31 +124,24 @@ public:
 		FHathoraOnLobbyInfo OnComplete
 	);
 
-	UDELEGATE()
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FHathoraOnLobbyInfos, FHathoraLobbyInfosResult, Result);
-
 	// Get all public active lobbies for a given application. Use this endpoint to display
 	// all public lobbies that a player can join in the game client. Use
 	// ListRegionActivePublicLobbies() to only see lobbies in a specific region.
-	UFUNCTION(BlueprintCallable, Category = "HathoraSDK | LobbyV3")
 	void ListAllActivePublicLobbies(FHathoraOnLobbyInfos OnComplete);
 
 	// Get all active lobbies for a given application, filtered by Region.
 	// Use this endpoint to display all public lobbies that a player can join
 	// in the game client. Use ListAllActivePublicLobbies() to see all lobbies.
 	// @param Region Filter the returned lobbies by the provided region.
-	UFUNCTION(BlueprintCallable, Category = "HathoraSDK | LobbyV3")
 	void ListRegionActivePublicLobbies(EHathoraCloudRegion Region, FHathoraOnLobbyInfos OnComplete);
 
 	// Get details for a lobby.
 	// @param RoomId Unique identifier to a game session or match.
-	UFUNCTION(BlueprintCallable, Category = "HathoraSDK | LobbyV3")
 	void GetLobbyInfoByRoomId(FString RoomId, FHathoraOnLobbyInfo OnComplete);
 
 	// Get details for a lobby. If 2 or more lobbies have the same shortCode, then the most
 	// recently created lobby will be returned.
 	// @param ShortCode User-defined identifier for a lobby.
-	UFUNCTION(BlueprintCallable, Category = "HathoraSDK | LobbyV3")
 	void GetLobbyInfoByShortCode(FString ShortCode, FHathoraOnLobbyInfo OnComplete);
 
 private:

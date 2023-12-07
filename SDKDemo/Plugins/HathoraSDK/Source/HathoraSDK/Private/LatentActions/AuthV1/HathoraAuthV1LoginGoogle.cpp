@@ -1,0 +1,29 @@
+// Copyright 2023 Hathora, Inc.
+
+#include "LatentActions/AuthV1/HathoraAuthV1LoginGoogle.h"
+
+UHathoraAuthV1LoginGoogle *UHathoraAuthV1LoginGoogle::LoginGoogle(
+	UHathoraSDKAuthV1 *HathoraSDKAuthV1,
+	UObject *WorldContextObject,
+	FString IdToken
+) {
+	UHathoraAuthV1LoginGoogle *Action = NewObject<UHathoraAuthV1LoginGoogle>();
+	Action->HathoraSDKAuthV1 = HathoraSDKAuthV1;
+	Action->IdToken = IdToken;
+	Action->RegisterWithGameInstance(WorldContextObject);
+	return Action;
+}
+
+void UHathoraAuthV1LoginGoogle::Activate()
+{
+	HathoraSDKAuthV1->LoginGoogle(
+		IdToken,
+		UHathoraSDKAuthV1::FHathoraOnLogin::CreateLambda(
+			[this](const FHathoraLoginResult& Result)
+			{
+				OnComplete.Broadcast(Result);
+				SetReadyToDestroy();
+			}
+		)
+	);
+}

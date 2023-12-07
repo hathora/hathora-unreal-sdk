@@ -25,7 +25,6 @@ public:
 	// Pings are returned in milliseconds.
 	// @param OnComplete The delegate to call when the request is complete with averaged ping times.
 	// @param NumPingsPerRegion The number of pings to send to each region.
-	UFUNCTION(BlueprintCallable, Category = "HathoraSDK")
 	static void GetRegionalPings(const FHathoraOnGetRegionalPings& OnComplete, int32 NumPingsPerRegion = 3);
 
 	// Create an instance of the Hathora SDK using the AppId, and DevToken if specified,
@@ -67,10 +66,5 @@ public:
 	UHathoraSDKRoomV2* RoomV2;
 
 private:
-	FHathoraOnGetRegionalPings OnGetRegionalPingsComplete;
-
-	UFUNCTION()
-	void OnGetRegionalPingsCompleteWrapper(FHathoraRegionPings Result);
-
 	void SetCredentials(FString AppId, FHathoraSDKSecurity Security);
 };
