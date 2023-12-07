@@ -12,3 +12,12 @@
 .DS_Store
 
 builds/
+
+# Ignore AngelScript generated files from @mikeseese's engine source version
+Binds.Cache*
+
+*.log
+
+*.tar
+*.tar.gz
+*.tgz

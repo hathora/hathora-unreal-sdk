@@ -2,7 +2,9 @@
 
 #include "HathoraSDKProcessesV1.h"
 #include "HathoraSDKModule.h"
+#include "HathoraSDK.h"
 #include "Serialization/JsonSerializer.h"
+#include "JsonObjectConverter.h"
 
 void UHathoraSDKProcessesV1::GetAllRunningProcesses(FHathoraOnProcessInfos OnComplete)
 {
@@ -13,7 +15,7 @@ void UHathoraSDKProcessesV1::GetAllRunningProcesses(FHathoraOnProcessInfos OnCom
 void UHathoraSDKProcessesV1::GetRegionRunningProcesses(EHathoraCloudRegion Region, FHathoraOnProcessInfos OnComplete)
 {
 	TArray<TPair<FString, FString>> QueryOptions;
-	QueryOptions.Add(TPair<FString, FString>(TEXT("region"), GetRegionString(Region)));
+	QueryOptions.Add(TPair<FString, FString>(TEXT("region"), UHathoraSDK::GetRegionString(Region)));
 	GetProcesses(true, QueryOptions, OnComplete);
 }
 
@@ -26,7 +28,7 @@ void UHathoraSDKProcessesV1::GetAllStoppedProcesses(FHathoraOnProcessInfos OnCom
 void UHathoraSDKProcessesV1::GetRegionStoppedProcesses(EHathoraCloudRegion Region, FHathoraOnProcessInfos OnComplete)
 {
 	TArray<TPair<FString, FString>> QueryOptions;
-	QueryOptions.Add(TPair<FString, FString>(TEXT("region"), GetRegionString(Region)));
+	QueryOptions.Add(TPair<FString, FString>(TEXT("region"), UHathoraSDK::GetRegionString(Region)));
 	GetProcesses(false, QueryOptions, OnComplete);
 }
 
@@ -174,7 +176,7 @@ FHathoraProcessInfo UHathoraSDKProcessesV1::ParseProcessInfo(TSharedPtr<FJsonObj
 		FJsonObjectConverter::JsonObjectToUStruct(ExposedPort.ToSharedRef(), &ProcessInfo.ExposedPort, 0, 0);
 	}
 
-	ProcessInfo.Region = ParseRegion(ProcessInfoJson->GetStringField(TEXT("region")));
+	ProcessInfo.Region = UHathoraSDK::ParseRegion(ProcessInfoJson->GetStringField(TEXT("region")));
 	ProcessInfo.ProcessId = ProcessInfoJson->GetStringField(TEXT("processId"));
 	ProcessInfo.DeploymentId = ProcessInfoJson->GetIntegerField(TEXT("deploymentId"));
 	ProcessInfo.AppId = ProcessInfoJson->GetStringField(TEXT("appId"));

@@ -16,6 +16,8 @@ public class SDKDemo : ModuleRules
 			"InputCore",
 			"HathoraSDK",
 			"UMG",
+			"Json",
+			"JsonUtilities",
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
