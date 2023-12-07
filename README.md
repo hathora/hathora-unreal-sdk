@@ -92,11 +92,27 @@ To create an instance of `UHathoraSDK`, call the `Create Hathora SDK` BP node. T
 
 The sample project provides a complete example of using the Hathora Lobby service, including:
 - Client menu to create and join lobbies with a custom `roomConfig`, which also shows corresponding region ping results
-  - See `Content/W_Lobby` which uses `Content/B_LobbyComponent` as an easy to use interface to the SDK
+  - See `Content/W_Lobby` which uses the [Hathora Lobby Component](#hathora-lobby-component) as an easy to use interface to the SDK
 - Server code to fetch, update, and replicate the `roomConfig` and `shortCode`
   - See `Content/ThirdPerson/Blueprints/B_MatchGameState`
 - Client facing HUD to display the in-match replicated `roomConfig` and `shortCode`
   - See `Content/ThirdPerson/Blueprints/W_MatchHUD`
+
+### Hathora Lobby Component
+
+The SDK plugin provides an [Actor Component](https://docs.unrealengine.com/5.3/en-US/components-in-unreal-engine/) class `UHathoraLobbyComponent`, or simply `Hathora Lobby` in the Blueprint editor. This class implements most of the boilerplate code necessary to implement something like the provided [Lobby Example](#lobby-example). It's recommended to check out the Lobby Example to see where it's all used. Search for `Hathora Lobby` in the Tools > Find in Blueprints window.
+
+It exposes the following functions:
+- `IsLoggedIn` which returns if there is an auth token in the SDK credentials
+- `CreateAndJoinLobby` which will create a lobby with a randomly generated short code of a specified length and automatically join it when it's available
+- `CreateAndJoinLobbyCustomShortCode` which will create a lobby with a specified short code of a specified length and automatically join it when it's available
+- `FetchPublicLobbies` will find all the available public lobbies with their connection info and broadcast on the `OnLobbyReady` delegate when a particular lobby is `active` and the connection info is available
+- `JoinLobbyWithShortCode` will get the lobby with the specified short code, it's connection info, and join it when it's available
+- `JoinLobbyWithConnectionInfo` which is used when you have the connection info and want to join the lobby; it's mainly used to manipulate the struct into the necessary Unreal open level command. This is used for joining public lobbies that are listed in the table
+
+It exposes the following delegates/event dispatchers:
+- `OnError` is called whenever any of the functions/queries return an error, with a message string
+- `OnLobbyReady` is called with a room id and it's associated connection info when a particular lobby is available to accept connections
 
 ## Packaging
 
