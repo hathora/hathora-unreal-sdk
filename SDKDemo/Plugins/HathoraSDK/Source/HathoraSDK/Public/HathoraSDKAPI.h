@@ -13,7 +13,7 @@
 UCLASS(BlueprintType)
 class HATHORASDK_API UHathoraSDKAPI : public UBlueprintFunctionLibrary
 {
-	GENERATED_BODY()
+	GENERATED_UCLASS_BODY()
 
 public:
 	void SetCredentials(FString AppId, FHathoraSDKSecurity Security);
@@ -47,6 +47,12 @@ protected:
 		TFunction<void(FHttpRequestPtr, FHttpResponsePtr, bool)> OnProcessRequestComplete
 	);
 
+	UFUNCTION()
+	void OnWorldRemoved(ULevel* Level, UWorld* World);
+
 	FString AppId;
 	FHathoraSDKSecurity Security;
+
+	bool bIsBoundToWorldRemoving = false;
+	bool bWorldIsBeingDestroyed = false;
 };
