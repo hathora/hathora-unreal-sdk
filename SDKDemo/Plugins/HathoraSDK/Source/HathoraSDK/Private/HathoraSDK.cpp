@@ -3,6 +3,7 @@
 #include "HathoraSDK.h"
 #include "HathoraSDKModule.h"
 #include "HathoraSDKConfig.h"
+#include "HathoraSDKAppV1.h"
 #include "HathoraSDKAuthV1.h"
 #include "HathoraSDKDiscoveryV1.h"
 #include "HathoraSDKLobbyV3.h"
@@ -32,6 +33,7 @@ void UHathoraSDK::GetRegionalPings(const FHathoraOnGetRegionalPings& OnComplete,
 UHathoraSDK* UHathoraSDK::CreateHathoraSDK()
 {
 	UHathoraSDK* SDK = NewObject<UHathoraSDK>();
+	SDK->AppV1 = NewObject<UHathoraSDKAppV1>();
 	SDK->AuthV1 = NewObject<UHathoraSDKAuthV1>();
 	SDK->DiscoveryV1 = NewObject<UHathoraSDKDiscoveryV1>();
 	SDK->LobbyV3 = NewObject<UHathoraSDKLobbyV3>();
@@ -129,6 +131,11 @@ void UHathoraSDK::SetAuthToken(FString Token)
 	SetCredentials(Config->GetAppId(), Security);
 }
 
+FString UHathoraSDK::GetAuthToken()
+{
+	return AuthV1->GetAuthToken();
+}
+
 bool UHathoraSDK::IsLoggedIn()
 {
 	return AuthV1->IsLoggedIn();
@@ -136,6 +143,7 @@ bool UHathoraSDK::IsLoggedIn()
 
 void UHathoraSDK::SetCredentials(FString AppId, FHathoraSDKSecurity Security)
 {
+	AppV1->SetCredentials(AppId, Security);
 	AuthV1->SetCredentials(AppId, Security);
 	DiscoveryV1->SetCredentials(AppId, Security);
 	LobbyV3->SetCredentials(AppId, Security);
