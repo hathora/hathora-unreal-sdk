@@ -42,7 +42,7 @@ void UHathoraSDKRoomV2::CreateRoom(EHathoraCloudRegion Region, FString RoomConfi
 				}
 				else
 				{
-					Result.ErrorMessage = Content;
+					Result.ErrorMessage = UHathoraSDK::ParseErrorMessage(Content);
 				}
 			}
 			else
@@ -159,7 +159,7 @@ void UHathoraSDKRoomV2::GetRoomInfo(FString RoomId, FHathoraOnGetRoomInfo OnComp
 				}
 				else
 				{
-					Result.ErrorMessage = Content;
+					Result.ErrorMessage = UHathoraSDK::ParseErrorMessage(Content);
 				}
 			}
 			else
@@ -232,7 +232,7 @@ void UHathoraSDKRoomV2::GetRoomsForProcess(FString ProcessId, bool bActive, FHat
 				}
 				else
 				{
-					Result.ErrorMessage = Content;
+					Result.ErrorMessage = UHathoraSDK::ParseErrorMessage(Content);
 				}
 			}
 			else
@@ -267,7 +267,7 @@ void UHathoraSDKRoomV2::DestroyRoom(FString RoomId, FHathoraOnDestroyRoom OnComp
 
 				if (!Result.bDestroyed)
 				{
-					Result.ErrorMessage = Response->GetContentAsString();
+					Result.ErrorMessage = UHathoraSDK::ParseErrorMessage(Response->GetContentAsString());
 				}
 			}
 			else
@@ -302,7 +302,7 @@ void UHathoraSDKRoomV2::SuspendRoom(FString RoomId, FHathoraOnSuspendRoom OnComp
 
 				if (!Result.bSuspended)
 				{
-					Result.ErrorMessage = Response->GetContentAsString();
+					Result.ErrorMessage = UHathoraSDK::ParseErrorMessage(Response->GetContentAsString());
 				}
 			}
 			else
@@ -341,7 +341,7 @@ void UHathoraSDKRoomV2::GetConnectionInfo(FString RoomId, FHathoraOnRoomConnecti
 				}
 				else
 				{
-					Result.ErrorMessage = Content;
+					Result.ErrorMessage = UHathoraSDK::ParseErrorMessage(Content);
 				}
 			}
 			else
@@ -380,7 +380,7 @@ void UHathoraSDKRoomV2::UpdateRoomConfig(FString RoomId, FString RoomConfig, FHa
 
 				if (!Result.bUpdated)
 				{
-					Result.ErrorMessage = Response->GetContentAsString();
+					Result.ErrorMessage = UHathoraSDK::ParseErrorMessage(Response->GetContentAsString());
 				}
 			}
 			else

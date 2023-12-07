@@ -11,6 +11,7 @@
 #include "HttpModule.h"
 #include "Interfaces/IHttpRequest.h"
 #include "Interfaces/IHttpResponse.h"
+#include "Dom/JsonObject.h"
 
 void UHathoraSDK::GetRegionalPings(const FHathoraOnGetRegionalPings& OnComplete, int32 NumPingsPerRegion)
 {
@@ -118,6 +119,32 @@ EHathoraCloudRegion UHathoraSDK::ParseRegion(FString RegionString)
 	{
 		UE_LOG(LogHathoraSDK, Error, TEXT("[ParseRegion] Unknown region: %s"), *RegionString);
 		return EHathoraCloudRegion::Unknown;
+	}
+}
+
+FString UHathoraSDK::ParseErrorMessage(FString Content)
+{
+	TSharedPtr<FJsonObject> OutObject;
+	TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(Content);
+	FJsonSerializer::Deserialize(Reader, OutObject);
+
+	if (OutObject.IsValid())
+	{
+		FString Message;
+		bool bValid = OutObject->TryGetStringField(TEXT("message"), Message);
+
+		if (bValid)
+		{
+			return Message;
+		}
+		else
+		{
+			return Content;
+		}
+	}
+	else
+	{
+		return Content;
 	}
 }
 

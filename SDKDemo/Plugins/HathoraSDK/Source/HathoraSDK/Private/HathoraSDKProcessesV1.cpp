@@ -60,7 +60,7 @@ void UHathoraSDKProcessesV1::GetProcesses(bool bRunning, TArray<TPair<FString, F
 				}
 				else
 				{
-					Result.ErrorMessage = Content;
+					Result.ErrorMessage = UHathoraSDK::ParseErrorMessage(Content);
 				}
 			}
 			else
@@ -110,7 +110,7 @@ void UHathoraSDKProcessesV1::GetProcessInfo(FString ProcessId, FHathoraOnProcess
 				}
 				else
 				{
-					Result.ErrorMessage = Content;
+					Result.ErrorMessage = UHathoraSDK::ParseErrorMessage(Content);
 				}
 			}
 			else

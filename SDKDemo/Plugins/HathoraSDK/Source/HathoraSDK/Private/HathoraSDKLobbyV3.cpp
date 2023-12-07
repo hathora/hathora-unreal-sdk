@@ -112,7 +112,7 @@ void UHathoraSDKLobbyV3::CreateLobby(
 				}
 				else
 				{
-					Result.ErrorMessage = Content;
+					Result.ErrorMessage = UHathoraSDK::ParseErrorMessage(Content);
 				}
 			}
 			else
@@ -173,7 +173,7 @@ void UHathoraSDKLobbyV3::ListActivePublicLobbies(TArray<TPair<FString, FString>>
 				}
 				else
 				{
-					Result.ErrorMessage = Content;
+					Result.ErrorMessage = UHathoraSDK::ParseErrorMessage(Content);
 				}
 			}
 			else
@@ -223,7 +223,7 @@ void UHathoraSDKLobbyV3::GetLobbyInfoByRoomId(FString RoomId, FHathoraOnLobbyInf
 				}
 				else
 				{
-					Result.ErrorMessage = Content;
+					Result.ErrorMessage = UHathoraSDK::ParseErrorMessage(Content);
 				}
 			}
 			else
@@ -273,7 +273,7 @@ void UHathoraSDKLobbyV3::GetLobbyInfoByShortCode(FString ShortCode, FHathoraOnLo
 				}
 				else
 				{
-					Result.ErrorMessage = Content;
+					Result.ErrorMessage = UHathoraSDK::ParseErrorMessage(Content);
 				}
 			}
 			else

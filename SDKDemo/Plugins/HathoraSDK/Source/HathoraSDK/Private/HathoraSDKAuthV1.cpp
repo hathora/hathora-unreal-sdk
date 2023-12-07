@@ -2,6 +2,7 @@
 
 #include "HathoraSDKAuthV1.h"
 #include "HathoraSDKModule.h"
+#include "HathoraSDK.h"
 #include "Serialization/JsonSerializer.h"
 
 void UHathoraSDKAuthV1::LoginAnonymous(FHathoraOnLogin OnComplete)
@@ -68,7 +69,7 @@ void UHathoraSDKAuthV1::Login(FString Path, FJsonObject Body, FHathoraOnLogin On
 				}
 				else
 				{
-					Result.ErrorMessage = Content;
+					Result.ErrorMessage = UHathoraSDK::ParseErrorMessage(Content);
 				}
 			}
 			else

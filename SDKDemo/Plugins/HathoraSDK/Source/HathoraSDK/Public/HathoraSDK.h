@@ -44,6 +44,9 @@ public:
 	UFUNCTION(BlueprintPure, Category = "HathoraSDK")
 	static EHathoraCloudRegion ParseRegion(FString RegionString);
 
+	UFUNCTION(BlueprintPure, Category = "HathoraSDK")
+	static FString ParseErrorMessage(FString Content);
+
 	// Set the auth token to use for all requests; primarily on the
 	// client after the player has logged in.
 	// @param Token The JWT auth token to use for all requests.
