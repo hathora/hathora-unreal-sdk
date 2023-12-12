@@ -38,7 +38,7 @@ void UHathoraSDKProcessesV1::GetProcesses(bool bRunning, TArray<TPair<FString, F
 		TEXT("GET"),
 		FString::Printf(TEXT("/processes/v1/%s/list/%s"), *AppId, bRunning ? TEXT("running") : TEXT("stopped")),
 		QueryOptions,
-		[&, OnComplete](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccess) mutable
+		[bRunning, OnComplete](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccess) mutable
 		{
 			FHathoraProcessInfosResult Result;
 			if (bSuccess && Response.IsValid())
@@ -85,7 +85,7 @@ void UHathoraSDKProcessesV1::GetProcessInfo(FString ProcessId, FHathoraOnProcess
 	SendRequest(
 		TEXT("GET"),
 		FString::Printf(TEXT("/processes/v1/%s/info/%s"), *AppId, *ProcessId),
-		[&, OnComplete](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccess) mutable
+		[OnComplete](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccess) mutable
 		{
 			FHathoraProcessInfoResult Result;
 			if (bSuccess && Response.IsValid())

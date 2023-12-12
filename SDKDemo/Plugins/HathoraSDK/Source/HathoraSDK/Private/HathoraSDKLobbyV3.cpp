@@ -87,7 +87,7 @@ void UHathoraSDKLobbyV3::CreateLobby(
 		FString::Printf(TEXT("/lobby/v3/%s/create"), *AppId),
 		QueryOptions,
 		Body,
-		[&, OnComplete](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccess) mutable
+		[OnComplete](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccess) mutable
 		{
 			FHathoraLobbyInfoResult Result;
 			if (bSuccess && Response.IsValid())
@@ -151,7 +151,7 @@ void UHathoraSDKLobbyV3::ListActivePublicLobbies(TArray<TPair<FString, FString>>
 		TEXT("GET"),
 		FString::Printf(TEXT("/lobby/v3/%s/list/public"), *AppId),
 		QueryOptions,
-		[&, OnComplete](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccess) mutable
+		[OnComplete](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccess) mutable
 		{
 			FHathoraLobbyInfosResult Result;
 			if (bSuccess && Response.IsValid())
@@ -198,7 +198,7 @@ void UHathoraSDKLobbyV3::GetLobbyInfoByRoomId(FString RoomId, FHathoraOnLobbyInf
 	SendRequest(
 		TEXT("GET"),
 		FString::Printf(TEXT("/lobby/v3/%s/info/roomid/%s"), *AppId, *RoomId),
-		[&, OnComplete](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccess) mutable
+		[OnComplete](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccess) mutable
 		{
 			FHathoraLobbyInfoResult Result;
 			if (bSuccess && Response.IsValid())
@@ -248,7 +248,7 @@ void UHathoraSDKLobbyV3::GetLobbyInfoByShortCode(FString ShortCode, FHathoraOnLo
 	SendRequest(
 		TEXT("GET"),
 		FString::Printf(TEXT("/lobby/v3/%s/info/shortcode/%s"), *AppId, *ShortCode),
-		[&, OnComplete](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccess) mutable
+		[OnComplete](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccess) mutable
 		{
 			FHathoraLobbyInfoResult Result;
 			if (bSuccess && Response.IsValid())

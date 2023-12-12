@@ -1,6 +1,7 @@
 // Copyright 2023 Hathora, Inc.
 
 #include "LatentActions/RoomV2/HathoraRoomV2UpdateRoomConfig.h"
+#include "HathoraSDKModule.h"
 
 UHathoraRoomV2UpdateRoomConfig *UHathoraRoomV2UpdateRoomConfig::UpdateRoomConfig(
 	UHathoraSDKRoomV2 *HathoraSDKRoomV2,
@@ -18,6 +19,18 @@ UHathoraRoomV2UpdateRoomConfig *UHathoraRoomV2UpdateRoomConfig::UpdateRoomConfig
 
 void UHathoraRoomV2UpdateRoomConfig::Activate()
 {
+	if (!IsValid(this) || !IsValid(HathoraSDKRoomV2))
+	{
+		UE_LOG(LogHathoraSDK, Error, TEXT("UpdateRoomConfig failed because the underlying Hathora API is not valid."));
+
+		if (IsValid(this))
+		{
+			SetReadyToDestroy();
+		}
+
+		return;
+	}
+
 	HathoraSDKRoomV2->UpdateRoomConfig(
 		RoomId,
 		RoomConfig,

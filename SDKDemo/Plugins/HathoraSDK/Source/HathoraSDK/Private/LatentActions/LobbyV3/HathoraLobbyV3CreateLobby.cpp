@@ -1,6 +1,7 @@
 // Copyright 2023 Hathora, Inc.
 
 #include "LatentActions/LobbyV3/HathoraLobbyV3CreateLobby.h"
+#include "HathoraSDKModule.h"
 
 UHathoraLobbyV3CreateLobby *UHathoraLobbyV3CreateLobby::CreateLobby(
 	UHathoraSDKLobbyV3 *HathoraSDKLobbyV3,
@@ -24,6 +25,18 @@ UHathoraLobbyV3CreateLobby *UHathoraLobbyV3CreateLobby::CreateLobby(
 
 void UHathoraLobbyV3CreateLobby::Activate()
 {
+	if (!IsValid(this) || !IsValid(HathoraSDKLobbyV3))
+	{
+		UE_LOG(LogHathoraSDK, Error, TEXT("CreateLobby failed because the underlying Hathora API is not valid."));
+
+		if (IsValid(this))
+		{
+			SetReadyToDestroy();
+		}
+
+		return;
+	}
+
 	HathoraSDKLobbyV3->CreateLobby(
 		Visibility,
 		RoomConfig,

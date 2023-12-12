@@ -14,7 +14,7 @@ void UHathoraLobbyComponent::BeginPlay()
 
 bool UHathoraLobbyComponent::IsLoggedIn()
 {
-	return SDK != nullptr && SDK->IsLoggedIn();
+	return IsValid(SDK) && SDK->IsLoggedIn();
 }
 
 void UHathoraLobbyComponent::CreateAndJoinLobby(
@@ -44,6 +44,14 @@ void UHathoraLobbyComponent::CreateAndJoinLobbyCustomShortCode(
 			UHathoraSDKLobbyV3::FHathoraOnLobbyInfo::CreateLambda(
 				[this](const FHathoraLobbyInfoResult& Result)
 				{
+					if (!IsValid(this))
+					{
+						// this object is being destroyed, so let's not process anything
+						FString ErrorMessage = FString::Printf(TEXT("Create Lobby failed: Lobby Component is no longer valid"));
+						UE_LOG(LogHathoraSDK, Error, TEXT("%s"), *ErrorMessage);
+						return;
+					}
+
 					if (Result.ErrorMessage.IsEmpty())
 					{
 						JoinRoomIdWhenReady = Result.Data.RoomId;
@@ -82,11 +90,27 @@ void UHathoraLobbyComponent::JoinLobbyWithConnectionInfo(FHathoraConnectionInfo 
 
 void UHathoraLobbyComponent::GetLobbyConnectionInfo(FString RoomId)
 {
+	if (!IsValid(SDK) || !IsValid(SDK->RoomV2))
+	{
+		FString ErrorMessage = TEXT("Get lobby connection info failed: Hathora SDK is not valid");
+		UE_LOG(LogHathoraSDK, Error, TEXT("%s"), *ErrorMessage);
+		OnError.Broadcast(ErrorMessage);
+		return;
+	}
+
 	SDK->RoomV2->GetConnectionInfo(
 		RoomId,
 		UHathoraSDKRoomV2::FHathoraOnRoomConnectionInfo::CreateLambda(
 			[this, RoomId](const FHathoraRoomConnectionInfoResult& Result)
 			{
+				if (!IsValid(this))
+				{
+					// this object is being destroyed, so let's not process anything
+					FString ErrorMessage = FString::Printf(TEXT("Create Lobby failed: Lobby Component is no longer valid"));
+					UE_LOG(LogHathoraSDK, Error, TEXT("%s"), *ErrorMessage);
+					return;
+				}
+
 				if (Result.ErrorMessage.IsEmpty())
 				{
 					if (Result.Data.Status == TEXT("active"))
@@ -104,16 +128,20 @@ void UHathoraLobbyComponent::GetLobbyConnectionInfo(FString RoomId)
 					else
 					{
 						// The lobby is still being created, so we need to wait for it to be ready.
-						FTimerHandle TimerHandle;
-						GetWorld()->GetTimerManager().SetTimer(
-							TimerHandle,
-							[this, RoomId]()
-							{
-								GetLobbyConnectionInfo(RoomId);
-							},
-							1.0f,
-							false
-						);
+						UWorld* World = GetWorld();
+						if (IsValid(World))
+						{
+							FTimerHandle TimerHandle;
+							World->GetTimerManager().SetTimer(
+								TimerHandle,
+								[this, RoomId]()
+								{
+									GetLobbyConnectionInfo(RoomId);
+								},
+								1.0f,
+								false
+							);
+						}
 					}
 				}
 				else
@@ -129,11 +157,27 @@ void UHathoraLobbyComponent::GetLobbyConnectionInfo(FString RoomId)
 
 void UHathoraLobbyComponent::GetPublicLobbyInfo(FString RoomId)
 {
+	if (!IsValid(SDK) || !IsValid(SDK->LobbyV3))
+	{
+		FString ErrorMessage = TEXT("Get public lobby info failed: Hathora SDK is not valid");
+		UE_LOG(LogHathoraSDK, Error, TEXT("%s"), *ErrorMessage);
+		OnError.Broadcast(ErrorMessage);
+		return;
+	}
+
 	SDK->LobbyV3->GetLobbyInfoByRoomId(
 		RoomId,
 		UHathoraSDKLobbyV3::FHathoraOnLobbyInfo::CreateLambda(
 			[this](const FHathoraLobbyInfoResult& Result)
 			{
+				if (!IsValid(this))
+				{
+					// this object is being destroyed, so let's not process anything
+					FString ErrorMessage = FString::Printf(TEXT("Create Lobby failed: Lobby Component is no longer valid"));
+					UE_LOG(LogHathoraSDK, Error, TEXT("%s"), *ErrorMessage);
+					return;
+				}
+
 				if (Result.ErrorMessage.IsEmpty())
 				{
 					FHathoraConnectionInfo* Value = PreReadyLobbies.Find(Result.Data.RoomId);
@@ -161,10 +205,26 @@ void UHathoraLobbyComponent::GetPublicLobbyInfo(FString RoomId)
 
 void UHathoraLobbyComponent::FetchPublicLobbies()
 {
+	if (!IsValid(SDK) || !IsValid(SDK->LobbyV3))
+	{
+		FString ErrorMessage = TEXT("Fetch public lobbies failed: Hathora SDK is not valid");
+		UE_LOG(LogHathoraSDK, Error, TEXT("%s"), *ErrorMessage);
+		OnError.Broadcast(ErrorMessage);
+		return;
+	}
+
 	SDK->LobbyV3->ListAllActivePublicLobbies(
 		UHathoraSDKLobbyV3::FHathoraOnLobbyInfos::CreateLambda(
 			[this](const FHathoraLobbyInfosResult& Result)
 			{
+				if (!IsValid(this))
+				{
+					// this object is being destroyed, so let's not process anything
+					FString ErrorMessage = FString::Printf(TEXT("Create Lobby failed: Lobby Component is no longer valid"));
+					UE_LOG(LogHathoraSDK, Error, TEXT("%s"), *ErrorMessage);
+					return;
+				}
+
 				if (Result.ErrorMessage.IsEmpty())
 				{
 					for (FHathoraLobbyInfo LobbyInfo : Result.Data)
@@ -185,11 +245,27 @@ void UHathoraLobbyComponent::FetchPublicLobbies()
 
 void UHathoraLobbyComponent::JoinLobbyWithShortCode(FString ShortCode)
 {
+	if (!IsValid(SDK) || !IsValid(SDK->LobbyV3))
+	{
+		FString ErrorMessage = TEXT("Join lobby with short code failed: Hathora SDK is not valid");
+		UE_LOG(LogHathoraSDK, Error, TEXT("%s"), *ErrorMessage);
+		OnError.Broadcast(ErrorMessage);
+		return;
+	}
+
 	SDK->LobbyV3->GetLobbyInfoByShortCode(
 		ShortCode,
 		UHathoraSDKLobbyV3::FHathoraOnLobbyInfo::CreateLambda(
 			[this](const FHathoraLobbyInfoResult& Result)
 			{
+				if (!IsValid(this))
+				{
+					// this object is being destroyed, so let's not process anything
+					FString ErrorMessage = FString::Printf(TEXT("Create Lobby failed: Lobby Component is no longer valid"));
+					UE_LOG(LogHathoraSDK, Error, TEXT("%s"), *ErrorMessage);
+					return;
+				}
+
 				if (Result.ErrorMessage.IsEmpty())
 				{
 					JoinRoomIdWhenReady = Result.Data.RoomId;

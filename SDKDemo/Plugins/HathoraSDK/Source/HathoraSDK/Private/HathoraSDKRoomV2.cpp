@@ -28,7 +28,7 @@ void UHathoraSDKRoomV2::CreateRoom(EHathoraCloudRegion Region, FString RoomConfi
 		FString::Printf(TEXT("/rooms/v2/%s/create"), *AppId),
 		QueryOptions,
 		Body,
-		[&, OnComplete](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccess) mutable
+		[OnComplete](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccess) mutable
 		{
 			FHathoraRoomConnectionInfoResult Result;
 			if (bSuccess && Response.IsValid())
@@ -116,7 +116,7 @@ void UHathoraSDKRoomV2::GetRoomInfo(FString RoomId, FHathoraOnGetRoomInfo OnComp
 	SendRequest(
 		TEXT("GET"),
 		FString::Printf(TEXT("/rooms/v2/%s/info/%s"), *AppId, *RoomId),
-		[&, OnComplete](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccess) mutable
+		[OnComplete](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccess) mutable
 		{
 			FHathoraGetRoomInfoResult Result;
 			if (bSuccess && Response.IsValid())
@@ -194,7 +194,7 @@ void UHathoraSDKRoomV2::GetRoomsForProcess(FString ProcessId, bool bActive, FHat
 	SendRequest(
 		TEXT("GET"),
 		FString::Printf(TEXT("/rooms/v2/%s/list/%s/%s"), *AppId, *ProcessId, bActive ? TEXT("active") : TEXT("inactive")),
-		[&, OnComplete](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccess) mutable
+		[OnComplete](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccess) mutable
 		{
 			FHathoraGetRoomsForProcessResult Result;
 			if (bSuccess && Response.IsValid())
@@ -257,7 +257,7 @@ void UHathoraSDKRoomV2::DestroyRoom(FString RoomId, FHathoraOnDestroyRoom OnComp
 	SendRequest(
 		TEXT("POST"),
 		FString::Printf(TEXT("/rooms/v2/%s/destroy/%s"), *AppId, *RoomId),
-		[&, OnComplete](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccess) mutable
+		[OnComplete](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccess) mutable
 		{
 			FHathoraDestroyRoomResult Result;
 			if (bSuccess && Response.IsValid())
@@ -292,7 +292,7 @@ void UHathoraSDKRoomV2::SuspendRoom(FString RoomId, FHathoraOnSuspendRoom OnComp
 	SendRequest(
 		TEXT("POST"),
 		FString::Printf(TEXT("/rooms/v2/%s/suspend/%s"), *AppId, *RoomId),
-		[&, OnComplete](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccess) mutable
+		[OnComplete](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccess) mutable
 		{
 			FHathoraSuspendRoomResult Result;
 			if (bSuccess && Response.IsValid())
@@ -327,7 +327,7 @@ void UHathoraSDKRoomV2::GetConnectionInfo(FString RoomId, FHathoraOnRoomConnecti
 	SendRequest(
 		TEXT("GET"),
 		FString::Printf(TEXT("/rooms/v2/%s/connectioninfo/%s"), *AppId, *RoomId),
-		[&, OnComplete](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccess) mutable
+		[OnComplete](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccess) mutable
 		{
 			FHathoraRoomConnectionInfoResult Result;
 			if (bSuccess && Response.IsValid())
@@ -370,7 +370,7 @@ void UHathoraSDKRoomV2::UpdateRoomConfig(FString RoomId, FString RoomConfig, FHa
 		TEXT("POST"),
 		FString::Printf(TEXT("/rooms/v2/%s/update/%s"), *AppId, *RoomId),
 		Body,
-		[&, OnComplete](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccess) mutable
+		[OnComplete](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccess) mutable
 		{
 			FHathoraUpdateRoomConfigResult Result;
 			if (bSuccess && Response.IsValid())

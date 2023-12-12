@@ -5,6 +5,13 @@
 #include "HathoraSDKModule.h"
 #include "HttpModule.h"
 #include "JsonObjectWrapper.h"
+#include "Engine/World.h"
+
+UHathoraSDKAPI::UHathoraSDKAPI(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
+{
+	FWorldDelegates::PreLevelRemovedFromWorld.AddUObject(this, &UHathoraSDKAPI::OnWorldRemoved);
+}
 
 void UHathoraSDKAPI::SetCredentials(FString InAppId, FHathoraSDKSecurity InSecurity)
 {
@@ -45,11 +52,34 @@ void UHathoraSDKAPI::SendRequest(
 	FJsonObject Body,
 	TFunction<void(FHttpRequestPtr, FHttpResponsePtr, bool)> OnComplete)
 {
+	if (bWorldIsBeingDestroyed)
+	{
+		UE_LOG(LogHathoraSDK, Error, TEXT("Could not make %s request to %s because the world is being destroyed."), *Method, *Endpoint);
+		return;
+	}
+
+	if (!IsValid(this))
+	{
+		UE_LOG(LogHathoraSDK, Error, TEXT("Could not make %s request to %s because the underlying Hathora API object is not valid."), *Method, *Endpoint);
+		return;
+	}
+
 	FHttpRequestRef Request = FHttpModule::Get().CreateRequest();
 
 	Request->SetVerb(Method);
 
-	Request->OnProcessRequestComplete().BindLambda(OnComplete);
+	Request->OnProcessRequestComplete().BindLambda(
+		[this, Method, Endpoint, OnComplete](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
+		{
+			if (bWorldIsBeingDestroyed)
+			{
+				UE_LOG(LogHathoraSDK, Error, TEXT("Could not call OnComplete for %s request to %s because the world is being destroyed."), *Method, *Endpoint);
+				return;
+			}
+
+			OnComplete(Request, Response, bWasSuccessful);
+		}
+	);
 
 	FString QueryString = "?";
 	for (auto QueryOption : QueryOptions) {
@@ -84,4 +114,10 @@ void UHathoraSDKAPI::SendRequest(
 	}
 
 	Request->ProcessRequest();
+}
+
+void UHathoraSDKAPI::OnWorldRemoved(ULevel* Level, UWorld* World)
+{
+	bWorldIsBeingDestroyed = true;
+	FWorldDelegates::PreLevelRemovedFromWorld.RemoveAll(this);
 }

@@ -2,6 +2,7 @@
 
 #include "LatentActions/HathoraGetRegionalPings.h"
 #include "HathoraSDK.h"
+#include "HathoraSDKModule.h"
 
 UHathoraGetRegionalPings *UHathoraGetRegionalPings::GetRegionalPings(
 	UObject *WorldContextObject,
@@ -15,6 +16,12 @@ UHathoraGetRegionalPings *UHathoraGetRegionalPings::GetRegionalPings(
 
 void UHathoraGetRegionalPings::Activate()
 {
+	if (!IsValid(this))
+	{
+		UE_LOG(LogHathoraSDK, Error, TEXT("GetRegionalPings failed because the underlying Hathora API is not valid."));
+		return;
+	}
+
 	UHathoraSDK::GetRegionalPings(
 		FHathoraOnGetRegionalPings::CreateLambda(
 			[this](const FHathoraRegionPings& Result)
