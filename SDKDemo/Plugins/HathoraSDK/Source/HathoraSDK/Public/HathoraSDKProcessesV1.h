@@ -14,11 +14,11 @@ struct FHathoraProcessInfo
 
 	// Measures network traffic leaving the process in bytes.
 	UPROPERTY(BlueprintReadOnly, Category = "Default")
-	int32 EgressedBytes;
+	int32 EgressedBytes = 0;
 
 	// Tracks the number of active connections to a process.
 	UPROPERTY(BlueprintReadOnly, Category = "Default")
-	int32 ActiveConnections;
+	int32 ActiveConnections = 0;
 
 	// The last time RoomsAllocated was updated.
 	UPROPERTY(BlueprintReadOnly, Category = "Default")
@@ -26,15 +26,15 @@ struct FHathoraProcessInfo
 
 	// Tracks the number of rooms that have been allocated to the process.
 	UPROPERTY(BlueprintReadOnly, Category = "Default")
-	int32 RoomsAllocated;
+	int32 RoomsAllocated = 0;
 
 	// Process in drain will not accept any new rooms.
 	UPROPERTY(BlueprintReadOnly, Category = "Default")
-	bool bDraining;
+	bool bDraining = false;
 
 	// Whether or not the process has terminated.
 	UPROPERTY(BlueprintReadOnly, Category = "Default")
-	bool bTerminated;
+	bool bTerminated = false;
 
 	// When the process has been terminated. Invalid if bTerminated is false.
 	UPROPERTY(BlueprintReadOnly, Category = "Default")
@@ -42,7 +42,7 @@ struct FHathoraProcessInfo
 
 	// Whether or not the process ever transitioned to stopping.
 	UPROPERTY(BlueprintReadOnly, Category = "Default")
-	bool bStopping;
+	bool bStopping = false;
 
 	// When the process is issued to stop. We use this to determine when
 	// we should stop billing. Invalid if bStopping is false.
@@ -51,7 +51,7 @@ struct FHathoraProcessInfo
 
 	// Whether or not the process ever transitioned to starting.
 	UPROPERTY(BlueprintReadOnly, Category = "Default")
-	bool bStarted;
+	bool bStarted = false;
 
 	// When the process bound to the specified port. We use this to
 	// determine when we should start billing. Invalid if bStarted is false.
@@ -64,7 +64,7 @@ struct FHathoraProcessInfo
 
 	// Governs how many rooms can be scheduled in a process.
 	UPROPERTY(BlueprintReadOnly, Category = "Default")
-	int32 RoomsPerProcess;
+	int32 RoomsPerProcess = 0;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Default")
 	TArray<FHathoraExposedPort> AdditionalExposedPorts;
@@ -75,7 +75,7 @@ struct FHathoraProcessInfo
 
 	// The region that the process is running in.
 	UPROPERTY(BlueprintReadOnly, Category = "Default")
-	EHathoraCloudRegion Region;
+	EHathoraCloudRegion Region = EHathoraCloudRegion::Unknown;
 
 	// System generated unique identifier to a runtime instance of your game server.
 	UPROPERTY(BlueprintReadOnly, Category = "Default")
@@ -83,7 +83,7 @@ struct FHathoraProcessInfo
 
 	// System generated id for a deployment. Increments by 1.
 	UPROPERTY(BlueprintReadOnly, Category = "Default")
-	int32 DeploymentId;
+	int32 DeploymentId = 0;
 
 	// System generated unique identifier for an application.
 	UPROPERTY(BlueprintReadOnly, Category = "Default")
