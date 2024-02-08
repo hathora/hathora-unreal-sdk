@@ -40,6 +40,9 @@ public class HathoraSDK : ModuleRules
 				"JsonUtilities",
 				"HTTP",
 				"Icmp",
+				"OnlineSubsystemUtils",
+				"Qos",
+				"PakFile",
 			}
 			);
 
