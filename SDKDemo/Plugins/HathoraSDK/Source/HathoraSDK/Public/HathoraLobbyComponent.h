@@ -68,9 +68,9 @@ private:
 	UPROPERTY()
 	UHathoraSDK* SDK = nullptr;
 
-	FString JoinRoomIdWhenReady;
 	TMap<FString, FHathoraConnectionInfo> PreReadyLobbies;
 
-	void GetLobbyConnectionInfo(FString RoomId);
-	void GetPublicLobbyInfo(FString RoomId);
+	typedef TDelegate<void(const FHathoraConnectionInfo&)> FHathoraOnGetGetLobbyConnectionInfo;
+	void GetLobbyConnectionInfo(FString RoomId, FHathoraOnGetGetLobbyConnectionInfo OnResult);
+	void GetLobbyConnectionInfo(FString RoomId, int32 Port, FHathoraOnGetGetLobbyConnectionInfo OnResult);
 };
