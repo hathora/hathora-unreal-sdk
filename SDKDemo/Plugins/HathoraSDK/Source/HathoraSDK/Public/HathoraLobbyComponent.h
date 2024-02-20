@@ -72,5 +72,5 @@ private:
 
 	typedef TDelegate<void(const FHathoraConnectionInfo&)> FHathoraOnGetGetLobbyConnectionInfo;
 	void GetLobbyConnectionInfo(FString RoomId, FHathoraOnGetGetLobbyConnectionInfo OnResult);
-	void GetLobbyConnectionInfo(FString RoomId, int32 Port, FHathoraOnGetGetLobbyConnectionInfo OnResult);
+	void GetLobbyConnectionInfo(FString RoomId, FString PortName, FHathoraOnGetGetLobbyConnectionInfo OnResult);
 };
