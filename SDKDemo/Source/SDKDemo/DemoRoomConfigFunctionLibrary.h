@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "JsonObjectConverter.h"
-#include "HathoraEngineSubsystem.h"
+#include "HathoraSDK.h"
 #include "DemoRoomConfigFunctionLibrary.generated.h"
 
 USTRUCT(BlueprintType)
@@ -36,8 +36,9 @@ public:
 			UE_LOG(LogTemp, Error, TEXT("Failed to serialize room config to string"));
 		}
 
-		UHathoraEngineSubsystem* Subsystem = GEngine->GetEngineSubsystem<UHathoraEngineSubsystem>();
-		OutString = Subsystem->AddPortToRoomConfig(OutString);
+#if WITH_SERVER_CODE && !WITH_EDITOR
+		OutString = UHathoraSDK::AddPortNameToRoomConfig(OutString);
+#endif
 
 		return OutString;
 	}
@@ -45,8 +46,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Room Config")
 	static FDemoRoomConfig DeserializeRoomConfigFromString(const FString& JsonString)
 	{
-		UHathoraEngineSubsystem* Subsystem = GEngine->GetEngineSubsystem<UHathoraEngineSubsystem>();
-		FString JsonStringWithoutPort = Subsystem->RemovePortFromRoomConfig(JsonString);
+		FString JsonStringWithoutPort = UHathoraSDK::RemovePortNameFromRoomConfig(JsonString);
 
 		FDemoRoomConfig OutRoomConfig;
 		bool bResult = FJsonObjectConverter::JsonObjectStringToUStruct(JsonStringWithoutPort, &OutRoomConfig, 0, 0);
