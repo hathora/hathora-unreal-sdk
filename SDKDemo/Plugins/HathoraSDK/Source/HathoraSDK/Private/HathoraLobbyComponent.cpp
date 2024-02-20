@@ -6,7 +6,7 @@
 #include "HathoraSDKAuthV1.h"
 #include "HathoraSDKLobbyV3.h"
 #include "HathoraSDKRoomV2.h"
-#include "HathoraEngineSubsystem.h"
+#include "HathoraGameInstanceSubsystem.h"
 
 void UHathoraLobbyComponent::BeginPlay()
 {
@@ -201,10 +201,10 @@ void UHathoraLobbyComponent::GetLobbyConnectionInfo(FString RoomId, FHathoraOnGe
 		return;
 	}
 
-	SDK->RoomV2->GetRoomInfo(
+	SDK->LobbyV3->GetLobbyInfoByRoomId(
 		RoomId,
-		UHathoraSDKRoomV2::FHathoraOnGetRoomInfo::CreateLambda(
-			[this, RoomId, OnResult](const FHathoraGetRoomInfoResult& Result)
+		UHathoraSDKLobbyV3::FHathoraOnLobbyInfo::CreateLambda(
+			[this, RoomId, OnResult](const FHathoraLobbyInfoResult& Result)
 			{
 				if (!IsValid(this))
 				{
@@ -216,23 +216,11 @@ void UHathoraLobbyComponent::GetLobbyConnectionInfo(FString RoomId, FHathoraOnGe
 
 				if (Result.ErrorMessage.IsEmpty())
 				{
-					if (Result.Data.Status == EHathoraRoomStatus::Active)
+					FString PortName = UHathoraSDK::GetPortNameFromRoomConfig(Result.Data.RoomConfig);
+					if (PortName != TEXT(""))
 					{
-						UHathoraEngineSubsystem* HathoraEngineSubsystem = GEngine->GetEngineSubsystem<UHathoraEngineSubsystem>();
-						if (HathoraEngineSubsystem)
-						{
-							int32 Port = HathoraEngineSubsystem->GetPortFromRoomConfig(Result.Data.RoomConfig);
-							if (Port != 0)
-							{
-								GetLobbyConnectionInfo(RoomId, Port, OnResult);
-								return;
-							}
-						}
-						else
-						{
-							FString ErrorMessage = FString::Printf(TEXT("GetLobbyConnectionInfo failed: Hathora Engine Subsystem is not valid"));
-							UE_LOG(LogHathoraSDK, Error, TEXT("%s"), *ErrorMessage);
-						}
+						GetLobbyConnectionInfo(RoomId, PortName, OnResult);
+						return;
 					}
 				}
 
@@ -256,12 +244,12 @@ void UHathoraLobbyComponent::GetLobbyConnectionInfo(FString RoomId, FHathoraOnGe
 	);
 }
 
-void UHathoraLobbyComponent::GetLobbyConnectionInfo(FString RoomId, int32 Port, FHathoraOnGetGetLobbyConnectionInfo OnResult)
+void UHathoraLobbyComponent::GetLobbyConnectionInfo(FString RoomId, FString PortName, FHathoraOnGetGetLobbyConnectionInfo OnResult)
 {
 	SDK->RoomV2->GetConnectionInfo(
 		RoomId,
 		UHathoraSDKRoomV2::FHathoraOnRoomConnectionInfo::CreateLambda(
-			[this, RoomId, Port, OnResult](const FHathoraRoomConnectionInfoResult& Result)
+			[this, RoomId, PortName, OnResult](const FHathoraRoomConnectionInfoResult& Result)
 			{
 				if (!IsValid(this))
 				{
@@ -279,7 +267,20 @@ void UHathoraLobbyComponent::GetLobbyConnectionInfo(FString RoomId, int32 Port, 
 						// This assumes you have specified all of the potential ports in the Hathora additional
 						// exposed ports to ensure proper port forwarding occurs.
 						FHathoraConnectionInfo ConnectionInfo = Result.Data;
-						ConnectionInfo.ExposedPort.Port = Port;
+
+						if (PortName != TEXT("default") && PortName != TEXT(""))
+						{
+							// we need to use a different exposed port than the default one
+							for (FHathoraExposedPort ExposedPort : ConnectionInfo.AdditionalExposedPorts)
+							{
+								if (ExposedPort.Name == PortName)
+								{
+									ConnectionInfo.ExposedPort = ExposedPort;
+									break;
+								}
+							}
+						}
+
 						OnResult.ExecuteIfBound(ConnectionInfo);
 					}
 					else
@@ -293,9 +294,9 @@ void UHathoraLobbyComponent::GetLobbyConnectionInfo(FString RoomId, int32 Port, 
 							FTimerHandle TimerHandle;
 							World->GetTimerManager().SetTimer(
 								TimerHandle,
-								[this, RoomId, Port, OnResult]()
+								[this, RoomId, PortName, OnResult]()
 								{
-									GetLobbyConnectionInfo(RoomId, Port, OnResult);
+									GetLobbyConnectionInfo(RoomId, PortName, OnResult);
 								},
 								1.0f,
 								false

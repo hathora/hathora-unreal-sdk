@@ -157,6 +157,7 @@ void FHathoraForkProcess::ForkIfRequested(UWorld* World)
 		FPlatformProcess::EWaitAndForkResult Result = FPlatformProcess::EWaitAndForkResult::Error;
 		if (bRealFork)
 		{
+			GLog->Flush();
 			Result = FPlatformProcess::WaitAndFork();
 		}
 		else if (bFakeFork)

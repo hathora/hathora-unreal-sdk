@@ -120,6 +120,76 @@ FString UHathoraSDK::ParseErrorMessage(FString Content)
 	}
 }
 
+FString UHathoraSDK::GetPortNameFromRoomConfig(const FString &RoomConfig)
+{
+	TSharedPtr<FJsonObject> OutRoomConfig;
+	TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(RoomConfig);
+	FJsonSerializer::Deserialize(Reader, OutRoomConfig);
+
+	if (!OutRoomConfig.IsValid())
+	{
+		return TEXT("");
+	}
+
+	FString ParsedPortName;
+	if (OutRoomConfig->TryGetStringField(TEXT("hathoraGamePortName"), ParsedPortName))
+	{
+		return ParsedPortName;
+	}
+
+	return TEXT("");
+}
+
+FString UHathoraSDK::AddPortNameToRoomConfig(const FString &RoomConfig)
+{
+	TSharedPtr<FJsonObject> OutRoomConfig;
+	TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(RoomConfig);
+	FJsonSerializer::Deserialize(Reader, OutRoomConfig);
+
+	if (!OutRoomConfig.IsValid())
+	{
+		return RoomConfig;
+	}
+
+	FURL DefaultUrl;
+	if (DefaultUrl.Port == 7777)
+	{
+		OutRoomConfig->SetStringField(TEXT("hathoraGamePortName"), TEXT("default"));
+	}
+	else
+	{
+		OutRoomConfig->SetStringField(TEXT("hathoraGamePortName"), TEXT("fork") + FString::FromInt(DefaultUrl.Port - 7777));
+	}
+	FString RoomConfigString;
+	TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&RoomConfigString);
+	FJsonSerializer::Serialize(OutRoomConfig.ToSharedRef(), Writer);
+
+	return RoomConfigString;
+}
+
+FString UHathoraSDK::RemovePortNameFromRoomConfig(const FString &RoomConfig)
+{
+	TSharedPtr<FJsonObject> OutRoomConfig;
+	TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(RoomConfig);
+	FJsonSerializer::Deserialize(Reader, OutRoomConfig);
+
+	if (!OutRoomConfig.IsValid())
+	{
+		return RoomConfig;
+	}
+
+	if (OutRoomConfig->HasField(TEXT("hathoraGamePortName")))
+	{
+		OutRoomConfig->RemoveField(TEXT("hathoraGamePortName"));
+	}
+
+	FString RoomConfigString;
+	TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&RoomConfigString);
+	FJsonSerializer::Serialize(OutRoomConfig.ToSharedRef(), Writer);
+
+	return RoomConfigString;
+}
+
 void UHathoraSDK::SetAuthToken(FString Token)
 {
 	const UHathoraSDKConfig* Config = GetDefault<UHathoraSDKConfig>();
