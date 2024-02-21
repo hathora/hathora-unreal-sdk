@@ -1,6 +1,6 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-#include "HathoraForkProcess.h"
+#include "Forking/HathoraForkProcess.h"
 #include "OnlineSubsystemUtils.h"
 #include "IPlatformFilePak.h"
 #include "HAL/PlatformFileManager.h"

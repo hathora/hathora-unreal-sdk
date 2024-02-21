@@ -47,15 +47,6 @@ public:
 	UFUNCTION(BlueprintPure, Category = "HathoraSDK")
 	static FString ParseErrorMessage(FString Content);
 
-	UFUNCTION(BlueprintCallable, Category = "HathoraSDK")
-	static FString GetPortNameFromRoomConfig(const FString &RoomConfig);
-
-	UFUNCTION(BlueprintCallable, Category = "HathoraSDK")
-	static FString AddPortNameToRoomConfig(const FString &RoomConfig);
-
-	UFUNCTION(BlueprintCallable, Category = "HathoraSDK")
-	static FString RemovePortNameFromRoomConfig(const FString &RoomConfig);
-
 	// Set the auth token to use for all requests; primarily on the
 	// client after the player has logged in.
 	// @param Token The JWT auth token to use for all requests.
