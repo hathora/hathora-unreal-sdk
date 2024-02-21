@@ -30,7 +30,7 @@ const FString UHathoraForkingSubsystem::ExposedPortNamePrefix(TEXT("game"));
 
 // This is how much time we will wait between polling GetActiveRoomsForProcess to check if
 // a room has been allocated to this process yet (in seconds).
-const float UHathoraForkingSubsystem::RoomAllocationPollingInterval(1.0f);
+const float UHathoraForkingSubsystem::RoomAllocationPollingInterval(5.0f);
 
 void UHathoraForkingSubsystem::Initialize(FSubsystemCollectionBase &Collection)
 {
@@ -70,17 +70,6 @@ void UHathoraForkingSubsystem::Fork()
 	if (IsValid(World) && World->GetNetMode() == ENetMode::NM_DedicatedServer)
 	{
 		FHathoraServerEnvironment HathoraEnvVars = UHathoraSDK::GetServerEnvironment();
-
-		// This will fill an array of all the Hathora-exposed ports for the child processes.
-		// We use these ports in the RoomConfig to let clients know which port to connect to.
-		// This function blocks.
-		GetExposedPorts();
-
-		if (ExposedPorts.Num() != HathoraEnvVars.RoomsPerProcess)
-		{
-			UE_LOG(LogHathoraSDK, Error, TEXT("The number of exposed ports (%d) does not match the number of rooms per process (%d), will not attempt to fork"), ExposedPorts.Num(), HathoraEnvVars.RoomsPerProcess);
-			return;
-		}
 
 		// We only want to fork if the RoomsPerProcess environment variable
 		// (injected by Hathora) is greater than 1
@@ -186,6 +175,17 @@ void UHathoraForkingSubsystem::Fork()
 			// the setup happens, and it won't be called again.
 			FHathoraForkProcess::OnEndFramePostFork();
 
+			// This will fill an array of all the Hathora-exposed ports for the child processes.
+			// We use these ports in the RoomConfig to let clients know which port to connect to.
+			// This function blocks.
+			GetExposedPorts();
+
+			if (ExposedPorts.Num() != HathoraEnvVars.RoomsPerProcess)
+			{
+				UE_LOG(LogHathoraSDK, Error, TEXT("The number of exposed ports (%d) does not match the number of rooms per process (%d), will not attempt to fork"), ExposedPorts.Num(), HathoraEnvVars.RoomsPerProcess);
+				return;
+			}
+
 			// Block for this child until there is a room that hasn't been assigned to this process.
 			// We denote how this is determined within WaitForRoomAllocation by checking the RoomConfig
 			// for UHathoraForkingSubsystem::RoomConfigPortKey.
@@ -220,8 +220,8 @@ void UHathoraForkingSubsystem::Fork()
 #endif
 }
 
-// This function calls GetProcessInfo once on the parent process to get the exposed ports for
-// the child processes. This will be put into a 0-based array that the child processes will use
+// This function calls GetProcessInfo once on each of the child process to get the exposed ports.
+// This will be put into a 0-based array that the child processes will use
 // to let clients know which port to connect to. This function blocks.
 void UHathoraForkingSubsystem::GetExposedPorts()
 {

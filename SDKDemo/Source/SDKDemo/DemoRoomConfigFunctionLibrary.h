@@ -42,8 +42,22 @@ public:
 		UHathoraSDKConfig* Config = GetMutableDefault<UHathoraSDKConfig>();
 		if (Config->GetUseBuiltInForking())
 		{
-			UHathoraForkingSubsystem* ForkingSubsystem = GEngine->GetWorldFromContextObjectChecked(WorldContextObject)->GetSubsystem<UHathoraForkingSubsystem>();
-			OutString = ForkingSubsystem->AddPortToRoomConfig(OutString);
+			UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull);
+
+			if (World)
+			{
+				UGameInstance* GameInstance = World->GetGameInstance();
+
+				if (GameInstance)
+				{
+					UHathoraForkingSubsystem* ForkingSubsystem = GameInstance->GetSubsystem<UHathoraForkingSubsystem>();
+
+					if (ForkingSubsystem)
+					{
+						OutString = ForkingSubsystem->AddPortToRoomConfig(OutString);
+					}
+				}
+			}
 		}
 #endif
 
@@ -58,6 +72,10 @@ public:
 		if (Config->GetUseBuiltInForking())
 		{
 			JsonStringWithoutPort = UHathoraForkingSubsystem::RemovePortFromRoomConfig(JsonString);
+		}
+		else
+		{
+			JsonStringWithoutPort = JsonString;
 		}
 
 		FDemoRoomConfig OutRoomConfig;

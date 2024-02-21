@@ -45,70 +45,42 @@ void ADemoMatchGameState::BeginPlay()
 
 void ADemoMatchGameState::QueryActiveRooms()
 {
-	SDK->RoomV2->GetActiveRoomsForProcess(
-		HathoraEnvVars.ProcessId,
-		UHathoraSDKRoomV2::FHathoraOnGetRoomsForProcess::CreateLambda(
-			[this](const FHathoraGetRoomsForProcessResult& Result)
+	UHathoraSDK::GetServerRoomId(
+		1.0f,
+		UHathoraSDK::FOnGetRoomId::CreateLambda(
+			[this](const FString InRoomId)
 			{
-				if (Result.ErrorMessage.IsEmpty())
-				{
-					if (!Result.Data.IsEmpty())
-					{
-						// NOTE: THIS ASSUMES ONLY 1 ROOM PER PROCESS
-						// YOU WILL NEED TO CHANGE THIS LOGIC OTHERWISE
-
-						RoomId = Result.Data[0].RoomId;
-
-						SDK->LobbyV3->GetLobbyInfoByRoomId(
-							RoomId,
-							UHathoraSDKLobbyV3::FHathoraOnLobbyInfo::CreateLambda(
-								[this](const FHathoraLobbyInfoResult& LobbyInfoResult)
-								{
-									if (LobbyInfoResult.ErrorMessage.IsEmpty())
-									{
-										LobbyInfo = LobbyInfoResult.Data;
-										bLobbyIsReady = true;
-
-										// Provide a short to allow variables to replicate first
-										FTimerHandle TimerHandle;
-										GetWorld()->GetTimerManager().SetTimer(
-											TimerHandle,
-											[this]()
-											{
-												MC_LobbyReady();
-												ProcessMatchTime();
-											},
-											1.0f,
-											false
-										);
-									}
-									else
-									{
-										UE_LOG(LogTemp, Error, TEXT("ERROR: Could not get lobby info for room id %s: %s"), *RoomId, *LobbyInfoResult.ErrorMessage);
-									}
-								}
-							)
-						);
-					}
-					else
-					{
-						// While this likely shouldn't happen, let's try again
-						FTimerHandle TimerHandle;
-						GetWorld()->GetTimerManager().SetTimer(
-							TimerHandle,
-							[this]()
+				RoomId = InRoomId;
+				SDK->LobbyV3->GetLobbyInfoByRoomId(
+					RoomId,
+					UHathoraSDKLobbyV3::FHathoraOnLobbyInfo::CreateLambda(
+						[this](const FHathoraLobbyInfoResult& LobbyInfoResult)
+						{
+							if (LobbyInfoResult.ErrorMessage.IsEmpty())
 							{
-								QueryActiveRooms();
-							},
-							1.0f,
-							false
-						);
-					}
-				}
-				else
-				{
-					UE_LOG(LogTemp, Error, TEXT("ERROR: Could not get active rooms for process id %s: %s"), *HathoraEnvVars.ProcessId, *Result.ErrorMessage);
-				}
+								LobbyInfo = LobbyInfoResult.Data;
+								bLobbyIsReady = true;
+
+								// Provide a short to allow variables to replicate first
+								FTimerHandle TimerHandle;
+								GetWorld()->GetTimerManager().SetTimer(
+									TimerHandle,
+									[this]()
+									{
+										MC_LobbyReady();
+										ProcessMatchTime();
+									},
+									1.0f,
+									false
+								);
+							}
+							else
+							{
+								UE_LOG(LogTemp, Error, TEXT("ERROR: Could not get lobby info for room id %s: %s"), *RoomId, *LobbyInfoResult.ErrorMessage);
+							}
+						}
+					)
+				);
 			}
 		)
 	);
