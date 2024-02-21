@@ -38,6 +38,9 @@ public:
 
 	FString AddPortToRoomConfig(const FString &RoomConfig);
 
+	UFUNCTION(BlueprintPure, Category = "HathoraSDK|Forking")
+	FString GetRoomId() const { return RoomId; }
+
 private:
 	int32 StartingPort;
 	FString RoomId;

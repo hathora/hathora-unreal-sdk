@@ -56,7 +56,7 @@ This `Fork()` method will do the following:
 
 ### Enabling via Project Settings
 
-This functionality is disabled by default and must be enabled in your Project Settings. Under `Plugins > HathoraSDK`, enable `Use Built In Forking` to enable processing supporting forking functionality.
+This functionality is disabled by default and must be enabled in your Project Settings. Under `Plugins > Hathora SDK`, enable `Use Built In Forking` to enable processing supporting forking functionality. You may need to click the `Set as Default` button to save the setting to the `Config/DefaultGame.ini` config file for it to be properly packaged in.
 
 ### More Technical Details
 
