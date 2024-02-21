@@ -6,7 +6,7 @@
 #include "HathoraSDKAuthV1.h"
 #include "HathoraSDKLobbyV3.h"
 #include "HathoraSDKRoomV2.h"
-#include "HathoraGameInstanceSubsystem.h"
+#include "Forking/HathoraForkingSubsystem.h"
 
 void UHathoraLobbyComponent::BeginPlay()
 {
@@ -216,10 +216,19 @@ void UHathoraLobbyComponent::GetLobbyConnectionInfo(FString RoomId, FHathoraOnGe
 
 				if (Result.ErrorMessage.IsEmpty())
 				{
-					FString PortName = UHathoraSDK::GetPortNameFromRoomConfig(Result.Data.RoomConfig);
-					if (PortName != TEXT(""))
+					UHathoraSDKConfig* Config = GetMutableDefault<UHathoraSDKConfig>();
+					if (Config->GetUseBuiltInForking())
 					{
-						GetLobbyConnectionInfo(RoomId, PortName, OnResult);
+						int32 Port = UHathoraForkingSubsystem::GetPortFromRoomConfig(Result.Data.RoomConfig);
+						if (Port != 0)
+						{
+							GetLobbyConnectionInfo(RoomId, Port, OnResult);
+							return;
+						}
+					}
+					else
+					{
+						GetLobbyConnectionInfo(RoomId, -1, OnResult); // -1 will tell GetLobbyConnectionInfo to use the default exposed port
 						return;
 					}
 				}
@@ -244,12 +253,12 @@ void UHathoraLobbyComponent::GetLobbyConnectionInfo(FString RoomId, FHathoraOnGe
 	);
 }
 
-void UHathoraLobbyComponent::GetLobbyConnectionInfo(FString RoomId, FString PortName, FHathoraOnGetGetLobbyConnectionInfo OnResult)
+void UHathoraLobbyComponent::GetLobbyConnectionInfo(FString RoomId, int32 Port, FHathoraOnGetGetLobbyConnectionInfo OnResult)
 {
 	SDK->RoomV2->GetConnectionInfo(
 		RoomId,
 		UHathoraSDKRoomV2::FHathoraOnRoomConnectionInfo::CreateLambda(
-			[this, RoomId, PortName, OnResult](const FHathoraRoomConnectionInfoResult& Result)
+			[this, RoomId, Port, OnResult](const FHathoraRoomConnectionInfoResult& Result)
 			{
 				if (!IsValid(this))
 				{
@@ -268,17 +277,9 @@ void UHathoraLobbyComponent::GetLobbyConnectionInfo(FString RoomId, FString Port
 						// exposed ports to ensure proper port forwarding occurs.
 						FHathoraConnectionInfo ConnectionInfo = Result.Data;
 
-						if (PortName != TEXT("default") && PortName != TEXT(""))
+						if (Port != -1)
 						{
-							// we need to use a different exposed port than the default one
-							for (FHathoraExposedPort ExposedPort : ConnectionInfo.AdditionalExposedPorts)
-							{
-								if (ExposedPort.Name == PortName)
-								{
-									ConnectionInfo.ExposedPort = ExposedPort;
-									break;
-								}
-							}
+							ConnectionInfo.ExposedPort.Port = Port;
 						}
 
 						OnResult.ExecuteIfBound(ConnectionInfo);
@@ -294,9 +295,9 @@ void UHathoraLobbyComponent::GetLobbyConnectionInfo(FString RoomId, FString Port
 							FTimerHandle TimerHandle;
 							World->GetTimerManager().SetTimer(
 								TimerHandle,
-								[this, RoomId, PortName, OnResult]()
+								[this, RoomId, Port, OnResult]()
 								{
-									GetLobbyConnectionInfo(RoomId, PortName, OnResult);
+									GetLobbyConnectionInfo(RoomId, Port, OnResult);
 								},
 								1.0f,
 								false

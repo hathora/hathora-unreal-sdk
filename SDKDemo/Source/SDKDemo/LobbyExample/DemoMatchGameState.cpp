@@ -127,7 +127,7 @@ void ADemoMatchGameState::ProcessMatchTime()
 	{
 		FDemoRoomConfig RoomConfig = UDemoRoomConfigFunctionLibrary::DeserializeRoomConfigFromString(LobbyInfo.RoomConfig);
 		RoomConfig.bMatchStarted = true;
-		FString NewRoomConfig = UDemoRoomConfigFunctionLibrary::SerializeRoomConfigToString(RoomConfig);
+		FString NewRoomConfig = UDemoRoomConfigFunctionLibrary::SerializeRoomConfigToString(RoomConfig, GetWorld());
 
 		// Tell Hathora that the match has started, so
 		// new clients won't see the match in the lobby list
