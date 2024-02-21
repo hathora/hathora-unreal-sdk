@@ -281,7 +281,7 @@ void UDemoLobbyWidget::CreateLobby()
 			GetWorld()->GetTimerManager().ClearTimer(ErrorTimerHandle);
 			GetWorld()->GetTimerManager().ClearTimer(PingTimerHandle);
 
-			FString SerializedLobbyConfig = UDemoRoomConfigFunctionLibrary::SerializeRoomConfigToString(LobbyConfig);
+			FString SerializedLobbyConfig = UDemoRoomConfigFunctionLibrary::SerializeRoomConfigToString(LobbyConfig, GetWorld());
 			HathoraLobby->CreateAndJoinLobby(
 				bCreatePublicLobby ? EHathoraLobbyVisibility::Public : EHathoraLobbyVisibility::Private,
 				SerializedLobbyConfig,

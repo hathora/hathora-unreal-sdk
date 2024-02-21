@@ -6,6 +6,8 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "JsonObjectConverter.h"
 #include "HathoraSDK.h"
+#include "HathoraSDKConfig.h"
+#include "Forking/HathoraForkingSubsystem.h"
 #include "DemoRoomConfigFunctionLibrary.generated.h"
 
 USTRUCT(BlueprintType)
@@ -25,8 +27,8 @@ class UDemoRoomConfigFunctionLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 public:
-	UFUNCTION(BlueprintCallable, Category = "Room Config")
-	static FString SerializeRoomConfigToString(const FDemoRoomConfig& RoomConfig)
+	UFUNCTION(BlueprintCallable, Category = "Room Config", meta = (WorldContext = "WorldContextObject"))
+	static FString SerializeRoomConfigToString(const FDemoRoomConfig& RoomConfig, UObject *WorldContextObject)
 	{
 		FString OutString;
 		bool bResult = FJsonObjectConverter::UStructToJsonObjectString(RoomConfig, OutString);
@@ -37,7 +39,12 @@ public:
 		}
 
 #if WITH_SERVER_CODE && !WITH_EDITOR
-		OutString = UHathoraSDK::AddPortNameToRoomConfig(OutString);
+		UHathoraSDKConfig* Config = GetMutableDefault<UHathoraSDKConfig>();
+		if (Config->GetUseBuiltInForking())
+		{
+			UHathoraForkingSubsystem* ForkingSubsystem = GEngine->GetWorldFromContextObjectChecked(WorldContextObject)->GetSubsystem<UHathoraForkingSubsystem>();
+			OutString = ForkingSubsystem->AddPortToRoomConfig(OutString);
+		}
 #endif
 
 		return OutString;
@@ -46,7 +53,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Room Config")
 	static FDemoRoomConfig DeserializeRoomConfigFromString(const FString& JsonString)
 	{
-		FString JsonStringWithoutPort = UHathoraSDK::RemovePortNameFromRoomConfig(JsonString);
+		FString JsonStringWithoutPort;
+		UHathoraSDKConfig* Config = GetMutableDefault<UHathoraSDKConfig>();
+		if (Config->GetUseBuiltInForking())
+		{
+			JsonStringWithoutPort = UHathoraForkingSubsystem::RemovePortFromRoomConfig(JsonString);
+		}
 
 		FDemoRoomConfig OutRoomConfig;
 		bool bResult = FJsonObjectConverter::JsonObjectStringToUStruct(JsonStringWithoutPort, &OutRoomConfig, 0, 0);
