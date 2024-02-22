@@ -1,44 +1,59 @@
 // Copyright 2023 Hathora, Inc.
 
-#include "HathoraSDKProcessesV1.h"
+#include "HathoraSDKProcessesV2.h"
 #include "HathoraSDKModule.h"
 #include "HathoraSDK.h"
 #include "Serialization/JsonSerializer.h"
 #include "JsonObjectConverter.h"
 
-void UHathoraSDKProcessesV1::GetAllRunningProcesses(FHathoraOnProcessInfos OnComplete)
+FString UHathoraSDKProcessesV2::GetProcessStatusString(EHathoraProcessStatus Status)
 {
-	TArray<TPair<FString, FString>> QueryOptions;
-	GetProcesses(true, QueryOptions, OnComplete);
+	FString StatusString = UEnum::GetValueAsString(Status);
+	StatusString = StatusString.ToLower().RightChop(StatusString.Find("::") + 2);
+
+	return StatusString;
 }
 
-void UHathoraSDKProcessesV1::GetRegionRunningProcesses(EHathoraCloudRegion Region, FHathoraOnProcessInfos OnComplete)
+EHathoraProcessStatus UHathoraSDKProcessesV2::ParseStatus(FString StatusString)
 {
-	TArray<TPair<FString, FString>> QueryOptions;
-	QueryOptions.Add(TPair<FString, FString>(TEXT("region"), UHathoraSDK::GetRegionString(Region)));
-	GetProcesses(true, QueryOptions, OnComplete);
+	EHathoraProcessStatus Status = EHathoraProcessStatus::Unknown;
+	for (uint32 i = 0; i < static_cast<uint8>(EHathoraProcessStatus::Unknown); i++)
+	{
+		FString CurrentStatus = GetProcessStatusString(static_cast<EHathoraProcessStatus>(i));
+		if (CurrentStatus == StatusString)
+		{
+			Status = static_cast<EHathoraProcessStatus>(i);
+			break;
+		}
+	}
+
+	if (Status == EHathoraProcessStatus::Unknown)
+	{
+		UE_LOG(LogHathoraSDK, Error, TEXT("[ParseRegion] Unknown status: %s"), *StatusString);
+	}
+
+	return Status;
 }
 
-void UHathoraSDKProcessesV1::GetAllStoppedProcesses(FHathoraOnProcessInfos OnComplete)
+void UHathoraSDKProcessesV2::GetLatestProcesses(TArray<EHathoraProcessStatus> StatusFilter, TArray<EHathoraCloudRegion> RegionFilter, FHathoraOnProcessInfos OnComplete)
 {
 	TArray<TPair<FString, FString>> QueryOptions;
-	GetProcesses(false, QueryOptions, OnComplete);
-}
 
-void UHathoraSDKProcessesV1::GetRegionStoppedProcesses(EHathoraCloudRegion Region, FHathoraOnProcessInfos OnComplete)
-{
-	TArray<TPair<FString, FString>> QueryOptions;
-	QueryOptions.Add(TPair<FString, FString>(TEXT("region"), UHathoraSDK::GetRegionString(Region)));
-	GetProcesses(false, QueryOptions, OnComplete);
-}
+	for (EHathoraProcessStatus Status : StatusFilter)
+	{
+		QueryOptions.Add(TPair<FString, FString>(TEXT("status"), UHathoraSDKProcessesV2::GetProcessStatusString(Status)));
+	}
 
-void UHathoraSDKProcessesV1::GetProcesses(bool bRunning, TArray<TPair<FString, FString>> QueryOptions, FHathoraOnProcessInfos OnComplete)
-{
+	for (EHathoraCloudRegion Region : RegionFilter)
+	{
+		QueryOptions.Add(TPair<FString, FString>(TEXT("region"), UHathoraSDK::GetRegionString(Region)));
+	}
+
 	SendRequest(
 		TEXT("GET"),
-		FString::Printf(TEXT("/processes/v1/%s/list/%s"), *AppId, bRunning ? TEXT("running") : TEXT("stopped")),
+		FString::Printf(TEXT("/processes/v2/%s/list/latest"), *AppId),
 		QueryOptions,
-		[bRunning, OnComplete](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccess) mutable
+		[OnComplete](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccess) mutable
 		{
 			FHathoraProcessInfosResult Result;
 			if (bSuccess && Response.IsValid())
@@ -70,21 +85,21 @@ void UHathoraSDKProcessesV1::GetProcesses(bool bRunning, TArray<TPair<FString, F
 
 			if (!Result.ErrorMessage.IsEmpty())
 			{
-				UE_LOG(LogHathoraSDK, Error, TEXT("[Get%sProcesses] Error: %s"), bRunning ? TEXT("Running") : TEXT("Stopped"), *Result.ErrorMessage);
+				UE_LOG(LogHathoraSDK, Error, TEXT("[GetLatestProcesses] Error: %s"), *Result.ErrorMessage);
 			}
 
 			if (!OnComplete.ExecuteIfBound(Result))
 			{
-				UE_LOG(LogHathoraSDK, Warning, TEXT("[Get%sProcesses] function pointer was not valid, so OnComplete will not be called"), bRunning ? TEXT("Running") : TEXT("Stopped"));
+				UE_LOG(LogHathoraSDK, Warning, TEXT("[GetLatestProcesses] function pointer was not valid, so OnComplete will not be called"));
 			}
 		});
 }
 
-void UHathoraSDKProcessesV1::GetProcessInfo(FString ProcessId, FHathoraOnProcessInfo OnComplete)
+void UHathoraSDKProcessesV2::GetProcessInfo(FString ProcessId, FHathoraOnProcessInfo OnComplete)
 {
 	SendRequest(
 		TEXT("GET"),
-		FString::Printf(TEXT("/processes/v1/%s/info/%s"), *AppId, *ProcessId),
+		FString::Printf(TEXT("/processes/v2/%s/info/%s"), *AppId, *ProcessId),
 		[OnComplete](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccess) mutable
 		{
 			FHathoraProcessInfoResult Result;
@@ -130,20 +145,13 @@ void UHathoraSDKProcessesV1::GetProcessInfo(FString ProcessId, FHathoraOnProcess
 		});
 }
 
-FHathoraProcessInfo UHathoraSDKProcessesV1::ParseProcessInfo(TSharedPtr<FJsonObject> ProcessInfoJson)
+FHathoraProcessInfo UHathoraSDKProcessesV2::ParseProcessInfo(TSharedPtr<FJsonObject> ProcessInfoJson)
 {
 	FHathoraProcessInfo ProcessInfo;
 
-	ProcessInfo.EgressedBytes = ProcessInfoJson->GetIntegerField(TEXT("egressedBytes"));
-	ProcessInfo.ActiveConnections = ProcessInfoJson->GetIntegerField(TEXT("activeConnections"));
-
-	FDateTime::ParseIso8601(
-		*ProcessInfoJson->GetStringField(TEXT("roomsAllocatedUpdatedAt")),
-		ProcessInfo.RoomsAllocatedUpdatedAt
-	);
+	ProcessInfo.Status = ParseStatus(ProcessInfoJson->GetStringField(TEXT("status")));
 
 	ProcessInfo.RoomsAllocated = ProcessInfoJson->GetIntegerField(TEXT("roomsAllocated"));
-	ProcessInfo.bDraining = ProcessInfoJson->GetBoolField(TEXT("draining"));
 
 	ProcessInfo.bTerminated = FDateTime::ParseIso8601(
 		*ProcessInfoJson->GetStringField(TEXT("terminatedAt")),
@@ -161,8 +169,8 @@ FHathoraProcessInfo UHathoraSDKProcessesV1::ParseProcessInfo(TSharedPtr<FJsonObj
 	);
 
 	FDateTime::ParseIso8601(
-		*ProcessInfoJson->GetStringField(TEXT("startingAt")),
-		ProcessInfo.StartingAt
+		*ProcessInfoJson->GetStringField(TEXT("createdAt")),
+		ProcessInfo.CreatedAt
 	);
 
 	ProcessInfo.RoomsPerProcess = ProcessInfoJson->GetIntegerField(TEXT("roomsPerProcess"));
@@ -182,4 +190,39 @@ FHathoraProcessInfo UHathoraSDKProcessesV1::ParseProcessInfo(TSharedPtr<FJsonObj
 	ProcessInfo.AppId = ProcessInfoJson->GetStringField(TEXT("appId"));
 
 	return ProcessInfo;
+}
+
+void UHathoraSDKProcessesV2::StopProcess(FString ProcessId, FHathoraOnStopProcess OnComplete)
+{
+	SendRequest(
+		TEXT("POST"),
+		FString::Printf(TEXT("/processes/v2/%s/stop/%s"), *AppId, *ProcessId),
+		[OnComplete](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccess) mutable
+		{
+			FHathoraStopProcessResult Result;
+			if (bSuccess && Response.IsValid())
+			{
+				Result.StatusCode = Response->GetResponseCode();
+				FString Content = Response->GetContentAsString();
+
+				if (Result.StatusCode != 204)
+				{
+					Result.ErrorMessage = UHathoraSDK::ParseErrorMessage(Content);
+				}
+			}
+			else
+			{
+				Result.ErrorMessage = TEXT("Could not stop process unknown error");
+			}
+
+			if (!Result.ErrorMessage.IsEmpty())
+			{
+				UE_LOG(LogHathoraSDK, Error, TEXT("[StopProcess] Error: %s"), *Result.ErrorMessage);
+			}
+
+			if (!OnComplete.ExecuteIfBound(Result))
+			{
+				UE_LOG(LogHathoraSDK, Warning, TEXT("[StopProcess] function pointer was not valid, so OnComplete will not be called"));
+			}
+		});
 }
