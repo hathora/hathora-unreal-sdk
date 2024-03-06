@@ -43,6 +43,40 @@ Here is an example of using that node:
 
 ![image](https://github.com/hathora/hathora-unreal-sdk/assets/549323/e27ec908-d5a1-400d-89fc-ab0282387be8)
 
+### Authentication Configuration
+
+When you call `CreateHathoraSDK` in either BP or C++, it will automatically determine the authentication configuration for the API calls based on the available configuration.
+
+#### In Editor
+
+While you're in the editor, it'll read from `Config/DefaultGame.ini` (see [Client Builds](#client-builds) below) by default, but you can specify both the App ID and Dev Token to be only used when in editor for testing purposes.
+
+Go to **Edit > Project Settings > Plugins > Hathora SDK** and specify both your App ID and Dev Token here:
+
+![image](./Images/ProjectSettings.png)
+
+It's **not recommended** to press the `Set as Default` button here for security reasons, and instead manually modify the INI config files.
+
+#### Client Builds
+
+For the settings to be packaged in a build, you must specify them in one of the `Config/*.ini` files. Both clients and servers need the App ID so you can specify this in `Config/DefaultGame.ini`:
+
+``` ini
+[/Script/HathoraSDK.HathoraSDKConfig]
+AppId=app-***********************
+```
+
+**DO NOT** specify the Dev Token in this file or it will be packaged with client builds and with enough reverse engineering, you would leak a secret that can manage your whole Hathora account. We're working on a better method for this to prevent accidental credential leaks, but in the meantime, follow the [Server Builds](#server-builds) section below for the Dev Token.
+
+#### Server Builds
+
+The Dev Token needs to be packaged for your dedicated server to be able to make authorized calls like Get Process Info or Get Room Info. You can safely configure to package this in only the server builds by specifying it in `Config/DedicatedServerGame.ini` which is only used by unreal for the `Server` target type:
+
+``` ini
+[/Script/HathoraSDK.HathoraSDKConfig]
+DevToken=Ga__*********
+```
+
 ### Manually calling API endpoints
 
 The SDK provides functions that provide access to the Hathora Cloud API endpoints. You can find a list of the supported endpoints [below](#supported-cloud-api-endpoints).
@@ -170,6 +204,8 @@ You're likely familiar with setting a default map for when an Unreal game starts
 The Client build will open the `Game Default Map` option.
 
 ### Packaging the Builds
+
+Before you can package a build, make sure you have [properly set up your `Config/*.ini` files](#authentication-configuration) to ensure the App ID and Dev Token get packaged correctly and safely. The linked section goes into more detail, but you **need to make sure that Dev Token isn't specified in `Config/DefaultGame.ini`!**
 
 Now that you have Linux cross-compilation set up on a source build of Unreal with Server and Client targets opening the correct maps on startup, you're ready to package the builds. While you can create scripts to do automate this process, you can easily build the two targets under the Platforms menu in the Editor. Once you have selected the correct target and build configuration, you can select `Package Project`. In the below images, you'll see we're packaging a Linux Server (Development) and a Windows Client (Development):
 
