@@ -5,32 +5,31 @@
 #include "CoreMinimal.h"
 #include "HathoraSDKAPI.h"
 #include "HathoraTypes.h"
-#include "HathoraSDKProcessesV1.generated.h"
+#include "HathoraSDKProcessesV2.generated.h"
+
+UENUM(BlueprintType)
+enum class EHathoraProcessStatus : uint8
+{
+	Starting,
+	Running,
+	Draining,
+	Stopping,
+	Stopped,
+	Failed,
+	Unknown UMETA(Hidden)
+};
 
 USTRUCT(BlueprintType)
 struct FHathoraProcessInfo
 {
 	GENERATED_BODY()
 
-	// Measures network traffic leaving the process in bytes.
 	UPROPERTY(BlueprintReadOnly, Category = "Default")
-	int32 EgressedBytes = 0;
-
-	// Tracks the number of active connections to a process.
-	UPROPERTY(BlueprintReadOnly, Category = "Default")
-	int32 ActiveConnections = 0;
-
-	// The last time RoomsAllocated was updated.
-	UPROPERTY(BlueprintReadOnly, Category = "Default")
-	FDateTime RoomsAllocatedUpdatedAt;
+	EHathoraProcessStatus Status = EHathoraProcessStatus::Unknown;
 
 	// Tracks the number of rooms that have been allocated to the process.
 	UPROPERTY(BlueprintReadOnly, Category = "Default")
 	int32 RoomsAllocated = 0;
-
-	// Process in drain will not accept any new rooms.
-	UPROPERTY(BlueprintReadOnly, Category = "Default")
-	bool bDraining = false;
 
 	// Whether or not the process has terminated.
 	UPROPERTY(BlueprintReadOnly, Category = "Default")
@@ -60,7 +59,7 @@ struct FHathoraProcessInfo
 
 	// When the process started being provisioned. Always valid.
 	UPROPERTY(BlueprintReadOnly, Category = "Default")
-	FDateTime StartingAt;
+	FDateTime CreatedAt;
 
 	// Governs how many rooms can be scheduled in a process.
 	UPROPERTY(BlueprintReadOnly, Category = "Default")
@@ -120,38 +119,56 @@ struct FHathoraProcessInfosResult
 	TArray<FHathoraProcessInfo> Data;
 };
 
+USTRUCT(BlueprintType)
+struct FHathoraStopProcessResult
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadOnly, Category = "Default")
+	int32 StatusCode = 0;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Default")
+	FString ErrorMessage;
+};
+
 UCLASS(BlueprintType)
-class HATHORASDK_API UHathoraSDKProcessesV1 : public UHathoraSDKAPI
+class HATHORASDK_API UHathoraSDKProcessesV2 : public UHathoraSDKAPI
 {
 	GENERATED_BODY()
 
 public:
 	typedef TDelegate<void(const FHathoraProcessInfoResult&)> FHathoraOnProcessInfo;
 	typedef TDelegate<void(const FHathoraProcessInfosResult&)> FHathoraOnProcessInfos;
+	typedef TDelegate<void(const FHathoraStopProcessResult&)> FHathoraOnStopProcess;
 
-	// Retrieve 10 most recently started process objects for an application.
-	void GetAllRunningProcesses(FHathoraOnProcessInfos OnComplete);
+	// Get the string representation of the process status enum value.
+	UFUNCTION(BlueprintPure, Category = "HathoraSDK")
+	static FString GetProcessStatusString(EHathoraProcessStatus Region);
 
-	// Retrieve 10 most recently started process objects for an application,
-	// filtered by Region.
-	// @param Region Filter the returned processes by the provided region.
-	void GetRegionRunningProcesses(EHathoraCloudRegion Region, FHathoraOnProcessInfos OnComplete);
+	// Parse the string representation to get the enum value.
+	UFUNCTION(BlueprintPure, Category = "HathoraSDK")
+	static EHathoraProcessStatus ParseStatus(FString StatusString);
 
-	// Retrieve 10 most recently stopped process objects for an application.
-	void GetAllStoppedProcesses(FHathoraOnProcessInfos OnComplete);
-
-	// Retrieve 10 most recently stopped process objects for an application.
-	// filtered by Region.
-	// @param Region Filter the returned processes by the provided region.
-	void GetRegionStoppedProcesses(EHathoraCloudRegion Region, FHathoraOnProcessInfos OnComplete);
+	// Retrieve the 10 most recent processes objects for an application.
+	// Filter the array by optionally passing in a status or region.
+	// @param StatusFilter Optional filter to only return processes with
+	//                     a status of any of the provided statuses in the array.
+	//                     An empty array will not filter by status.
+	// @param RegionFilter Optional filter to only return processes in the
+	//                     a region of any of the provided regions in the array.
+	//                     An empty array will not filter by region.
+	void GetLatestProcesses(TArray<EHathoraProcessStatus> StatusFilter, TArray<EHathoraCloudRegion> RegionFilter, FHathoraOnProcessInfos OnComplete);
 
 	// Get details for a process.
 	// @param ProcessId System generated unique identifier to a runtime
 	//                  instance of your game server.
 	void GetProcessInfo(FString ProcessId, FHathoraOnProcessInfo OnComplete);
 
+	// Stops a process immediately.
+	// @param ProcessId System generated unique identifier to a runtime
+	//                  instance of your game server.
+	void StopProcess(FString ProcessId, FHathoraOnStopProcess OnComplete);
+
 private:
 	static FHathoraProcessInfo ParseProcessInfo(TSharedPtr<FJsonObject> ProcessInfoJson);
-
-	void GetProcesses(bool bRunning, TArray<TPair<FString, FString>> QueryOptions, FHathoraOnProcessInfos OnComplete);
 };

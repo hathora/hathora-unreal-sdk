@@ -5,38 +5,38 @@
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintAsyncActionBase.h"
 #include "HathoraTypes.h"
-#include "HathoraProcessesV1LatentCommon.h"
-#include "HathoraProcessesV1GetProcessInfo.generated.h"
+#include "HathoraProcessesV2LatentCommon.h"
+#include "HathoraProcessesV2StopProcess.generated.h"
 
 UCLASS()
-class HATHORASDK_API UHathoraProcessesV1GetProcessInfo : public UBlueprintAsyncActionBase
+class HATHORASDK_API UHathoraProcessesV2StopProcess : public UBlueprintAsyncActionBase
 {
 	GENERATED_BODY()
 
 public:
 	virtual void Activate() override;
 
-	// Get details for a process.
+	// Stops a process immediately.
 	// @param ProcessId System generated unique identifier to a runtime
 	//                  instance of your game server.
 	UFUNCTION(
 		BlueprintCallable,
 		meta =
 			(BlueprintInternalUseOnly = "true",
-			 Category = "HathoraSDK | ProcessesV1",
+			 Category = "HathoraSDK | ProcessesV2",
 			 WorldContext = "WorldContextObject")
 	)
-	static UHathoraProcessesV1GetProcessInfo *GetProcessInfo(
-		UHathoraSDKProcessesV1 *HathoraSDKProcessesV1,
+	static UHathoraProcessesV2StopProcess *StopProcess(
+		UHathoraSDKProcessesV2 *HathoraSDKProcessesV2,
 		UObject *WorldContextObject,
 		FString ProcessId
 	);
 
 	UPROPERTY(BlueprintAssignable)
-	FHathoraProcessesV1OnProcessInfo OnComplete;
+	FHathoraProcessesV2OnStopProcess OnComplete;
 
 	UPROPERTY()
-	UHathoraSDKProcessesV1 *HathoraSDKProcessesV1;
+	UHathoraSDKProcessesV2 *HathoraSDKProcessesV2;
 
 	FString ProcessId;
 };
