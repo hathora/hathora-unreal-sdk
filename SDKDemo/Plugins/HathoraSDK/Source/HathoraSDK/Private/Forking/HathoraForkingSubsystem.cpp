@@ -7,7 +7,7 @@
 #include "HathoraSDKConfig.h"
 #include "HathoraTypes.h"
 #include "HathoraSDKRoomV2.h"
-#include "HathoraSDKProcessesV1.h"
+#include "HathoraSDKProcessesV2.h"
 #include "HttpModule.h"
 #include "HttpManager.h"
 
@@ -230,9 +230,9 @@ void UHathoraForkingSubsystem::GetExposedPorts()
 	FEvent* Event = FPlatformProcess::GetSynchEventFromPool();
 	FHathoraServerEnvironment HathoraEnvVars = UHathoraSDK::GetServerEnvironment();
 
-	SDK->ProcessesV1->GetProcessInfo(
+	SDK->ProcessesV2->GetProcessInfo(
 		HathoraEnvVars.ProcessId,
-		UHathoraSDKProcessesV1::FHathoraOnProcessInfo::CreateLambda(
+		UHathoraSDKProcessesV2::FHathoraOnProcessInfo::CreateLambda(
 			[Event, HathoraEnvVars, this](const FHathoraProcessInfoResult &Result)
 			{
 				if (Result.StatusCode == 200)
