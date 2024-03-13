@@ -2,9 +2,9 @@
 
 using UnrealBuildTool;
 
-public class HathoraSDK : ModuleRules
+public class HathoraSDKEditor : ModuleRules
 {
-	public HathoraSDK(ReadOnlyTargetRules Target) : base(Target)
+	public HathoraSDKEditor(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
@@ -26,8 +26,6 @@ public class HathoraSDK : ModuleRules
 			new string[]
 			{
 				"Core",
-				"DeveloperSettings",
-				"Json"
 			}
 			);
 
@@ -37,9 +35,11 @@ public class HathoraSDK : ModuleRules
 			{
 				"CoreUObject",
 				"Engine",
-				"JsonUtilities",
-				"HTTP",
-				"Icmp",
+				"Slate",
+				"SlateCore",
+				"WorkspaceMenuStructure",
+				"InputCore",
+				"HathoraSDK",
 			}
 			);
 
