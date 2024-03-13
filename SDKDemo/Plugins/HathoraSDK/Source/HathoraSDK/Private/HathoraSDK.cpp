@@ -6,7 +6,7 @@
 #include "HathoraSDKAuthV1.h"
 #include "HathoraSDKDiscoveryV1.h"
 #include "HathoraSDKLobbyV3.h"
-#include "HathoraSDKProcessesV1.h"
+#include "HathoraSDKProcessesV2.h"
 #include "HathoraSDKRoomV2.h"
 #include "HttpModule.h"
 #include "Interfaces/IHttpRequest.h"
@@ -35,7 +35,7 @@ UHathoraSDK* UHathoraSDK::CreateHathoraSDK()
 	SDK->AuthV1 = NewObject<UHathoraSDKAuthV1>();
 	SDK->DiscoveryV1 = NewObject<UHathoraSDKDiscoveryV1>();
 	SDK->LobbyV3 = NewObject<UHathoraSDKLobbyV3>();
-	SDK->ProcessesV1 = NewObject<UHathoraSDKProcessesV1>();
+	SDK->ProcessesV2 = NewObject<UHathoraSDKProcessesV2>();
 	SDK->RoomV2 = NewObject<UHathoraSDKRoomV2>();
 
 	const UHathoraSDKConfig* Config = GetDefault<UHathoraSDKConfig>();
@@ -139,6 +139,6 @@ void UHathoraSDK::SetCredentials(FString AppId, FHathoraSDKSecurity Security)
 	AuthV1->SetCredentials(AppId, Security);
 	DiscoveryV1->SetCredentials(AppId, Security);
 	LobbyV3->SetCredentials(AppId, Security);
-	ProcessesV1->SetCredentials(AppId, Security);
+	ProcessesV2->SetCredentials(AppId, Security);
 	RoomV2->SetCredentials(AppId, Security);
 }

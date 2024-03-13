@@ -11,7 +11,7 @@
 class UHathoraSDKAuthV1;
 class UHathoraSDKDiscoveryV1;
 class UHathoraSDKLobbyV3;
-class UHathoraSDKProcessesV1;
+class UHathoraSDKProcessesV2;
 class UHathoraSDKRoomV2;
 
 UCLASS(BlueprintType)
@@ -66,7 +66,7 @@ public:
 	UHathoraSDKLobbyV3* LobbyV3;
 
 	UPROPERTY(BlueprintReadOnly, Category="HathoraSDK")
-	UHathoraSDKProcessesV1* ProcessesV1;
+	UHathoraSDKProcessesV2* ProcessesV2;
 
 	UPROPERTY(BlueprintReadOnly, Category="HathoraSDK")
 	UHathoraSDKRoomV2* RoomV2;
