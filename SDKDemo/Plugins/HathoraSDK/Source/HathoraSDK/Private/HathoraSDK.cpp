@@ -12,6 +12,7 @@
 #include "Interfaces/IHttpRequest.h"
 #include "Interfaces/IHttpResponse.h"
 #include "Dom/JsonObject.h"
+#include "Forking/HathoraForkingSubsystem.h"
 
 void UHathoraSDK::GetRegionalPings(const FHathoraOnGetRegionalPings& OnComplete, int32 NumPingsPerRegion)
 {
@@ -118,6 +119,116 @@ FString UHathoraSDK::ParseErrorMessage(FString Content)
 	{
 		return Content;
 	}
+}
+
+void UHathoraSDK::GetServerRoomId(float PollingInterval, FOnGetRoomId OnComplete)
+{
+	UHathoraSDK* SDK = UHathoraSDK::CreateHathoraSDK();
+	SDK->AddToRoot(); // make sure this doesn't get garbage collected
+	SDK->QueryServerRoomId(
+		PollingInterval,
+		FOnGetRoomId::CreateLambda(
+			[OnComplete, SDK](const FString Result)
+			{
+				OnComplete.ExecuteIfBound(Result);
+				SDK->RemoveFromRoot(); // Allow this SDK reference to be garbage collected
+			}
+		)
+	);
+}
+
+void UHathoraSDK::QueryServerRoomId(float PollingInterval, FOnGetRoomId OnComplete)
+{
+	UWorld *World = GWorld;
+
+	if (IsValid(World) && World->GetNetMode() == ENetMode::NM_DedicatedServer)
+	{
+		if (UHathoraSDK::IsUsingBuiltInForking())
+		{
+			if (World->GetGameInstance() != nullptr)
+			{
+				UHathoraForkingSubsystem* ForkingSubsystem = World->GetGameInstance()->GetSubsystem<UHathoraForkingSubsystem>();
+				if (ForkingSubsystem != nullptr)
+				{
+					FString RoomId = ForkingSubsystem->GetRoomId();
+
+					if (RoomId == TEXT(""))
+					{
+						AsyncTask(ENamedThreads::AnyThread, [PollingInterval, OnComplete, this]()
+						{
+							FPlatformProcess::Sleep(PollingInterval);
+							AsyncTask(ENamedThreads::GameThread, [PollingInterval, OnComplete, this]()
+							{
+								QueryServerRoomId(PollingInterval, OnComplete);
+							});
+						});
+					}
+					else
+					{
+						OnComplete.ExecuteIfBound(RoomId);
+					}
+				}
+			}
+			else
+			{
+				UE_LOG(LogHathoraSDK, Error, TEXT("ERROR: GameInstance is null; could not get the Room ID."));
+				OnComplete.ExecuteIfBound(TEXT(""));
+			}
+		}
+		else
+		{
+			FHathoraServerEnvironment HathoraEnvVars = UHathoraSDK::GetServerEnvironment();
+
+			RoomV2->GetActiveRoomsForProcess(
+				HathoraEnvVars.ProcessId,
+				UHathoraSDKRoomV2::FHathoraOnGetRoomsForProcess::CreateLambda(
+					[HathoraEnvVars, PollingInterval, OnComplete, this](const FHathoraGetRoomsForProcessResult& Result)
+					{
+						FString RoomId;
+
+						if (Result.ErrorMessage.IsEmpty())
+						{
+							if (!Result.Data.IsEmpty())
+							{
+								RoomId = Result.Data[0].RoomId;
+							}
+						}
+						else
+						{
+							UE_LOG(LogHathoraSDK, Error, TEXT("ERROR: Could not get active rooms for process id %s: %s"), *HathoraEnvVars.ProcessId, *Result.ErrorMessage);
+						}
+
+						if (RoomId == TEXT(""))
+						{
+							AsyncTask(ENamedThreads::AnyThread, [PollingInterval, OnComplete, this]()
+							{
+								FPlatformProcess::Sleep(PollingInterval);
+								AsyncTask(ENamedThreads::GameThread, [PollingInterval, OnComplete, this]()
+								{
+									QueryServerRoomId(PollingInterval, OnComplete);
+								});
+							});
+						}
+						else
+						{
+							OnComplete.ExecuteIfBound(RoomId);
+						}
+					}
+				)
+			);
+		}
+	}
+	else
+	{
+		UE_LOG(LogHathoraSDK, Error, TEXT("Called QueryServerRoomId from a client or the world is not valid."));
+		OnComplete.ExecuteIfBound(TEXT(""));
+	}
+}
+
+bool UHathoraSDK::IsUsingBuiltInForking()
+{
+	const UHathoraSDKConfig* Config = GetDefault<UHathoraSDKConfig>();
+	return Config->GetUseBuiltInForking();
 }
 
 void UHathoraSDK::SetAuthToken(FString Token)
