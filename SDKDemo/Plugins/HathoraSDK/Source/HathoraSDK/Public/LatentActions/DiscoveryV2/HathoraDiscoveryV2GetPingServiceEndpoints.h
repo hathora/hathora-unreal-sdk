@@ -5,16 +5,16 @@
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintAsyncActionBase.h"
 #include "HathoraTypes.h"
-#include "HathoraSDKDiscoveryV1.h"
-#include "HathoraDiscoveryV1GetPingServiceEndpoints.generated.h"
+#include "HathoraSDKDiscoveryV2.h"
+#include "HathoraDiscoveryV2GetPingServiceEndpoints.generated.h"
 
 UDELEGATE()
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(
-	FHathoraDiscoveryV1GetPingServiceEndpointsComplete, const TArray<FHathoraDiscoveredPingEndpoint>&, Endpoints
+	FHathoraDiscoveryV2GetPingServiceEndpointsComplete, const TArray<FHathoraDiscoveredPingEndpoint>&, Endpoints
 );
 
 UCLASS()
-class HATHORASDK_API UHathoraDiscoveryV1GetPingServiceEndpoints : public UBlueprintAsyncActionBase
+class HATHORASDK_API UHathoraDiscoveryV2GetPingServiceEndpoints : public UBlueprintAsyncActionBase
 {
 	GENERATED_BODY()
 
@@ -28,17 +28,17 @@ public:
 		BlueprintCallable,
 		meta =
 			(BlueprintInternalUseOnly = "true",
-			 Category = "HathoraSDK | DiscoveryV1",
+			 Category = "HathoraSDK | DiscoveryV2",
 			 WorldContext = "WorldContextObject")
 	)
-	static UHathoraDiscoveryV1GetPingServiceEndpoints *GetPingServiceEndpoints(
-		UHathoraSDKDiscoveryV1 *HathoraSDKDiscoveryV1,
+	static UHathoraDiscoveryV2GetPingServiceEndpoints *GetPingServiceEndpoints(
+		UHathoraSDKDiscoveryV2 *HathoraSDKDiscoveryV2,
 		UObject *WorldContextObject
 	);
 
 	UPROPERTY(BlueprintAssignable)
-	FHathoraDiscoveryV1GetPingServiceEndpointsComplete OnComplete;
+	FHathoraDiscoveryV2GetPingServiceEndpointsComplete OnComplete;
 
 	UPROPERTY()
-	UHathoraSDKDiscoveryV1 *HathoraSDKDiscoveryV1;
+	UHathoraSDKDiscoveryV2 *HathoraSDKDiscoveryV2;
 };

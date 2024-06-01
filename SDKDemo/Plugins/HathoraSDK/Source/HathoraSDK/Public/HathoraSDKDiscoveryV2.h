@@ -5,10 +5,10 @@
 #include "CoreMinimal.h"
 #include "HathoraSDKAPI.h"
 #include "HathoraTypes.h"
-#include "HathoraSDKDiscoveryV1.generated.h"
+#include "HathoraSDKDiscoveryV2.generated.h"
 
 UCLASS(BlueprintType)
-class HATHORASDK_API UHathoraSDKDiscoveryV1 : public UHathoraSDKAPI
+class HATHORASDK_API UHathoraSDKDiscoveryV2 : public UHathoraSDKAPI
 {
 	GENERATED_BODY()
 
