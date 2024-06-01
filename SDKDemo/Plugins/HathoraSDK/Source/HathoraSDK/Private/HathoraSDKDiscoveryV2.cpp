@@ -1,16 +1,16 @@
 // Copyright 2023 Hathora, Inc.
 
-#include "HathoraSDKDiscoveryV1.h"
+#include "HathoraSDKDiscoveryV2.h"
 #include "HathoraSDKModule.h"
 #include "HathoraSDKConfig.h"
 #include "JsonObjectConverter.h"
 #include "Icmp.h"
 
-void UHathoraSDKDiscoveryV1::GetPingServiceEndpoints(const FHathoraOnGetPingServiceEndpoints& OnComplete)
+void UHathoraSDKDiscoveryV2::GetPingServiceEndpoints(const FHathoraOnGetPingServiceEndpoints& OnComplete)
 {
 	SendRequest(
 		TEXT("GET"),
-		TEXT("/discovery/v1/ping"),
+		TEXT("/discovery/v2/ping"),
 		[OnComplete](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccess) mutable
 	{
 		TArray<FHathoraDiscoveredPingEndpoint> PingEndpointsResult;
@@ -30,7 +30,7 @@ void UHathoraSDKDiscoveryV1::GetPingServiceEndpoints(const FHathoraOnGetPingServ
 	});
 }
 
-void UHathoraSDKDiscoveryV1::GetRegionalPings(const FHathoraOnGetRegionalPings& OnComplete, int32 InNumPingsPerRegion)
+void UHathoraSDKDiscoveryV2::GetRegionalPings(const FHathoraOnGetRegionalPings& OnComplete, int32 InNumPingsPerRegion)
 {
 	if (InNumPingsPerRegion <= 0)
 	{
@@ -41,7 +41,7 @@ void UHathoraSDKDiscoveryV1::GetRegionalPings(const FHathoraOnGetRegionalPings& 
 	OnGetRegionalPingsComplete = OnComplete;
 	NumPingsPerRegion = InNumPingsPerRegion;
 	GetPingServiceEndpoints(
-		UHathoraSDKDiscoveryV1::FHathoraOnGetPingServiceEndpoints::CreateLambda(
+		UHathoraSDKDiscoveryV2::FHathoraOnGetPingServiceEndpoints::CreateLambda(
 			[this](const TArray<FHathoraDiscoveredPingEndpoint>& Endpoints)
 			{
 				PingEndpoints = Endpoints;
@@ -53,7 +53,7 @@ void UHathoraSDKDiscoveryV1::GetRegionalPings(const FHathoraOnGetRegionalPings& 
 	);
 }
 
-void UHathoraSDKDiscoveryV1::PingEachRegion()
+void UHathoraSDKDiscoveryV2::PingEachRegion()
 {
 	// recursively call this function until we have pinged each region
 	// the desired number of times, and then aggregate the results and return

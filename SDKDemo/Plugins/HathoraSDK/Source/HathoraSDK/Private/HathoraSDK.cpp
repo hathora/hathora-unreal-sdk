@@ -4,7 +4,7 @@
 #include "HathoraSDKModule.h"
 #include "HathoraSDKConfig.h"
 #include "HathoraSDKAuthV1.h"
-#include "HathoraSDKDiscoveryV1.h"
+#include "HathoraSDKDiscoveryV2.h"
 #include "HathoraSDKLobbyV3.h"
 #include "HathoraSDKProcessesV2.h"
 #include "HathoraSDKRoomV2.h"
@@ -17,7 +17,7 @@ void UHathoraSDK::GetRegionalPings(const FHathoraOnGetRegionalPings& OnComplete,
 {
 	UHathoraSDK* SDK = UHathoraSDK::CreateHathoraSDK();
 	SDK->AddToRoot(); // make sure this doesn't get garbage collected
-	SDK->DiscoveryV1->GetRegionalPings(
+	SDK->DiscoveryV2->GetRegionalPings(
 		FHathoraOnGetRegionalPings::CreateLambda(
 			[OnComplete, SDK](const FHathoraRegionPings& Result)
 			{
@@ -33,7 +33,7 @@ UHathoraSDK* UHathoraSDK::CreateHathoraSDK()
 {
 	UHathoraSDK* SDK = NewObject<UHathoraSDK>();
 	SDK->AuthV1 = NewObject<UHathoraSDKAuthV1>();
-	SDK->DiscoveryV1 = NewObject<UHathoraSDKDiscoveryV1>();
+	SDK->DiscoveryV2 = NewObject<UHathoraSDKDiscoveryV2>();
 	SDK->LobbyV3 = NewObject<UHathoraSDKLobbyV3>();
 	SDK->ProcessesV2 = NewObject<UHathoraSDKProcessesV2>();
 	SDK->RoomV2 = NewObject<UHathoraSDKRoomV2>();
@@ -137,7 +137,7 @@ bool UHathoraSDK::IsLoggedIn()
 void UHathoraSDK::SetCredentials(FString AppId, FHathoraSDKSecurity Security)
 {
 	AuthV1->SetCredentials(AppId, Security);
-	DiscoveryV1->SetCredentials(AppId, Security);
+	DiscoveryV2->SetCredentials(AppId, Security);
 	LobbyV3->SetCredentials(AppId, Security);
 	ProcessesV2->SetCredentials(AppId, Security);
 	RoomV2->SetCredentials(AppId, Security);

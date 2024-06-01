@@ -9,7 +9,7 @@
 #include "HathoraSDK.generated.h"
 
 class UHathoraSDKAuthV1;
-class UHathoraSDKDiscoveryV1;
+class UHathoraSDKDiscoveryV2;
 class UHathoraSDKLobbyV3;
 class UHathoraSDKProcessesV2;
 class UHathoraSDKRoomV2;
@@ -60,7 +60,7 @@ public:
 	UHathoraSDKAuthV1* AuthV1;
 
 	UPROPERTY(BlueprintReadOnly, Category="HathoraSDK")
-	UHathoraSDKDiscoveryV1* DiscoveryV1;
+	UHathoraSDKDiscoveryV2* DiscoveryV2;
 
 	UPROPERTY(BlueprintReadOnly, Category="HathoraSDK")
 	UHathoraSDKLobbyV3* LobbyV3;

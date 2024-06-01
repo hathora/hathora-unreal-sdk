@@ -64,6 +64,7 @@ enum class EHathoraCloudRegion : uint8
 	Los_Angeles,
 	Washington_DC,
 	Chicago,
+	Dallas,
 	London,
 	Frankfurt,
 	Mumbai,
