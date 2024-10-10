@@ -9,6 +9,11 @@ This README covers:
 - [Development Setup](#development-setup)
 - [Development code Formatting and style](#code-formatting-and-style)
 
+## ⚠️ Required: install Git LFS before cloning
+Git LFS is required to properly clone this repo ("Download ZIP" will **not** work due to large Unreal asset files), it's a Git extension to enable large file versioning.
+
+Install Git LFS here: [https://git-lfs.com/](https://git-lfs.com/).
+
 ## SDK Plugin Usage
 
 The SDK supports most Hathora Cloud API endpoints, which you can [call manually](#manually-calling-api-endpoints). The SDK also provides an easy interface to automatically fetch and ping all available Hathora Cloud regions with the [Get Regional Pings](#get-regional-pings) function.
@@ -252,7 +257,7 @@ Ultimately, you need to create a gzipped tarball that has a `Dockerfile` in the 
 
 ## Development Setup
 
-Note: be sure to install/enable Git LFS (`git install lfs`) before cloning the repo, otherwise you will see issues with assets missing.
+Note: be sure to [install Git LFS](https://git-lfs.com/) before cloning the repo, otherwise you will see issues with assets missing.
 
 ### macOS
 
