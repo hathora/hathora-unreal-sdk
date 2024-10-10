@@ -252,6 +252,8 @@ Ultimately, you need to create a gzipped tarball that has a `Dockerfile` in the 
 
 ## Development Setup
 
+Note: be sure to install/enable Git LFS (`git install lfs`) before cloning the repo, otherwise you will see issues with assets missing.
+
 ### macOS
 
 #### Install stuff
