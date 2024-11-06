@@ -20,4 +20,6 @@ COPY --chown=nonroot:nonroot --from=0 /home/nonroot/server /home/nonroot/server
 # Expose the Unreal game server port
 EXPOSE 7777/udp
 
+# Use the bottom line if you intend to use multiple rooms per process, see ./Plugins/HathoraSDK/Source/HathoraSDK/Public/Forking/README.md
 ENTRYPOINT ["/home/nonroot/server/SDKDemo/Binaries/Linux/SDKDemoServer"]
+# ENTRYPOINT ["/home/nonroot/server/SDKDemo/Binaries/Linux/SDKDemoServer", "-nothreading", "-PostForkThreading"]
