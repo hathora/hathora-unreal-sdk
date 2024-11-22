@@ -19,6 +19,11 @@ void UHathoraSDKAPI::SetCredentials(FString InAppId, FHathoraSDKSecurity InSecur
 	this->Security = InSecurity;
 }
 
+FString UHathoraSDKAPI::GetAuthToken()
+{
+	return Security.AuthToken;
+}
+
 void UHathoraSDKAPI::SendRequest(
 	FString Method,
 	FString Endpoint,
