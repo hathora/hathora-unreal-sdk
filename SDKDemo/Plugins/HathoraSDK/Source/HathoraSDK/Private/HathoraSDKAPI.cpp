@@ -10,7 +10,10 @@
 UHathoraSDKAPI::UHathoraSDKAPI(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
-	FWorldDelegates::PreLevelRemovedFromWorld.AddUObject(this, &UHathoraSDKAPI::OnWorldRemoved);
+	if (!HasAnyFlags(RF_ClassDefaultObject))
+	{
+		FWorldDelegates::PreLevelRemovedFromWorld.AddUObject(this, &UHathoraSDKAPI::OnWorldRemoved);
+	}
 }
 
 void UHathoraSDKAPI::SetCredentials(FString InAppId, FHathoraSDKSecurity InSecurity)
@@ -118,6 +121,9 @@ void UHathoraSDKAPI::SendRequest(
 
 void UHathoraSDKAPI::OnWorldRemoved(ULevel* Level, UWorld* World)
 {
-	bWorldIsBeingDestroyed = true;
-	FWorldDelegates::PreLevelRemovedFromWorld.RemoveAll(this);
+	if (World != nullptr && GetWorld() == World)
+	{
+		bWorldIsBeingDestroyed = true;
+		FWorldDelegates::PreLevelRemovedFromWorld.RemoveAll(this);
+	}
 }
