@@ -110,8 +110,26 @@ struct FHathoraServerEnvironment
 	FString ProcessId;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Default")
+	FString DeploymentId;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Default")
+	FString BuildTag;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Default")
 	EHathoraCloudRegion Region = EHathoraCloudRegion::Unknown;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Default")
 	int32 RoomsPerProcess = 0;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Default")
+	FString InitialRoomId;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Default")
+	FString InitialRoomConfig;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Default")
+	FString Hostname;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Default")
+	int32 DefaultPort = 0;
 };

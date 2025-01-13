@@ -59,8 +59,14 @@ FHathoraServerEnvironment UHathoraSDK::GetServerEnvironment()
 	Environment.AppId = FPlatformMisc::GetEnvironmentVariable(TEXT("HATHORA_APP_ID"));
 	Environment.AppSecret = FPlatformMisc::GetEnvironmentVariable(TEXT("HATHORA_APP_SECRET"));
 	Environment.ProcessId = FPlatformMisc::GetEnvironmentVariable(TEXT("HATHORA_PROCESS_ID"));
+	Environment.DeploymentId = FPlatformMisc::GetEnvironmentVariable(TEXT("HATHORA_DEPLOYMENT_ID"));
+	Environment.BuildTag = FPlatformMisc::GetEnvironmentVariable(TEXT("HATHORA_BUILD_TAG"));
 	Environment.Region = ParseRegion(FPlatformMisc::GetEnvironmentVariable(TEXT("HATHORA_REGION")));
 	Environment.RoomsPerProcess = FCString::Atoi(*FPlatformMisc::GetEnvironmentVariable(TEXT("HATHORA_ROOMS_PER_PROCESS")));
+	Environment.InitialRoomId = FPlatformMisc::GetEnvironmentVariable(TEXT("HATHORA_INITIAL_ROOM_ID"));
+	Environment.InitialRoomConfig = FPlatformMisc::GetEnvironmentVariable(TEXT("HATHORA_INITIAL_ROOM_CONFIG"));
+	Environment.Hostname = FPlatformMisc::GetEnvironmentVariable(TEXT("HATHORA_HOSTNAME"));
+	Environment.DefaultPort = FCString::Atoi(*FPlatformMisc::GetEnvironmentVariable(TEXT("HATHORA_DEFAULT_PORT")));
 
 	return Environment;
 }
