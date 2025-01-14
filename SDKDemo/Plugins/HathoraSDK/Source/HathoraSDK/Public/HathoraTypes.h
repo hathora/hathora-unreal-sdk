@@ -72,6 +72,8 @@ enum class EHathoraCloudRegion : uint8
 	Tokyo,
 	Sydney,
 	Sao_Paulo,
+	Dubai,
+	Johannesburg,
 	Unknown UMETA(Hidden)
 };
 
