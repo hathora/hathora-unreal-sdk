@@ -42,11 +42,6 @@ UHathoraSDK* UHathoraSDK::CreateHathoraSDK()
 	FString AppId = Config->GetAppId();
 	FHathoraSDKSecurity Security(Config->GetDevToken());
 
-	if (Config->GetDevToken().Len() == 0)
-	{
-		UE_LOG(LogHathoraSDK, Warning, TEXT("No DevToken specified in Game.ini. This is required for server builds."));
-	}
-
 	SDK->SetCredentials(Config->GetAppId(), Security);
 
 	return SDK;
