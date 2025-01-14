@@ -27,6 +27,7 @@ void UHathoraDiscoveryV2GetPingServiceEndpoints::Activate()
 		return;
 	}
 
+#pragma warning(disable: 4996)
 	HathoraSDKDiscoveryV2->GetPingServiceEndpoints(
 		UHathoraSDKDiscoveryV2::FHathoraOnGetPingServiceEndpoints::CreateLambda(
 			[this](const TArray<FHathoraDiscoveredPingEndpoint>& Endpoints)
@@ -36,4 +37,5 @@ void UHathoraDiscoveryV2GetPingServiceEndpoints::Activate()
 			}
 		)
 	);
+#pragma warning(default: 4996)
 }

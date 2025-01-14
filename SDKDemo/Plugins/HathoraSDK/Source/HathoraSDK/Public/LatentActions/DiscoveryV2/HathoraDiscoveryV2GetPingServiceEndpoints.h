@@ -29,7 +29,9 @@ public:
 		meta =
 			(BlueprintInternalUseOnly = "true",
 			 Category = "HathoraSDK | DiscoveryV2",
-			 WorldContext = "WorldContextObject")
+			 WorldContext = "WorldContextObject",
+			 DeprecatedFunction,
+			 DeprecationMessage = "Manually specify the regions you'd like to ping in UHathoraSDK::GetPingsForRegions (recommended) or call UHathoraSDK::GetRegionMap to get the URLs for all regions (for this version of the plugin).")
 	)
 	static UHathoraDiscoveryV2GetPingServiceEndpoints *GetPingServiceEndpoints(
 		UHathoraSDKDiscoveryV2 *HathoraSDKDiscoveryV2,

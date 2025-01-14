@@ -135,3 +135,11 @@ struct FHathoraServerEnvironment
 	UPROPERTY(BlueprintReadOnly, Category = "Default")
 	int32 DefaultPort = 0;
 };
+
+UENUM(BlueprintType)
+enum class EHathoraPingType : uint8
+{
+	ICMP,
+	UDPEcho,
+	Unknown UMETA(Hidden)
+};

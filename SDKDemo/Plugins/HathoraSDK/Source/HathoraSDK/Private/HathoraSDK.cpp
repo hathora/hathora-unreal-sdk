@@ -8,6 +8,7 @@
 #include "HathoraSDKLobbyV3.h"
 #include "HathoraSDKProcessesV2.h"
 #include "HathoraSDKRoomV2.h"
+#include "HathoraPingUtility.h"
 #include "HttpModule.h"
 #include "Interfaces/IHttpRequest.h"
 #include "Interfaces/IHttpResponse.h"
@@ -15,18 +16,52 @@
 
 void UHathoraSDK::GetRegionalPings(const FHathoraOnGetRegionalPings& OnComplete, int32 NumPingsPerRegion)
 {
-	UHathoraSDK* SDK = UHathoraSDK::CreateHathoraSDK();
-	SDK->AddToRoot(); // make sure this doesn't get garbage collected
-	SDK->DiscoveryV2->GetRegionalPings(
+	UHathoraSDK::GetPingsForRegions(
+		UHathoraSDK::GetRegionMap(),
+		EHathoraPingType::ICMP,
+		OnComplete,
+		NumPingsPerRegion
+	);
+}
+
+void UHathoraSDK::GetPingsForRegions(TMap<FString, FString> Regions, EHathoraPingType PingType, const FHathoraOnGetRegionalPings& OnComplete, int32 NumPingsPerRegion)
+{
+	UHathoraPingUtility* PingUtility = NewObject<UHathoraPingUtility>();
+	PingUtility->AddToRoot(); // make sure this doesn't get garbage collected
+	PingUtility->GetPingsForRegions(
+		Regions,
+		PingType,
 		FHathoraOnGetRegionalPings::CreateLambda(
-			[OnComplete, SDK](const FHathoraRegionPings& Result)
+			[OnComplete, PingUtility](const FHathoraRegionPings& Result)
 			{
 				OnComplete.ExecuteIfBound(Result);
-				SDK->RemoveFromRoot(); // Allow this SDK reference to be garbage collected
+				PingUtility->RemoveFromRoot(); // Allow this SDK reference to be garbage collected
 			}
 		),
 		NumPingsPerRegion
 	);
+}
+
+TMap<FString, FString> UHathoraSDK::GetRegionMap()
+{
+	TMap<FString, FString> RegionMap;
+
+	RegionMap.Add(TEXT("Chicago"), TEXT("chicago.ping.hathora.dev:10000"));
+	RegionMap.Add(TEXT("Dallas"), TEXT("dallas.ping.hathora.dev:10000"));
+	RegionMap.Add(TEXT("Dubai"), TEXT("dubai.ping.hathora.dev:10000"));
+	RegionMap.Add(TEXT("Frankfurt"), TEXT("frankfurt.ping.hathora.dev:10000"));
+	RegionMap.Add(TEXT("Johannesburg"), TEXT("johannesburg.ping.hathora.dev:10000"));
+	RegionMap.Add(TEXT("London"), TEXT("london.ping.hathora.dev:10000"));
+	RegionMap.Add(TEXT("Los Angeles"), TEXT("losangeles.ping.hathora.dev:10000"));
+	RegionMap.Add(TEXT("Mumbai"), TEXT("mumbai.ping.hathora.dev:10000"));
+	RegionMap.Add(TEXT("Sao Paulo"), TEXT("saopaulo.ping.hathora.dev:10000"));
+	RegionMap.Add(TEXT("Seattle"), TEXT("seattle.ping.hathora.dev:10000"));
+	RegionMap.Add(TEXT("Singapore"), TEXT("singapore.ping.hathora.dev:10000"));
+	RegionMap.Add(TEXT("Sydney"), TEXT("sydney.ping.hathora.dev:10000"));
+	RegionMap.Add(TEXT("Tokyo"), TEXT("tokyo.ping.hathora.dev:10000"));
+	RegionMap.Add(TEXT("Washington DC"), TEXT("washingtondc.ping.hathora.dev:10000"));
+
+	return RegionMap;
 }
 
 UHathoraSDK* UHathoraSDK::CreateHathoraSDK()
