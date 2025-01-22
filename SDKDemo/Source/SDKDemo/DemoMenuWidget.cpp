@@ -90,7 +90,9 @@ bool UDemoMenuWidget::Initialize()
 void UDemoMenuWidget::InitiatePing()
 {
 	RegionList->ClearChildren();
-	UHathoraSDK::GetRegionalPings(
+	UHathoraSDK::GetPingsForRegions(
+		UHathoraSDK::GetRegionMap(),
+		EHathoraPingType::ICMP,
 		FHathoraOnGetRegionalPings::CreateLambda(
 			[this](const FHathoraRegionPings& Result)
 			{
