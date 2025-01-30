@@ -25,7 +25,24 @@ public:
 	// Pings are returned in milliseconds.
 	// @param OnComplete The delegate to call when the request is complete with averaged ping times.
 	// @param NumPingsPerRegion The number of pings to send to each region.
+	UE_DEPRECATED(4.0, "Use GetPingsForRegions instead.")
 	static void GetRegionalPings(const FHathoraOnGetRegionalPings& OnComplete, int32 NumPingsPerRegion = 3);
+
+	// Get ping times to the specified regions.
+	// Each region is pinged NumPingsPerRegion times and the
+	// minimum is returned.
+	// Pings are returned in milliseconds.
+	// @param RegionUrls A map of region names to region URL to ping (include `:port` in the URL string if using EHathoraPingType::UDPEcho).
+	// @param PingType The type of ping/protocol to use.
+	// @param OnComplete The delegate to call when the request is complete with averaged ping times.
+	// @param NumPingsPerRegion The number of pings to send to each region.
+	static void GetPingsForRegions(TMap<FString, FString> RegionUrls, EHathoraPingType PingType, const FHathoraOnGetRegionalPings& OnComplete, int32 NumPingsPerRegion = 3);
+
+	// NOTE: This function may uses hardcoded values for the region URLs and may
+	// be outdated. It is recommended that your backend provides the region URLs
+	// to use in GetPingsForRegions instead.
+	UFUNCTION(BlueprintPure)
+	static TMap<FString, FString> GetRegionMap();
 
 	// Create an instance of the Hathora SDK using the AppId, and DevToken if specified,
 	// from Game.ini. See Project Settings > Plugins > HathoraSDK for more information.

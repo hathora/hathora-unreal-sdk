@@ -19,6 +19,7 @@ public:
 	// Pings are returned in milliseconds.
 	// @param OnComplete The delegate to call when the request is complete with averaged ping times.
 	// @param NumPingsPerRegion The number of pings to send to each region.
+	UE_DEPRECATED(4.0, "Use UHathoraSDK::GetPingsForRegions instead.")
 	void GetRegionalPings(const FHathoraOnGetRegionalPings& OnComplete, int32 NumPingsPerRegion = 3);
 
 	typedef TDelegate<void(const TArray<FHathoraDiscoveredPingEndpoint>&)> FHathoraOnGetPingServiceEndpoints;
@@ -26,14 +27,8 @@ public:
 	// Returns an array of all regions with a host that a client can ping via ICMP.
 	// See the "Get Regional Pings" functions that will handle the full ping process for you.
 	// @param OnComplete The delegate to call when the request is complete.
+	UE_DEPRECATED(4.0, "Manually specify the regions you'd like to ping in UHathoraSDK::GetPingsForRegions (recommended) or call UHathoraSDK::GetRegionMap to get the URLs for all regions (for this version of the plugin).")
 	void GetPingServiceEndpoints(const FHathoraOnGetPingServiceEndpoints& OnComplete);
 
 private:
-	FHathoraOnGetRegionalPings OnGetRegionalPingsComplete;
-	TArray<FHathoraDiscoveredPingEndpoint> PingEndpoints;
-	int32 NumPingsPerRegion;
-	int32 NumPingsPerRegionCompleted;
-	TSharedPtr<TMap<FString, TArray<int32>>> PingResults;
-
-	void PingEachRegion();
 };

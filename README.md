@@ -16,31 +16,36 @@ Install Git LFS here: [https://git-lfs.com/](https://git-lfs.com/).
 
 ## SDK Plugin Usage
 
-The SDK supports most Hathora Cloud API endpoints, which you can [call manually](#manually-calling-api-endpoints). The SDK also provides an easy interface to automatically fetch and ping all available Hathora Cloud regions with the [Get Regional Pings](#get-regional-pings) function.
+The SDK supports most Hathora Cloud API endpoints, which you can [call manually](#manually-calling-api-endpoints). The SDK also provides an easy interface to automatically fetch and ping all available Hathora Cloud regions with the [Get Pings For Regions](#get-pings-for-regions) function.
 
-### Get Regional Pings
+### Get Pings For Regions
 
-This function takes an optional second argument `int32 NumPingsPerRegion` which defaults to `3`. The SDK will execute the following when calling this function:
-1. Call the `GetPingServiceEndpoints` API call
-2. Send an ICMP echo for each region once in parallel
-3. After receiving a result for **each** region, step 2 is repeated `NumPingsPerRegion - 1` times. The SDK waits until a result is returned from each region before sending another set of pings to prevent some of the ICMP echos from being ignored/dropped due to subsequent/overlap requests.
-4. After running step 2 a total of `NumPingsPerRegion` times, the minimum is returned for each region. If a particular region timed out or was unreachable otherwise for each ping, it is omitted from the callback delegate.
+This function takes 4 arguments:
+1. A `TMap<FString, FString>` which maps regions names (whatever you'd like to call them) to URLs
+    - The URLs must include a `:<port>` suffix if using UDPEcho ping type; you can include this suffix for ICMP ping type calls too. Hathora servers support ports `443` and `10000` for the UDP echo requests
+    - It's recommended for your backend/matchmaker to provide this map of supported regions; there is a helper function `UHathoraSDK::GetRegionMap()` which provides a hardcoded map of all the regions.
+1. A `EHathoraPingType PingType` of either `EHathoraPingType::ICMP` or `EHathoraPingType::UDPEcho`. Both send an ICMP packet; the former uses the ICMP protocol and the latter uses the UDP protocol (expecting an echo response)
+1. A callback with the results
+1. An optional `int32 NumPingsPerRegion` which defaults to `3`
 
-The ICMP pings have a default timeout of `1.0 seconds`; you can change this in the `Edit > Project Settings... > Plugins submenu > Hathora SDK` menu (or just search for `ping timeout`):
+The SDK will execute the following when calling this function:
+1. Send an ICMP packet via ICMP or UDP for each region once in parallel
+1. After receiving a result for **each** region, step 2 is repeated `NumPingsPerRegion - 1` times. The SDK waits until a result is returned from each region before sending another set of pings to prevent some of the ICMP echos from being ignored/dropped due to subsequent/overlap requests.
+1. After running step 2 a total of `NumPingsPerRegion` times, the minimum is returned for each region. If a particular region timed out or was unreachable otherwise for each ping, it is omitted from the callback delegate.
+
+The pings have a default timeout of `1.0 seconds`; you can change this in the `Edit > Project Settings... > Plugins submenu > Hathora SDK` menu (or just search for `ping timeout`):
 
 ![image](https://github.com/hathora/hathora-unreal-sdk/assets/549323/a40905b3-6058-4290-9c8b-7f9d04b67a01)
 
 If you want to save the change for your entire project/team, make sure to click the **Set as Default** button at the top; this will save the setting in `Config/DefaultGame.ini` which you can add to your version control. If you don't do this, the setting will only apply to your instance of the Unreal project.
 
-If you [manually call](#manually-calling-api-endpoints) `GetPingServiceEndpoints()`, you will need to execute the ICMP echos yourself. You can see an example of this in [HathoraSDKDiscoveryV1.cpp](./SDKDemo/Plugins/HathoraSDK/Source/HathoraSDK/Private/HathoraSDKDiscoveryV1.cpp#L94-L97).
-
 #### C++
 
-To call `GetRegionalPings` with C++, you should use the `UHathoraSDK::GetRegionalPings(...)` static function. You can find an example of how to use this in [DemoMenuWidget.cpp](./SDKDemo/Source/SDKDemo/DemoMenuWidget.cpp#L93-L95).
+To call `GetPingsForRegions` with C++, you should use the `UHathoraSDK::GetPingsForRegions(...)` static function. You can find an example of how to use this in [DemoMenuWidget.cpp](./SDKDemo/Source/SDKDemo/DemoMenuWidget.cpp#L93-L95).
 
 #### Blueprint
 
-To call `GetRegionalPings` with BP, you should use the `Get Regional Pings` BP node found under the `Hathora SDK` category:
+To call `GetPingsForRegions` with BP, you should use the `Get Pings For Regions` BP node found under the `Hathora SDK` category:
 
 ![image](https://github.com/hathora/hathora-unreal-sdk/assets/549323/d5fa78ca-fb38-4fc2-9ab1-716f51aa6ebe)
 
@@ -75,6 +80,8 @@ AppId=app-***********************
 
 #### Server Builds
 
+**NOTE: This is only if you're manually making calls to authorized endpoints like `Get Process Info` or `Get Room Info` from the server. Most studios can ignore this section.**
+
 The Dev Token needs to be packaged for your dedicated server to be able to make authorized calls like Get Process Info or Get Room Info. You can safely configure to package this in only the server builds by specifying it in `Config/DedicatedServerGame.ini` which is only used by unreal for the `Server` target type:
 
 ``` ini
@@ -96,24 +103,22 @@ To create an instance of `UHathoraSDK`, call the static `UHathoraSDK::CreateHath
 UHathoraSDK* SDK = UHathoraSDK::CreateHathoraSDK();
 ```
 
-From there, you can get access to the supported API calls (e.g. `GetPingServiceEndpoints`) function via the respective `UHathoraSDK` property (e.g. `DiscoveryV1`):
+From there, you can get access to the supported API calls (e.g. `LoginAnonymous`) function via the respective `UHathoraSDK` property (e.g. `AuthV1`):
 
 ``` c++
-FHathoraOnGetPingServiceEndpoints OnGetEndpointsComplete;
-OnGetEndpointsComplete.BindUFunction(this, TEXT("YourCallback")); // assumes this is a UObject
-SDK->DiscoveryV1->GetPingServiceEndpoints(OnGetEndpointsComplete);
+UHathoraSDKAuthV1::FHathoraOnLogin OnComplete;
+OnComplete.BindUFunction(this, TEXT("YourCallback")); // assumes `this` is a UObject
+SDK->AuthV1->LoginAnonymous(OnComplete);
 ```
 
-All API calls have an `OnComplete` delegate callback like `OnGetEndpointsComplete` in the above example; make sure the function you provide (e.g. `UYourClass::YourCallback`) has the matching signature (e.g. `void (const TArray<FHathoraDiscoveredPingEndpoint>& PingEndpoints)`). You can find the appropriate signature in the respective `Plugins/HathoraSDK/Source/HathoraSDK/Public/HathoraSDK<API>.h` file (e.g [HathoraSDKDiscoveryV1.h](./SDKDemo/Plugins/HathoraSDK/Source/HathoraSDK/Public/HathoraSDKDiscoveryV1.h)).
+All API calls have an `OnComplete` delegate callback; make sure the function you provide (e.g. `UYourClass::YourCallback`) has the matching signature. You can find the appropriate signature in the respective `Plugins/HathoraSDK/Source/HathoraSDK/Public/HathoraSDK<API>.h` file (e.g [HathoraSDKAuthV1.h](./SDKDemo/Plugins/HathoraSDK/Source/HathoraSDK/Public/HathoraSDKAuthV1.h)).
 
 You can also use C++ lambdas:
 
 ``` c++
-FHathoraOnGetPingServiceEndpoints OnGetEndpointsComplete;
-OnGetEndpointsComplete.BindUFunction(this, TEXT("YourCallback"));
-SDK->DiscoveryV1->GetPingServiceEndpoints(
-  UHathoraSDKDiscoveryV1::FHathoraOnGetPingServiceEndpoints::CreateLambda(
-    [this](const TArray<FHathoraDiscoveredPingEndpoint>& Endpoints)
+SDK->AuthV1->LoginAnonymous(
+  UHathoraSDKAuthV1::FHathoraOnLogin::CreateLambda(
+    [this](const FHathoraLoginResult& Result)
     {
       // handle the response here
     }
@@ -123,7 +128,7 @@ SDK->DiscoveryV1->GetPingServiceEndpoints(
 
 #### Blueprint
 
-To create an instance of `UHathoraSDK`, call the `Create Hathora SDK` BP node. There's no need to provide an AppID or the Hathora Dev Token, so those are left blank in the call (but can be provided if you need them to access other APIs). From there, you can find API endpoint function nodes (e.g. `Get Ping Service Endpoints`) on the respective variable (e.g. `DiscoveryV1`):
+To create an instance of `UHathoraSDK`, call the `Create Hathora SDK` BP node. There's no need to provide an AppID or the Hathora Dev Token, so those are left blank in the call (but can be provided if you need them to access other APIs). From there, you can find API endpoint function nodes (e.g. `Login Anonymous`) on the respective variable (e.g. `AuthV1`):
 
 ![image](https://github.com/hathora/hathora-unreal-sdk/assets/549323/2558043c-7814-4264-a949-a4fd2dd37fbb)
 
@@ -234,17 +239,15 @@ Ultimately, you need to create a gzipped tarball that has a `Dockerfile` in the 
   - LoginAnonymous
   - LoginNickname
   - LoginGoogle
-- DiscoveryV1
-  - GetPingServiceEndpoints (helper function `Get Regional Pings` will call this and execute multiple pings for you, providing the minimum)
 - LobbyV3
   - CreateLobby
   - ListActivePublicLobbies
   - GetLobbyInfoByRoomId
   - GetLobbyInfoByShortCode
-- ProcessesV1
-  - GetRunningProcesses
-  - GetStoppedProcesses
+- ProcessesV2
+  - GetLatestProcesses
   - GetProcessInfo
+  - StopProcess
 - RoomV2
   - CreateRoom
   - GetRoomInfo
@@ -254,10 +257,6 @@ Ultimately, you need to create a gzipped tarball that has a `Dockerfile` in the 
   - SuspendRoom
   - GetConnectionInfo
   - UpdateRoomConfig
-
-## Development Setup
-
-⚠️ Note: be sure to [install Git LFS](https://git-lfs.com/) before cloning the repo, otherwise you will see issues with assets missing.
 
 ### macOS
 

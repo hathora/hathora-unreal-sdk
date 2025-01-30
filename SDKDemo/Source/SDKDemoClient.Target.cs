@@ -8,7 +8,7 @@ public class SDKDemoClientTarget : TargetRules
 	public SDKDemoClientTarget( TargetInfo Target) : base(Target)
 	{
 		Type = TargetType.Client;
-		DefaultBuildSettings = BuildSettingsVersion.V2;
+		DefaultBuildSettings = BuildSettingsVersion.Latest;
 		IncludeOrderVersion = EngineIncludeOrderVersion.Latest;
 		ExtraModuleNames.Add("SDKDemo");
 	}

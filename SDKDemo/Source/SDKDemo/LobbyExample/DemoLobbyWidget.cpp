@@ -170,7 +170,14 @@ void UDemoLobbyWidget::OnLobbyReady(
 
 void UDemoLobbyWidget::StartPings()
 {
-	UHathoraSDK::GetRegionalPings(
+	// This is supposed to trigger a compiler warning
+	// Your backend/matchmaker should be providing this TMap
+	// instead of calling this fixed, _possibly outdated_ function
+	TMap<FString, FString> RegionMap = UHathoraSDK::GetRegionMap();
+
+	UHathoraSDK::GetPingsForRegions(
+		RegionMap,
+		EHathoraPingType::ICMP,
 		FHathoraOnGetRegionalPings::CreateLambda(
 			[this](const FHathoraRegionPings& Result)
 			{
