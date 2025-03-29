@@ -18,6 +18,8 @@ class HATHORASDK_API UHathoraSDKAPI : public UBlueprintFunctionLibrary
 public:
 	void SetCredentials(FString AppId, FHathoraSDKSecurity Security);
 
+	FString GetAuthToken();
+
 protected:
 	void SendRequest(
 		FString Method,
