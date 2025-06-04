@@ -52,14 +52,14 @@ TMap<FString, FString> UHathoraSDK::GetRegionMap()
 	RegionMap.Add(TEXT("Frankfurt"), TEXT("frankfurt.ping.hathora.dev:10000"));
 	RegionMap.Add(TEXT("Johannesburg"), TEXT("johannesburg.ping.hathora.dev:10000"));
 	RegionMap.Add(TEXT("London"), TEXT("london.ping.hathora.dev:10000"));
-	RegionMap.Add(TEXT("Los Angeles"), TEXT("losangeles.ping.hathora.dev:10000"));
+	RegionMap.Add(TEXT("Los_Angeles"), TEXT("losangeles.ping.hathora.dev:10000"));
 	RegionMap.Add(TEXT("Mumbai"), TEXT("mumbai.ping.hathora.dev:10000"));
-	RegionMap.Add(TEXT("Sao Paulo"), TEXT("saopaulo.ping.hathora.dev:10000"));
+	RegionMap.Add(TEXT("Sao_Paulo"), TEXT("saopaulo.ping.hathora.dev:10000"));
 	RegionMap.Add(TEXT("Seattle"), TEXT("seattle.ping.hathora.dev:10000"));
 	RegionMap.Add(TEXT("Singapore"), TEXT("singapore.ping.hathora.dev:10000"));
 	RegionMap.Add(TEXT("Sydney"), TEXT("sydney.ping.hathora.dev:10000"));
 	RegionMap.Add(TEXT("Tokyo"), TEXT("tokyo.ping.hathora.dev:10000"));
-	RegionMap.Add(TEXT("Washington DC"), TEXT("washingtondc.ping.hathora.dev:10000"));
+	RegionMap.Add(TEXT("Washington_DC"), TEXT("washingtondc.ping.hathora.dev:10000"));
 
 	return RegionMap;
 }
