@@ -38,6 +38,7 @@ public:
 	// @param NumPingsPerRegion The number of pings to send to each region.
 	static void GetPingsForRegions(TMap<FString, FString> RegionUrls, EHathoraPingType PingType, const FHathoraOnGetRegionalPings& OnComplete, int32 NumPingsPerRegion = 3);
 
+	// Region names (the keys in the map) are the same as the enum values in EHathoraCloudRegion.
 	// NOTE: This function may uses hardcoded values for the region URLs and may
 	// be outdated. It is recommended that your backend provides the region URLs
 	// to use in GetPingsForRegions instead.
