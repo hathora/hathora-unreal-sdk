@@ -89,6 +89,10 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category="HathoraSDK")
 	UHathoraSDKRoomV2* RoomV2;
 
+	friend class UHathoraGetRegionalPings;
+
 private:
 	void SetCredentials(FString AppId, FHathoraSDKSecurity Security);
+
+	static void Internal_GetRegionalPings(const FHathoraOnGetRegionalPings& OnComplete, int32 NumPingsPerRegion = 3);
 };
