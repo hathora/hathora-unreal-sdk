@@ -22,8 +22,7 @@ void UHathoraGetRegionalPings::Activate()
 		return;
 	}
 
-#pragma warning(disable: 4996)
-	UHathoraSDK::GetRegionalPings(
+	UHathoraSDK::Internal_GetRegionalPings(
 		FHathoraOnGetRegionalPings::CreateLambda(
 			[this](const FHathoraRegionPings& Result)
 			{
@@ -33,5 +32,4 @@ void UHathoraGetRegionalPings::Activate()
 		),
 		NumPingsPerRegion
 	);
-#pragma warning(default: 4996)
 }

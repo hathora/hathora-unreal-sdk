@@ -6,6 +6,11 @@
 
 void UHathoraSDKDiscoveryV2::GetPingServiceEndpoints(const FHathoraOnGetPingServiceEndpoints& OnComplete)
 {
+	Internal_GetPingServiceEndpoints(OnComplete);
+}
+
+void UHathoraSDKDiscoveryV2::Internal_GetPingServiceEndpoints(const FHathoraOnGetPingServiceEndpoints& OnComplete)
+{
 	TArray<FHathoraDiscoveredPingEndpoint> PingEndpointsResult;
 	TMap<FString, FString> RegionUrls = UHathoraSDK::GetRegionMap();
 

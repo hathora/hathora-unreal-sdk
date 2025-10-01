@@ -4,6 +4,9 @@
 #include "HathoraSDKModule.h"
 #include "HathoraSDK.h"
 #include "HathoraSDKAuthV1.h"
+#include "Engine/Engine.h"
+#include "Engine/TimerHandle.h"
+#include "TimerManager.h"
 
 void UHathoraLobbyComponent::BeginPlay()
 {

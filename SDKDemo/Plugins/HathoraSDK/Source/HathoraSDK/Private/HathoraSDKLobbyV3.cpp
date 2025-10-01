@@ -3,6 +3,8 @@
 #include "HathoraSDKLobbyV3.h"
 #include "HathoraSDKModule.h"
 #include "HathoraSDK.h"
+#include "Serialization/JsonReader.h"
+#include "Serialization/JsonSerializer.h"
 
 FString UHathoraSDKLobbyV3::GetVisibilityString(EHathoraLobbyVisibility Visibility)
 {

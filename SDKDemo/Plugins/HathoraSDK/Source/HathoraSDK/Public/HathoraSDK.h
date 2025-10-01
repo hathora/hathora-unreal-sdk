@@ -42,7 +42,7 @@ public:
 	// NOTE: This function may uses hardcoded values for the region URLs and may
 	// be outdated. It is recommended that your backend provides the region URLs
 	// to use in GetPingsForRegions instead.
-	UFUNCTION(BlueprintPure)
+	UFUNCTION(BlueprintPure, Category = "HathoraSDK")
 	static TMap<FString, FString> GetRegionMap();
 
 	// Create an instance of the Hathora SDK using the AppId, and DevToken if specified,
@@ -89,6 +89,10 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category="HathoraSDK")
 	UHathoraSDKRoomV2* RoomV2;
 
+	friend class UHathoraGetRegionalPings;
+
 private:
 	void SetCredentials(FString AppId, FHathoraSDKSecurity Security);
+
+	static void Internal_GetRegionalPings(const FHathoraOnGetRegionalPings& OnComplete, int32 NumPingsPerRegion = 3);
 };
