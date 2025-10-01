@@ -65,6 +65,12 @@ public:
 	UFUNCTION(BlueprintPure, Category = "HathoraSDK")
 	static FString ParseErrorMessage(FString Content);
 
+	typedef TDelegate<void(const FString)> FOnGetRoomId;
+	static void GetServerRoomId(float PollingInterval, FOnGetRoomId OnComplete);
+
+	UFUNCTION(BlueprintPure, Category = "HathoraSDK")
+	static bool IsUsingBuiltInForking();
+
 	// Set the auth token to use for all requests; primarily on the
 	// client after the player has logged in.
 	// @param Token The JWT auth token to use for all requests.
@@ -91,4 +97,6 @@ public:
 
 private:
 	void SetCredentials(FString AppId, FHathoraSDKSecurity Security);
+
+	void QueryServerRoomId(float PollingInterval, FOnGetRoomId OnComplete);
 };

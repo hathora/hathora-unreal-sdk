@@ -5,6 +5,9 @@
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "JsonObjectConverter.h"
+#include "HathoraSDK.h"
+#include "HathoraSDKConfig.h"
+#include "Forking/HathoraForkingSubsystem.h"
 #include "DemoRoomConfigFunctionLibrary.generated.h"
 
 USTRUCT(BlueprintType)
@@ -24,8 +27,8 @@ class UDemoRoomConfigFunctionLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 public:
-	UFUNCTION(BlueprintCallable, Category = "Room Config")
-	static FString SerializeRoomConfigToString(const FDemoRoomConfig& RoomConfig)
+	UFUNCTION(BlueprintCallable, Category = "Room Config", meta = (WorldContext = "WorldContextObject"))
+	static FString SerializeRoomConfigToString(const FDemoRoomConfig& RoomConfig, UObject *WorldContextObject)
 	{
 		FString OutString;
 		bool bResult = FJsonObjectConverter::UStructToJsonObjectString(RoomConfig, OutString);
@@ -35,14 +38,48 @@ public:
 			UE_LOG(LogTemp, Error, TEXT("Failed to serialize room config to string"));
 		}
 
+#if WITH_SERVER_CODE && !WITH_EDITOR
+		UHathoraSDKConfig* Config = GetMutableDefault<UHathoraSDKConfig>();
+		if (Config->GetUseBuiltInForking())
+		{
+			UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull);
+
+			if (World)
+			{
+				UGameInstance* GameInstance = World->GetGameInstance();
+
+				if (GameInstance)
+				{
+					UHathoraForkingSubsystem* ForkingSubsystem = GameInstance->GetSubsystem<UHathoraForkingSubsystem>();
+
+					if (ForkingSubsystem)
+					{
+						OutString = ForkingSubsystem->AddPortToRoomConfig(OutString);
+					}
+				}
+			}
+		}
+#endif
+
 		return OutString;
 	}
 
 	UFUNCTION(BlueprintCallable, Category = "Room Config")
 	static FDemoRoomConfig DeserializeRoomConfigFromString(const FString& JsonString)
 	{
+		FString JsonStringWithoutPort;
+		UHathoraSDKConfig* Config = GetMutableDefault<UHathoraSDKConfig>();
+		if (Config->GetUseBuiltInForking())
+		{
+			JsonStringWithoutPort = UHathoraForkingSubsystem::RemovePortFromRoomConfig(JsonString);
+		}
+		else
+		{
+			JsonStringWithoutPort = JsonString;
+		}
+
 		FDemoRoomConfig OutRoomConfig;
-		bool bResult = FJsonObjectConverter::JsonObjectStringToUStruct(JsonString, &OutRoomConfig, 0, 0);
+		bool bResult = FJsonObjectConverter::JsonObjectStringToUStruct(JsonStringWithoutPort, &OutRoomConfig, 0, 0);
 
 		if (!bResult)
 		{
