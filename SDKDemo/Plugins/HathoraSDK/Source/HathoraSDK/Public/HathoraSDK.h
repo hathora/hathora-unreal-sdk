@@ -8,6 +8,7 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "HathoraSDK.generated.h"
 
+class UHathoraSDKAppV1;
 class UHathoraSDKAuthV1;
 class UHathoraSDKDiscoveryV2;
 class UHathoraSDKLobbyV3;
@@ -72,7 +73,13 @@ public:
 	void SetAuthToken(FString Token);
 
 	UFUNCTION(BlueprintPure, Category = "HathoraSDK")
+	FString GetAuthToken();
+
+	UFUNCTION(BlueprintPure, Category = "HathoraSDK")
 	bool IsLoggedIn();
+
+	UPROPERTY(BlueprintReadOnly, Category="HathoraSDK")
+	UHathoraSDKAppV1* AppV1;
 
 	UPROPERTY(BlueprintReadOnly, Category="HathoraSDK")
 	UHathoraSDKAuthV1* AuthV1;
