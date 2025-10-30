@@ -57,7 +57,12 @@ void UHathoraPingUtility::PingEachRegion()
 		FString Name = RegionUrl.Key;
 		bool bHasPort = RegionUrl.Value.Contains(":");
 		FString Host = bHasPort ? RegionUrl.Value.Left(RegionUrl.Value.Find(":")) : RegionUrl.Value;
-		int32 Port = bHasPort ? FCString::Atoi(*RegionUrl.Value.RightChop(RegionUrl.Value.Find(":") + 1)) : 443;
+
+		if (!bHasPort && PingType == EHathoraPingType::UDPEcho)
+		{
+			UE_LOG(LogHathoraSDK, Warning, TEXT("Region URL %s does not contain a port but EHathoraPingType::UDPEcho was selected; falling back to ICMP PingType."), *RegionUrl.Value);
+			PingType = EHathoraPingType::ICMP;
+		}
 
 		FIcmpEchoResultCallback Callback =
 			[this, Name, Host, CompletedPings, PingsToComplete](FIcmpEchoResult Result)

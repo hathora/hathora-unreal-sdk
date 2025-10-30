@@ -25,7 +25,7 @@ void UHathoraSDK::Internal_GetRegionalPings(const FHathoraOnGetRegionalPings& On
 {
 	UHathoraSDK::GetPingsForRegions(
 		UHathoraSDK::GetRegionMap(),
-		EHathoraPingType::ICMP,
+		EHathoraPingType::UDPEcho,
 		OnComplete,
 		NumPingsPerRegion
 	);

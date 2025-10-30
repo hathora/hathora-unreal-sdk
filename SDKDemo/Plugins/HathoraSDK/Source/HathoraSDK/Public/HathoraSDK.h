@@ -33,7 +33,7 @@ public:
 	// minimum is returned.
 	// Pings are returned in milliseconds.
 	// @param RegionUrls A map of region names to region URL to ping (include `:port` in the URL string if using EHathoraPingType::UDPEcho).
-	// @param PingType The type of ping/protocol to use.
+	// @param PingType The type of ping/protocol to use. It's recommended to use UDP Echo if possible as some LAN networks block or drop ICMP packets.
 	// @param OnComplete The delegate to call when the request is complete with averaged ping times.
 	// @param NumPingsPerRegion The number of pings to send to each region.
 	static void GetPingsForRegions(TMap<FString, FString> RegionUrls, EHathoraPingType PingType, const FHathoraOnGetRegionalPings& OnComplete, int32 NumPingsPerRegion = 3);
